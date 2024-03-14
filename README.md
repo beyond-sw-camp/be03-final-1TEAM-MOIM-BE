@@ -1,6 +1,13 @@
 ### 🙌🏻 팀명 : 선정 중
 
 ### 😁 팀원
+
+| 역할 | 이름 | 포지션 |
+| --- | --- | --- |
+| 팀장 | [한종승](https://github.com/BellWin98) | 프로젝트 매니징, FE/BE 개발 |
+| 팀원 | [신재석](https://github.com/MrKeeplearning) | FE/BE 개발 |
+| 팀원 | [배소영](https://github.com/qoth-0) | FE/BE 개발 |
+| 팀원 | [장은지](https://github.com/Jang-Eun-Ji) | FE/BE 개발 |
  
 |<img src="https://github.com/6candoit/Plrecipe/blob/abe45853ca17dede0881dbf0212ea25d74834bac/PNG/cow1.png" height="100">|<img src="https://github.com/6candoit/Plrecipe/blob/abe45853ca17dede0881dbf0212ea25d74834bac/PNG/tiger.png" height="100">|<img src="https://github.com/6candoit/Plrecipe/blob/abe45853ca17dede0881dbf0212ea25d74834bac/PNG/bunny.png" height="100">|<img src="https://github.com/6candoit/Plrecipe/blob/abe45853ca17dede0881dbf0212ea25d74834bac/PNG/dragon.png" height="100">|
 |:---:|:---:|:---:|:---:|
@@ -63,7 +70,7 @@
 
 <br>
 
-## 📝 요구사항
+## 📝 요구 사항
 <details>
 <summary><b>😀 회원(Member)</summary>
 
@@ -82,7 +89,7 @@
 
 <br>
 
-## 💻 기술스택
+## 💻 기술 스택
 
 📱 **Front-End :** <img src="https://img.shields.io/badge/Vue-4FC08D.svg?&style=flat-square&logo=Vuedotjs&logoColor=white">
 
