@@ -1,13 +1,13 @@
-package com.team1.schedule;
+package com.team1.moim;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ScheduleApplication {
+public class MoimApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ScheduleApplication.class, args);
+		SpringApplication.run(MoimApplication.class, args);
 	}
 
 }
