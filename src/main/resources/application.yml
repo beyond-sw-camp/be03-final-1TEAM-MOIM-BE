@@ -25,3 +25,14 @@ spring:
 jwt:
   expiration: 30 # 30?
   secretKey: mySecret
+cloud:
+  aws:
+    credentials:
+      access-key: ????
+      secret-key: ????
+    s3:
+      bucket: moim-bucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
