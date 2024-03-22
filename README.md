@@ -56,9 +56,14 @@
 ## ⚙️ ERD 
 ![Moim(모임)](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/30846904-0adf-4ead-be19-291e777a92f1)
 
-
-
 <br>
+
+## 📝 화면 설계서
+
+[모임(MOIM)-화면설계서.pdf](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/files/14720138/MOIM.-.pdf)
+
+[화면 설계서 링크](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/blob/main/docs/%EB%AA%A8%EC%9E%84(MOIM)-%ED%99%94%EB%A9%B4%EC%84%A4%EA%B3%84%EC%84%9C.pdf)
+
 
 ## 💻 기술 스택
 
