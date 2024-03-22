@@ -2,7 +2,7 @@
 
 ### 😁 팀원
  
-|<img src="img/bellwin_image.jpg" height="150">|<img src="img/jaeseok_image.jpg" height="150">|<img src="" height="150">|<img src="img/eunji_image.jpg" height="150">|
+|<img src="img/bellwin_image.jpg" height="150">|<img src="img/jaeseok_image.jpg" height="150">|<img src="img/soyoung_image.jpg" height="150">|<img src="img/eunji_image.jpg" height="150">|
 |:---:|:---:|:---:|:---:|
 | [한종승(팀장)](https://github.com/BellWin98) | [신재석(팀원)](https://github.com/MrKeeplearning) | [배소영(팀원)](https://github.com/qoth-0) | [장은지(팀원)](https://github.com/Jang-Eun-Ji) |
 </div>
@@ -54,7 +54,7 @@
 <br>
 
 ## ⚙️ ERD 
-![Moim_erd](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/12dec41b-ceca-43df-bf21-18614d57c160)
+![Moim(모임)](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/30846904-0adf-4ead-be19-291e777a92f1)
 
 
 
