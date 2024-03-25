@@ -11,11 +11,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class MoimCreateRequest {
+
     private String title;
-    private List<MoimInfo> moimInfos; // 직접적인 엔티티 대신 moimInfo의 식별자 목록을 사용
+    private List<MoimInfo> moimInfos;
     private String place;
     private int runningTime;
     private LocalDate expectStartDate;

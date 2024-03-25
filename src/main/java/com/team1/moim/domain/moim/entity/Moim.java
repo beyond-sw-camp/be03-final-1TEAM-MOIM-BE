@@ -95,4 +95,7 @@ public class Moim extends BaseTimeEntity {
     @OneToMany(mappedBy = "moim_id", cascade = CascadeType.ALL)
     private List<MoimInfo> moimInfos = new ArrayList<>();
 
+    public void delete() {
+        this.isDeleted = "Y";
+    }
 }
