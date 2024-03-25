@@ -39,7 +39,8 @@ public class SecurityConfig {
     }
 
     private static final String[] EventApiUrl = {
-            "/api/events"
+            "/api/events",
+            "/api/events/**"
     };
 
 }

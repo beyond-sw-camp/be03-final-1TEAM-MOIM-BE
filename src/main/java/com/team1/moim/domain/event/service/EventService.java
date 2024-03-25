@@ -5,6 +5,7 @@ import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.entity.Matrix;
 import com.team1.moim.domain.event.repository.EventRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,5 +53,32 @@ public class EventService {
 
     }
 
-
+    @Transactional
+    public EventResponse update(Long eventId, EventRequest request) {
+//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+//        Member member = memberRepository.findByEmail(email).orElseThrow();
+        Event event = eventRepository.findById(eventId).orElseThrow();
+//        if(member.getId() != event.getMember().getId()) {
+//            throw new AccessDeniedException("작성한 회원이 아닙니다.");
+//        }
+        Path path = null;
+        if (request.getFile() != null){
+            MultipartFile file = request.getFile();
+            String fileName = file.getOriginalFilename();
+            path = Paths.get(filePath, fileName);
+            try{
+                byte[] bytes = file.getBytes();
+                Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            }catch (IOException e) {
+                throw new IllegalArgumentException("File Not Available");
+            }
+        }
+        Matrix matrix;
+        if(request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
+        else if(request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
+        else if(request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
+        else matrix = Matrix.Q4;
+        event.updateEvent(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, path);
+        return EventResponse.from(event);
+    }
 }

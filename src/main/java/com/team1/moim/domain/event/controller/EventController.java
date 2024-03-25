@@ -27,6 +27,13 @@ public class EventController {
         return ResponseEntity.ok().body(eventService.create(request));
     }
 
+    // 일정 수정
+    @PatchMapping("/{eventId}")
+    public ResponseEntity<EventResponse> update(
+            @PathVariable(name = "eventId") Long eventId, @Valid EventRequest request) {
+        return ResponseEntity.ok().body(eventService.update(eventId, request));
+    }
+
 
 
 }
