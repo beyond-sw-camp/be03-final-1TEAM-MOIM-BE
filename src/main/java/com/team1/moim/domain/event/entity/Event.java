@@ -52,7 +52,7 @@ public class Event extends BaseTimeEntity {
 
 //    첨부파일
     @Column
-    private String file;
+    private String fileUrl;
 
 //    삭제여부
     @Column(nullable = false)
@@ -67,14 +67,14 @@ public class Event extends BaseTimeEntity {
     private String alarmYn = "N";
 
     @Builder
-    public Event(String title, String memo, LocalDateTime startDate, LocalDateTime endDate, String place, Matrix matrix, String file) {
+    public Event(String title, String memo, LocalDateTime startDate, LocalDateTime endDate, String place, Matrix matrix, String fileUrl) {
         this.title = title;
         this.memo = memo;
         this.startDate = startDate;
         this.endDate = endDate;
         this.place = place;
         this.matrix = matrix;
-        this.file = file;
+        this.fileUrl = fileUrl;
     }
 
 }
