@@ -78,7 +78,13 @@ public class EventService {
         else if(request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
         else if(request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
         else matrix = Matrix.Q4;
-        event.updateEvent(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, path);
+        event.update(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, path);
         return EventResponse.from(event);
+    }
+
+    @Transactional
+    public void delete(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        event.delete();
     }
 }

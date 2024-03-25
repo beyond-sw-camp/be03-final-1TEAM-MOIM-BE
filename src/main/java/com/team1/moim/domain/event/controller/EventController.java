@@ -6,6 +6,7 @@ import com.team1.moim.domain.event.service.EventService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,14 @@ public class EventController {
     public ResponseEntity<EventResponse> update(
             @PathVariable(name = "eventId") Long eventId, @Valid EventRequest request) {
         return ResponseEntity.ok().body(eventService.update(eventId, request));
+    }
+
+    // 일정 삭제
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<String> delete(
+            @PathVariable(name = "eventId") Long eventId) {
+        eventService.delete(eventId);
+        return ResponseEntity.ok("삭제되었습니다.");
     }
 
 

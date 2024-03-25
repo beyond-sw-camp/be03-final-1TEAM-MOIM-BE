@@ -79,7 +79,8 @@ public class Event extends BaseTimeEntity {
         this.fileUrl = fileUrl;
     }
 
-    public void updateEvent(String title, String memo, String startDate, String endDate, String place, Matrix matrix, Path path) {
+    // 일정 수정
+    public void update(String title, String memo, String startDate, String endDate, String place, Matrix matrix, Path path) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime LocalStart = LocalDateTime.parse(startDate, formatter);
         LocalDateTime LocalEnd = LocalDateTime.parse(endDate, formatter);
@@ -92,4 +93,10 @@ public class Event extends BaseTimeEntity {
         this.matrix = matrix;
         this.fileUrl = fileUrl;
     }
+
+    // 일정 삭제
+    public void delete() {
+        this.deleteYn = "Y";
+    }
+
 }
