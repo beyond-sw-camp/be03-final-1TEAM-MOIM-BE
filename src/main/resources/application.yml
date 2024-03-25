@@ -25,3 +25,6 @@ spring:
 jwt:
   expiration: 30 # 30?
   secretKey: mySecret
+
+file:
+ path: C:\Users\Playdata\Desktop\eventImage

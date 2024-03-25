@@ -1,6 +1,6 @@
 package com.team1.moim.domain.event.controller;
 
-import com.team1.moim.domain.event.dto.request.CreateEventRequest;
+import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.service.EventService;
 import jakarta.validation.Valid;
@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 
 @RestController
 @Slf4j
@@ -23,9 +21,10 @@ public class EventController {
         this.eventService = eventService;
     }
 
+    // 일정 등록
     @PostMapping
-    public ResponseEntity<EventResponse> create(@Valid CreateEventRequest createEventRequest){
-        return ResponseEntity.ok().body(eventService.create(createEventRequest));
+    public ResponseEntity<EventResponse> create(@Valid EventRequest request){
+        return ResponseEntity.ok().body(eventService.create(request));
     }
 
 

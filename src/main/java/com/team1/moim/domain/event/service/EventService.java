@@ -1,24 +1,17 @@
 package com.team1.moim.domain.event.service;
 
-import com.team1.moim.domain.event.dto.request.CreateEventRequest;
+import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.Event;
+import com.team1.moim.domain.event.entity.Matrix;
 import com.team1.moim.domain.event.repository.EventRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,15 +24,15 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
-    @Value("${image.path")
+    @Value("${file.path}")
     private String filePath;
 
-    public EventResponse create(CreateEventRequest createEventRequest) {
+    public EventResponse create(EventRequest request) {
 //        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Member member = memberRepository.findByEmail(email).orElseThrow();
         Path path = null;
-        if (createEventRequest.getFile() != null){
-            MultipartFile file = createEventRequest.getFile();
+        if (request.getFile() != null){
+            MultipartFile file = request.getFile();
             String fileName = file.getOriginalFilename();
             path = Paths.get(filePath, fileName);
             try{
@@ -48,10 +41,13 @@ public class EventService {
             }catch (IOException e) {
                 throw new IllegalArgumentException("File Not Available");
             }
-//            imagePath = s3Service.uploadFile(FILE_TYPE, createEventRequest.getFile());
-
         }
-        Event event = CreateEventRequest.toEntity(createEventRequest.getTitle(), createEventRequest.getMemo(), createEventRequest.getStartDate(), createEventRequest.getEndDate(), createEventRequest.getPlace(), createEventRequest.getMatrix(), path);
+        Matrix matrix;
+        if(request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
+        else if(request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
+        else if(request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
+        else matrix = Matrix.Q4;
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, path);
         return EventResponse.from(eventRepository.save(event));
 
     }
