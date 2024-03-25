@@ -8,6 +8,7 @@ import com.team1.moim.domain.moim.dto.request.MoimCreateRequest;
 import com.team1.moim.domain.moim.dto.response.MoimDetailResponse;
 import com.team1.moim.domain.moim.service.MoimService;
 import com.team1.moim.global.response.SuccessResponse;
+import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class MoimController {
 
     private final MoimService moimService;
-    private final MemberService memberService;
 
     @Autowired
-    public MoimController(MoimService moimService, MemberService memberService) {
+    public MoimController(MoimService moimService) {
         this.moimService = moimService;
-        this.memberService = memberService;
     }
 
     // 모임 생성
     @PostMapping("/{moimId}/create")
-    public ResponseEntity<SuccessResponse<MoimDetailResponse>> createMoim(@PathVariable Long moimId, MoimCreateRequest moimCreateRequest) {
-        MoimDetailResponse response = moimService.createMoim(moimCreateRequest);
+    public ResponseEntity<SuccessResponse<MoimDetailResponse>> createMoim(
+            @PathVariable Long moimId,
+            @Valid MoimCreateRequest moimCreateRequest) {
         return ResponseEntity.created(URI.create("/" + moimId + "/create"))
                 .body(SuccessResponse.create(HttpStatus.CREATED.value(),
                         CREATE_MOIM_SUCCESS.getMessage(),
@@ -44,7 +44,7 @@ public class MoimController {
     }
 
     // 모임 삭제
-    @DeleteMapping("/{moimId}")
+    @DeleteMapping("/{moimId}/delete")
     public ResponseEntity<SuccessResponse<Void>> deleteMoim(@PathVariable Long moimId) {
         moimService.deleteMoim(moimId);
         return ResponseEntity.ok(SuccessResponse.delete(HttpStatus.OK.value(), DELETE_MOIM_SUCCESS.getMessage()));
