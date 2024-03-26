@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler
-    public ResponseEntity<ApiErrorResponse> general(HttpServletRequest request, MoimException e){
+    private static final String LOG_FORMAT = "Class: {}, Status: {}, Message: {}";
+
+    @ExceptionHandler(MoimException.class)
+    public ResponseEntity<ApiErrorResponse> handleMoimException(HttpServletRequest request, MoimException e){
+
+        log.error(LOG_FORMAT, e.getClass().getSimpleName(), e.getErrorCode(), e.getErrorCode().getMessage());
         ErrorCode errorCode = e.getErrorCode();
         HttpStatus status = errorCode.getStatus();
 

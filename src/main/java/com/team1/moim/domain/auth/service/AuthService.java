@@ -4,6 +4,8 @@ import com.team1.moim.domain.auth.dto.request.SignUpRequest;
 import com.team1.moim.domain.member.dto.response.MemberResponse;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.entity.Role;
+import com.team1.moim.domain.member.exception.EmailDuplicationException;
+import com.team1.moim.domain.member.exception.NicknameDuplicateException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.exception.ErrorCode;
@@ -27,10 +29,10 @@ public class AuthService {
     @Transactional
     public MemberResponse signUp(SignUpRequest request) {
         if (memberRepository.findByNickname(request.getNickname()).isPresent()) {
-            throw new IllegalArgumentException(ErrorCode.NICKNAME_DUPLICATION.getMessage());
+            throw new NicknameDuplicateException();
         }
         if (memberRepository.findByEmail(request.getEmail()).isPresent()){
-            throw new IllegalArgumentException(ErrorCode.EMAIL_NOT_FOUND.getMessage());
+            throw new EmailDuplicationException();
         }
         String imageUrl = null;
         if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()){
