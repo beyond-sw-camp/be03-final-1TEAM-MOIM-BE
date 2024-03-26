@@ -29,7 +29,8 @@ public class EventController {
 
     // 일정 등록
     @PostMapping
-    public ResponseEntity<EventResponse> create(@Valid EventRequest request, @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests ){
+    public ResponseEntity<EventResponse> create(@Valid EventRequest request,
+                                                @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests ){
         return ResponseEntity.ok().body(eventService.create(request, toDoListRequests));
     }
 

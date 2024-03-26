@@ -34,8 +34,6 @@ public class EventRequest {
 
     private MultipartFile file;
 
-    private List<ToDoListRequest> toDoListList;
-
     private String repeatYn;
 
     private String alarmYn;
