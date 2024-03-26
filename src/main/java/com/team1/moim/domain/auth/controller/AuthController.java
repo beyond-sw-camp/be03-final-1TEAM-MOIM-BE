@@ -1,5 +1,7 @@
 package com.team1.moim.domain.auth.controller;
 
+import com.team1.moim.domain.auth.dto.request.LoginRequest;
+import com.team1.moim.domain.auth.dto.response.LoginResponse;
 import com.team1.moim.domain.auth.service.AuthService;
 import com.team1.moim.domain.auth.dto.request.SignUpRequest;
 import com.team1.moim.domain.member.dto.response.MemberResponse;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,4 +41,17 @@ public class AuthController {
                         authService.signUp(signUpRequest)
                 ));
     }
+
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<ApiSuccessResponse<LoginResponse>> login(HttpServletRequest request,
+                                                                   @Valid @RequestBody LoginRequest loginRequest){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        request.getServletPath(),
+                        authService.login(loginRequest)));
+    }
+
 }
