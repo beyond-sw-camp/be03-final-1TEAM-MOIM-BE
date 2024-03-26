@@ -14,7 +14,7 @@ spring:
     database-platform: org.hibernate.dialect.MariaDBDialect
     generate-ddl: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show_sql: true
   data:
     redis:
@@ -25,3 +25,6 @@ spring:
 jwt:
   expiration: 30 # 30?
   secretKey: mySecret
+
+file:
+ path: C:\Users\Playdata\Desktop\eventImage
