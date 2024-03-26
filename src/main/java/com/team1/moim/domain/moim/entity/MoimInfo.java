@@ -44,4 +44,6 @@ public class MoimInfo {
     @Builder.Default
     @Column(nullable = false)
     private String isAgreed = "N";
+
+
 }

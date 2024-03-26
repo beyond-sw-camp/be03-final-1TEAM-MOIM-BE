@@ -20,7 +20,8 @@ public class MoimService {
 
     // 모임 생성하기
     @Transactional
-    public MoimDetailResponse createMoim(MoimCreateRequest moimCreateRequest) {
+    public MoimDetailResponse create(MoimCreateRequest moimCreateRequest) {
+
         Moim newMoim = moimCreateRequest.toEntity(
                 moimCreateRequest.getTitle(),
 //                moimCreateRequest.getMoimInfos(),
@@ -39,7 +40,7 @@ public class MoimService {
 
     // 모임 삭제
     @Transactional
-    public void deleteMoim(Long id) {
+    public void delete(Long id) {
         Moim moim = moimRepository.findById(id).orElseThrow(MoimNotFoundException::new);
         moim.delete();
     }
@@ -50,7 +51,5 @@ public class MoimService {
         Moim pendingMoim = moimRepository.findByIsConfirmedAndIsDeletedAndId("N", "N", id);
         return FindPendingMoimResponse.from(pendingMoim);
     }
-
-
 
 }
