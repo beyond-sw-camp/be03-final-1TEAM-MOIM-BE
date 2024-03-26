@@ -1,4 +1,4 @@
-package com.team1.moim.domain.member.dto.request;
+package com.team1.moim.domain.auth.dto.request;
 
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.entity.Role;
@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
-public class CreateMemberRequest {
+public class SignUpRequest {
     @Email(message = "이메일 형식에 맞게 입력해주세요.")
     @NotEmpty(message = "이메일이 비어있으면 안됩니다.")
     private String email;
@@ -28,6 +28,7 @@ public class CreateMemberRequest {
                 .password(passwordEncoder.encode(password))
                 .nickname(nickname)
                 .profileImage(imageUrl)
+                .role(role)
                 .build();
     }
 }

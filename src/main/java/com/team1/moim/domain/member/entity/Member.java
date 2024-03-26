@@ -27,6 +27,8 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String profileImage;
 
+    private String refreshToken;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -35,14 +37,19 @@ public class Member extends BaseTimeEntity {
     private String deleteYn = "N";
 
     @Builder
-    public Member(String email, String password, String nickname, String profileImage) {
+    public Member(String email, String password, String nickname, String profileImage, Role role) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.profileImage = profileImage;
+        this.role = role;
     }
 
     public void withdraw(){
         this.deleteYn = "Y";
+    }
+
+    public void updateRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
     }
 }
