@@ -36,11 +36,10 @@ public class EventRequest {
 
     private String alarmYn;
 
-    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, Path path){
+    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime LocalStart = LocalDateTime.parse(startDate, formatter);
         LocalDateTime LocalEnd = LocalDateTime.parse(endDate, formatter);
-        String fileUrl = path != null ? path.toString() : null;
 
         return Event.builder()
                 .title(title)
