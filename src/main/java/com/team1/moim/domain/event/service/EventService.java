@@ -8,6 +8,7 @@ import com.team1.moim.domain.event.entity.Matrix;
 import com.team1.moim.domain.event.entity.ToDoList;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
+import com.team1.moim.global.config.s3.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,11 @@ import java.util.List;
 @Slf4j
 public class EventService {
 
+    private static final String FILE_TYPE = "events";
+
     private final EventRepository eventRepository;
     private final ToDoListRepository toDoListRepository;
-
-    @Value("${file.path}")
-    private String filePath;
+    private final S3Service s3Service;
 
     public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests) {
 //        String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -41,19 +42,11 @@ public class EventService {
         else if(request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
         else if(request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
         else matrix = Matrix.Q4;
-        Path path = null;
+        String fileUrl = null;
         if (request.getFile() != null){
-            MultipartFile file = request.getFile();
-            String fileName = file.getOriginalFilename();
-            path = Paths.get(filePath, fileName);
-            try{
-                byte[] bytes = file.getBytes();
-                Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-            }catch (IOException e) {
-                throw new IllegalArgumentException("File Not Available");
-            }
+            fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
         }
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, path);
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl);
         eventRepository.save(event);
 //        ToDoList 추가
         if(toDoListRequests != null) {
@@ -73,24 +66,16 @@ public class EventService {
 //        if(member.getId() != event.getMember().getId()) {
 //            throw new AccessDeniedException("작성한 회원이 아닙니다.");
 //        }
-        Path path = null;
+        String fileUrl = null;
         if (request.getFile() != null){
-            MultipartFile file = request.getFile();
-            String fileName = file.getOriginalFilename();
-            path = Paths.get(filePath, fileName);
-            try{
-                byte[] bytes = file.getBytes();
-                Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-            }catch (IOException e) {
-                throw new IllegalArgumentException("File Not Available");
-            }
+            fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
         }
         Matrix matrix;
         if(request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
         else if(request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
         else if(request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
         else matrix = Matrix.Q4;
-        event.update(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, path);
+        event.update(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl);
         return EventResponse.from(event);
     }
 
