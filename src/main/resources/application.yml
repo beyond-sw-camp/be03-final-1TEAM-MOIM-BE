@@ -1,3 +1,8 @@
+# 예외 처리를 커스텀하게 진행하기 위해 Whitelabel Error Page 옵션 OFF
+server:
+  error:
+    whitelabel:
+      enabled: false
 spring:
   servlet:
     multipart:
