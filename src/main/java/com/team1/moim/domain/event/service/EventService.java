@@ -57,7 +57,7 @@ public class EventService {
         Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, path);
         eventRepository.save(event);
 //        ToDoList 추가
-        if(!toDoListRequests.isEmpty()) {
+        if(toDoListRequests != null) {
             for(ToDoListRequest toDoListRequest : toDoListRequests) {
                 ToDoList toDoList = toDoListRequest.toEntity(toDoListRequest.getContents(), toDoListRequest.getIsChecked(), event);
                 toDoListRepository.save(toDoList);
