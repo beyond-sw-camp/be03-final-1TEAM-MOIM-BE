@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MoimRepository extends JpaRepository<Moim, Long> {
+    Moim findByIsConfirmedAndIsDeletedAndId(String isConfirmed, String isDeleted, Long id);
 }

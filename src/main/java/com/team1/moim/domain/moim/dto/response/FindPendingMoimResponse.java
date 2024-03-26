@@ -9,8 +9,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class MoimDetailResponse {
-    //투표현황, 제목, 참여자, 장소, 투표 마감일, 내용, 첨부파일
+public class FindPendingMoimResponse {
+
     private Long id;
     private String isConfirmed;
     private String title;
@@ -20,8 +20,8 @@ public class MoimDetailResponse {
     private String contents;
     private String filePath;
 
-    public static MoimDetailResponse from(Moim moim) {
-        return MoimDetailResponse.builder()
+    public static FindPendingMoimResponse from(Moim moim) {
+        return FindPendingMoimResponse.builder()
                 .id(moim.getId())
                 .isConfirmed(moim.getIsConfirmed())
                 .title(moim.getTitle())
@@ -32,5 +32,4 @@ public class MoimDetailResponse {
                 .filePath(moim.getFilePath())
                 .build();
     }
-
 }

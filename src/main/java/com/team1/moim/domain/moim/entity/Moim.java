@@ -5,6 +5,7 @@ import com.team1.moim.global.config.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +34,7 @@ public class Moim extends BaseTimeEntity {
     private Long id;
 
     // 호스트ID
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -75,7 +76,6 @@ public class Moim extends BaseTimeEntity {
     private LocalDateTime voteDeadline;
 
     // 최종 확정 일정
-    @Column(nullable = false)
     private LocalDateTime confirmedDate;
 
     // 확정 여부 (Y, N)
@@ -92,7 +92,7 @@ public class Moim extends BaseTimeEntity {
     private String isDeleted = "N";
 
     // 참여자 리스트
-    @OneToMany(mappedBy = "moim_id", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "moim", cascade = CascadeType.ALL)
     private List<MoimInfo> moimInfos = new ArrayList<>();
 
     public void delete() {
