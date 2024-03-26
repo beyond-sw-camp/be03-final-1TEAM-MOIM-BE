@@ -3,17 +3,14 @@ package com.team1.moim.domain.event.controller;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
-import com.team1.moim.domain.event.entity.ToDoList;
 import com.team1.moim.domain.event.service.EventService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @Slf4j

@@ -1,14 +1,11 @@
 package com.team1.moim.domain.event.entity;
 
-import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.global.config.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter

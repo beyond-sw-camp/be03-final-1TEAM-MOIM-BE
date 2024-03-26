@@ -2,7 +2,6 @@ package com.team1.moim.domain.event.dto.request;
 
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.entity.Matrix;
-import com.team1.moim.domain.event.entity.ToDoList;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Data
 public class EventRequest {
