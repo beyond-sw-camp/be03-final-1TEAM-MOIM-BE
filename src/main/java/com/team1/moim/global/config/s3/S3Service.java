@@ -64,6 +64,11 @@ public class S3Service {
         return amazonS3Client.getUrl(bucket, keyName).toString();
     }
 
+    public String getDefaultImage(String fileType){
+        String keyName =  fileType + "/" + "default_profile.png";
+        return getUrl(keyName);
+    }
+
     // UUID 파일명 반환
     public String getUuidFileName(String fileName){
         String ext = fileName.substring(fileName.indexOf(".") + 1);
