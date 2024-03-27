@@ -52,6 +52,8 @@ public class AuthService {
         String imageUrl = null;
         if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()){
             imageUrl = s3Service.uploadFile(FILE_TYPE, request.getProfileImage());
+        } else {
+            imageUrl = s3Service.getDefaultImage(FILE_TYPE);
         }
         Member newMember = request.toEntity(passwordEncoder, Role.ROLE_USER, imageUrl);
 
