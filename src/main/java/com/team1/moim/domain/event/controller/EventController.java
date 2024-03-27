@@ -1,6 +1,7 @@
 package com.team1.moim.domain.event.controller;
 
 import com.team1.moim.domain.event.dto.request.EventRequest;
+import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.service.EventService;
@@ -33,14 +34,17 @@ public class EventController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
                                                                     @Valid EventRequest request,
-                                                                    @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests){
+                                                                    @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests,
+                                                                    @RequestPart(value = "repeat",required = false) RepeatRequest repeatValue){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        eventService.create(request, toDoListRequests)));
+                        eventService.create(request, toDoListRequests, repeatValue)));
     }
+
+
 
     // 일정 수정
     @PreAuthorize("hasRole('ROLE_USER')")

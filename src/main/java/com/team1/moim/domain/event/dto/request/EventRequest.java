@@ -5,8 +5,6 @@ import com.team1.moim.domain.event.entity.Matrix;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -36,10 +34,11 @@ public class EventRequest {
 
     private String alarmYn;
 
-    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime LocalStart = LocalDateTime.parse(startDate, formatter);
-        LocalDateTime LocalEnd = LocalDateTime.parse(endDate, formatter);
+
+    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl, String repeatYn){
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime LocalStart = LocalDateTime.parse(startDate);
+        LocalDateTime LocalEnd = LocalDateTime.parse(endDate);
 
         return Event.builder()
                 .title(title)
@@ -49,6 +48,27 @@ public class EventRequest {
                 .place(place)
                 .matrix(matrix)
                 .fileUrl(fileUrl)
+                .repeatYn(repeatYn)
                 .build();
+    }
+
+    public EventRequest changeDateRequest(EventRequest request, String startDate, String endDate){
+        // 새로운 EventRequest 객체 생성 (깊은 복사는 필요한 필드만 수동으로 진행)
+        EventRequest newRequest = new EventRequest();
+
+        // 기존 request로부터 필요한 모든 필드를 새 객체로 복사
+        newRequest.setTitle(request.getTitle());
+        newRequest.setMemo(request.getMemo());
+        // 새로운 startDate와 endDate로 설정
+        newRequest.setStartDate(startDate);
+        newRequest.setEndDate(endDate);
+        newRequest.setPlace(request.getPlace());
+        newRequest.setMatrix(request.getMatrix());
+        newRequest.setFile(request.getFile());
+        newRequest.setRepeatYn(request.getRepeatYn());
+        newRequest.setAlarmYn(request.getAlarmYn());
+
+        // 수정된 객체 반환
+        return newRequest;
     }
 }
