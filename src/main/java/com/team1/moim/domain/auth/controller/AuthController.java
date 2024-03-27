@@ -1,5 +1,7 @@
 package com.team1.moim.domain.auth.controller;
 
+import com.team1.moim.domain.auth.dto.request.LoginRequest;
+import com.team1.moim.domain.auth.dto.response.LoginResponse;
 import com.team1.moim.domain.auth.dto.response.EmailResponse;
 import com.team1.moim.domain.auth.service.AuthService;
 import com.team1.moim.domain.auth.dto.request.SignUpRequest;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +51,19 @@ public class AuthController {
                 ));
     }
 
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<ApiSuccessResponse<LoginResponse>> login(HttpServletRequest request,
+                                                                   @Valid @RequestBody LoginRequest loginRequest){
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        request.getServletPath(),
+                        authService.login(loginRequest)));
+    }
+  
     @PostMapping("/send-email")
     public ResponseEntity<ApiSuccessResponse<EmailResponse>> send(HttpServletRequest request,
                                                                   @RequestParam("email") String email) throws NoSuchAlgorithmException {
