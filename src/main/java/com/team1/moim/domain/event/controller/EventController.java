@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class EventController {
     }
 
     // 일정 등록
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
                                                                     @Valid EventRequest request,
@@ -41,6 +43,7 @@ public class EventController {
     }
 
     // 일정 수정
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/{eventId}")
     public ResponseEntity<ApiSuccessResponse<EventResponse>> update(HttpServletRequest servRequest,
                                                                     @PathVariable(name = "eventId") Long eventId,
@@ -54,6 +57,7 @@ public class EventController {
     }
 
     // 일정 삭제
+    @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/{eventId}")
     public ResponseEntity<ApiSuccessResponse<String>> delete(HttpServletRequest servRequest,
                                                              @PathVariable(name = "eventId") Long eventId) {
