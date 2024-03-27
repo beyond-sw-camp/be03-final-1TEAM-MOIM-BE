@@ -25,12 +25,11 @@ public class MoimDetailResponse {
                 .id(moim.getId())
                 .isConfirmed(moim.getIsConfirmed())
                 .title(moim.getTitle())
-//                .moimInfos(moim.getMoimInfos())
+                .moimInfos(moim.getMoimInfos())
                 .place(moim.getPlace())
                 .voteDeadline(moim.getVoteDeadline())
                 .contents(moim.getContents())
                 .filePath(moim.getFilePath())
                 .build();
     }
-
 }

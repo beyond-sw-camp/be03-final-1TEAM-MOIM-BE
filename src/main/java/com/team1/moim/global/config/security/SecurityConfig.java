@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 .requestMatchers("/" ).permitAll()
                                 .requestMatchers(EVENT_API_URL).permitAll()
                                 .requestMatchers(AUTH_API_URL).permitAll()
+                                .requestMatchers(MOIM_API_URL).permitAll()
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -56,5 +57,10 @@ public class SecurityConfig {
     private static final String[] AUTH_API_URL = {
             "/api/auth",
             "/api/auth/**"
+    };
+
+    private static final String[] MOIM_API_URL = {
+            "/api/moim",
+            "/api/moim/**",
     };
 }

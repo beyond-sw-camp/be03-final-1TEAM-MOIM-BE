@@ -1,11 +1,19 @@
 package com.team1.moim.domain.moim.service;
 
-import com.team1.moim.domain.moim.dto.request.MoimCreateRequest;
+import com.team1.moim.domain.member.dto.request.MemberRequest;
+import com.team1.moim.domain.member.entity.Member;
+import com.team1.moim.domain.member.exception.MemberNotFoundException;
+import com.team1.moim.domain.member.repository.MemberRepository;
+import com.team1.moim.domain.moim.dto.request.MoimRequest;
+import com.team1.moim.domain.moim.dto.request.MoimInfoRequest;
 import com.team1.moim.domain.moim.dto.response.FindPendingMoimResponse;
 import com.team1.moim.domain.moim.dto.response.MoimDetailResponse;
 import com.team1.moim.domain.moim.entity.Moim;
+import com.team1.moim.domain.moim.entity.MoimInfo;
 import com.team1.moim.domain.moim.exception.MoimNotFoundException;
+import com.team1.moim.domain.moim.repository.MoimInfoRepository;
 import com.team1.moim.domain.moim.repository.MoimRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,25 +25,47 @@ import org.springframework.transaction.annotation.Transactional;
 public class MoimService {
 
     private final MoimRepository moimRepository;
+    private final MoimInfoRepository moimInfoRepository;
+    private final MemberRepository memberRepository;
 
     // 모임 생성하기
     @Transactional
-    public MoimDetailResponse create(MoimCreateRequest moimCreateRequest) {
+    public MoimDetailResponse create(
+            MoimRequest moimRequest,
+            List<MoimInfoRequest> moimInfoRequests) {
 
-        Moim newMoim = moimCreateRequest.toEntity(
-                moimCreateRequest.getTitle(),
-//                moimCreateRequest.getMoimInfos(),
-                moimCreateRequest.getPlace(),
-                moimCreateRequest.getRunningTime(),
-                moimCreateRequest.getExpectStartDate(),
-                moimCreateRequest.getExpectEndDate(),
-                moimCreateRequest.getExpectStartTime(),
-                moimCreateRequest.getExpectEndTime(),
-                moimCreateRequest.getVoteDeadline(),
-                moimCreateRequest.getContents(),
-                moimCreateRequest.getFilePath()
+        Moim moim = MoimRequest.toEntity(
+                moimRequest.getTitle(),
+//                moimRequest.getMoimInfos(),
+                moimRequest.getPlace(),
+                moimRequest.getRunningTime(),
+                moimRequest.getExpectStartDate(),
+                moimRequest.getExpectEndDate(),
+                moimRequest.getExpectStartTime(),
+                moimRequest.getExpectEndTime(),
+                moimRequest.getVoteDeadline(),
+                moimRequest.getContents(),
+                moimRequest.getFilePath()
         );
-        return MoimDetailResponse.from(moimRepository.save(newMoim));
+
+//        if (moimInfoRequests != null) {
+//            for (MoimInfoRequest moimInfoRequest : moimInfoRequests) {
+//                MoimInfo moimInfo = MoimInfoRequest.toEntity(
+//                        moim, member, moimInfoRequest.getIsVoted(), moimInfoRequest.getIsAgreed());
+//                moimInfoRepository.save(moimInfo);
+//            }
+//        }
+        if (moimInfoRequests != null) {
+            for (MoimInfoRequest moimInfoRequest : moimInfoRequests) {
+                Member member = memberRepository.findByEmail(moimInfoRequest.getMemberEmail())
+                        .orElseThrow(MemberNotFoundException::new);
+                MoimInfo moimInfo = MoimInfoRequest.toEntity(moim, member);
+//                moim.getMoimInfos().add(moimInfo);
+                moimInfoRepository.save(moimInfo);
+            }
+        }
+
+        return MoimDetailResponse.from(moimRepository.save(moim));
     }
 
     // 모임 삭제
