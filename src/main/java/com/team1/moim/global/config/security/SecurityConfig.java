@@ -62,8 +62,7 @@ public class SecurityConfig {
     }
 
     private static final String[] EVENT_API_URL = {
-            "/api/events",
-            "/api/events/**"
+
     };
 
     private static final String[] AUTH_API_URL = {
