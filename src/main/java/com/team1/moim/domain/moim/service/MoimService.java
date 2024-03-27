@@ -48,6 +48,8 @@ public class MoimService {
                 moimRequest.getFilePath()
         );
 
+        moimRepository.save(moim);
+
 //        if (moimInfoRequests != null) {
 //            for (MoimInfoRequest moimInfoRequest : moimInfoRequests) {
 //                MoimInfo moimInfo = MoimInfoRequest.toEntity(
@@ -65,7 +67,7 @@ public class MoimService {
             }
         }
 
-        return MoimDetailResponse.from(moimRepository.save(moim));
+        return MoimDetailResponse.from(moim);
     }
 
     // 모임 삭제
