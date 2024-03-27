@@ -92,8 +92,8 @@ public class Moim extends BaseTimeEntity {
     private String isDeleted = "N";
 
     // 참여자 리스트
-    @OneToMany(mappedBy = "moim", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MoimInfo> moimInfos = new ArrayList<>();
+//    @OneToMany(mappedBy = "moim", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<MoimInfo> moimInfos = new ArrayList<>();
 
     public void delete() {
         this.isDeleted = "Y";

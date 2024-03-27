@@ -26,7 +26,7 @@ public class MoimInfo {
     private Long id;
 
     // 모임 식별 번호
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "moim_id")
     private Moim moim;
 

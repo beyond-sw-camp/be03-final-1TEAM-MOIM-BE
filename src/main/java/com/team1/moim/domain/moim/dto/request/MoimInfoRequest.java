@@ -10,6 +10,8 @@ import lombok.Data;
 public class MoimInfoRequest {
 
     private String memberEmail;
+//    private String isVoted;
+//    private String isAgreed;
 
     public static MoimInfo toEntity(Moim moim, Member member) {
         return MoimInfo.builder()

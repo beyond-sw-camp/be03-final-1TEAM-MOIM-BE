@@ -14,7 +14,7 @@ public class MoimDetailResponse {
     private Long id;
     private String isConfirmed;
     private String title;
-    private List<MoimInfo> moimInfos;
+//    private List<MoimInfo> moimInfos;
     private String place;
     private LocalDateTime voteDeadline;
     private String contents;
@@ -25,7 +25,7 @@ public class MoimDetailResponse {
                 .id(moim.getId())
                 .isConfirmed(moim.getIsConfirmed())
                 .title(moim.getTitle())
-                .moimInfos(moim.getMoimInfos())
+//                .moimInfos(moim.getMoimInfos())
                 .place(moim.getPlace())
                 .voteDeadline(moim.getVoteDeadline())
                 .contents(moim.getContents())
