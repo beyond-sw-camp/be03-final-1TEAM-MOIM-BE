@@ -1,5 +1,6 @@
 package com.team1.moim.domain.group.service;
 
+import com.team1.moim.domain.group.exception.GroupInfoNotFoundException;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
@@ -65,13 +66,16 @@ public class GroupService {
     public void delete(Long id) {
         Group group = groupRepository.findById(id).orElseThrow(GroupNotFoundException::new);
         group.delete();
+        for (GroupInfo groupInfo : groupInfoRepository.findByGroup(group).orElseThrow(GroupInfoNotFoundException::new)) {
+            groupInfo.delete();
+        }
     }
 
     // 모임 조회(일정 확정 전)
     @Transactional
     public FindPendingGroupResponse findPendingGroup(Long id) {
-        Group pendingGroup = groupRepository.findByIsConfirmedAndIsDeletedAndId("N", "N", id);
+        Group pendingGroup = groupRepository.findByIsConfirmedAndIsDeletedAndId("N", "N", id)
+                .orElseThrow(GroupNotFoundException::new);
         return FindPendingGroupResponse.from(pendingGroup);
     }
-
 }

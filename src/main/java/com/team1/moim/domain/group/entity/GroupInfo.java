@@ -45,4 +45,12 @@ public class GroupInfo {
     @Column(nullable = false)
     private String isAgreed = "N";
 
+    // 삭제여부 (Y, N)
+    @Column(nullable = false)
+    @Builder.Default
+    private String isDeleted = "N";
+
+    public void delete() {
+        this.isDeleted = "Y";
+    }
 }

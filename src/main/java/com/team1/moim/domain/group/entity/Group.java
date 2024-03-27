@@ -15,15 +15,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "groups")
 public class Group extends BaseTimeEntity {
@@ -78,7 +75,6 @@ public class Group extends BaseTimeEntity {
 
     // 확정 여부 (Y, N)
     @Column(nullable = false)
-    @Builder.Default
     private String isConfirmed = "N";
 
     // 참여자수
@@ -86,8 +82,25 @@ public class Group extends BaseTimeEntity {
 
     // 삭제여부 (Y, N)
     @Column(nullable = false)
-    @Builder.Default
     private String isDeleted = "N";
+
+    @Builder
+    public Group(String title, String contents, int runningTime, LocalDate expectStartDate,
+                 LocalDate expectEndDate, LocalTime expectStartTime, LocalTime expectEndTime, String place,
+                 String filePath, LocalDateTime voteDeadline, LocalDateTime confirmedDate, int voters) {
+        this.title = title;
+        this.contents = contents;
+        this.runningTime = runningTime;
+        this.expectStartDate = expectStartDate;
+        this.expectEndDate = expectEndDate;
+        this.expectStartTime = expectStartTime;
+        this.expectEndTime = expectEndTime;
+        this.place = place;
+        this.filePath = filePath;
+        this.voteDeadline = voteDeadline;
+        this.confirmedDate = confirmedDate;
+        this.voters = voters;
+    }
 
     public void delete() {
         this.isDeleted = "Y";

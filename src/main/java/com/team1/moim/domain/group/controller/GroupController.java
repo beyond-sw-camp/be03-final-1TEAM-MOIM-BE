@@ -1,13 +1,12 @@
 package com.team1.moim.domain.group.controller;
 
-import static com.team1.moim.global.response.SuccessMessage.DELETE_GROUP_SUCCESS;
-
 import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
 import com.team1.moim.domain.group.dto.request.GroupRequest;
 import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
 import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.service.GroupService;
-import com.team1.moim.global.response.SuccessResponse;
+import com.team1.moim.global.dto.ApiSuccessResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -36,23 +35,45 @@ public class GroupController {
 
     // 모임 생성
     @PostMapping("/create")
-    public ResponseEntity<GroupDetailResponse> createGroup(
+    public ResponseEntity<ApiSuccessResponse<GroupDetailResponse>> createGroup(
+            HttpServletRequest httpServletRequest,
             @Valid GroupRequest groupRequest,
             @RequestPart(value = "groupInfoRequests", required = false) List<GroupInfoRequest> groupInfoRequests) {
 
-        return ResponseEntity.ok().body(groupService.create(groupRequest, groupInfoRequests));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        groupService.create(groupRequest, groupInfoRequests)));
     }
 
     // 모임 삭제
-    @DeleteMapping("/{groupId}/delete")
-    public ResponseEntity<SuccessResponse<Void>> deleteGroup(@PathVariable Long groupId) {
+    @DeleteMapping("/delete/{groupId}")
+    public ResponseEntity<ApiSuccessResponse<String>> deleteGroup(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long groupId) {
+
         groupService.delete(groupId);
-        return ResponseEntity.ok(SuccessResponse.delete(HttpStatus.OK.value(), DELETE_GROUP_SUCCESS.getMessage()));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        (groupId + "번 모임이 삭제되었습니다.")));
     }
 
     // 모임 조회(일정 확정 전)
     @GetMapping("/{groupId}")
-    public ResponseEntity<FindPendingGroupResponse> findPendingGroup(@PathVariable Long groupId) {
-        return ResponseEntity.ok().body(groupService.findPendingGroup(groupId));
+    public ResponseEntity<ApiSuccessResponse<FindPendingGroupResponse>> findPendingGroup(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long groupId) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        groupService.findPendingGroup(groupId)));
     }
 }
