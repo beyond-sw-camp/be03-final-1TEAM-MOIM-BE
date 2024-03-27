@@ -1,7 +1,6 @@
-package com.team1.moim.domain.moim.dto.request;
+package com.team1.moim.domain.group.dto.request;
 
-import com.team1.moim.domain.moim.entity.Moim;
-import com.team1.moim.domain.moim.entity.MoimInfo;
+import com.team1.moim.domain.group.entity.Group;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -9,18 +8,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class MoimRequest {
+public class GroupRequest {
 
     @NotEmpty(message = "제목을 입력하세요")
     private String title;
-
-//    private List<MoimInfo> moimInfos;
 
     private String place;
 
@@ -47,17 +43,16 @@ public class MoimRequest {
 
     private String filePath;
 
-    public static Moim toEntity(String title,
-//                                List<MoimInfo> moimInfos,
-                                String place,
-                                int runningTime,
-                                String expectStartDate,
-                                String expectEndDate,
-                                String expectStartTime,
-                                String expectEndTime,
-                                String voteDeadline,
-                                String contents,
-                                String filePath) {
+    public static Group toEntity(String title,
+                                 String place,
+                                 int runningTime,
+                                 String expectStartDate,
+                                 String expectEndDate,
+                                 String expectStartTime,
+                                 String expectEndTime,
+                                 String voteDeadline,
+                                 String contents,
+                                 String filePath) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -70,9 +65,8 @@ public class MoimRequest {
 
         LocalDateTime parsedVoteDeadline = LocalDateTime.parse(voteDeadline, dateTimeFormatter);
 
-        return Moim.builder()
+        return Group.builder()
                 .title(title)
-//                .moimInfos(moimInfos)
                 .place(place)
                 .runningTime(runningTime)
                 .expectStartDate(parsedStartDate)

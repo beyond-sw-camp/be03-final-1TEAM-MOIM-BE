@@ -11,6 +11,8 @@ public enum ErrorCode {
     JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "로그인이 만료 되었습니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
+    // Group
+    GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 모임입니다."),
 
     // Member
     EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다."),

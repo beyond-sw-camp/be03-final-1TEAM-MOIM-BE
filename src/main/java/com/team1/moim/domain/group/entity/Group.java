@@ -1,8 +1,7 @@
-package com.team1.moim.domain.moim.entity;
+package com.team1.moim.domain.group.entity;
 
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.global.config.BaseTimeEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,12 +10,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +25,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Moim extends BaseTimeEntity {
+@Table(name = "groups")
+public class Group extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -90,10 +88,6 @@ public class Moim extends BaseTimeEntity {
     @Column(nullable = false)
     @Builder.Default
     private String isDeleted = "N";
-
-    // 참여자 리스트
-//    @OneToMany(mappedBy = "moim", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<MoimInfo> moimInfos = new ArrayList<>();
 
     public void delete() {
         this.isDeleted = "Y";

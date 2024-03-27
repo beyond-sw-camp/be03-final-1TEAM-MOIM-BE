@@ -73,7 +73,7 @@ public class SecurityConfig {
     };
 
     private static final String[] MOIM_API_URL = {
-            "/api/moim",
-            "/api/moim/**",
+            "/api/group",
+            "/api/group/**",
     };
 }

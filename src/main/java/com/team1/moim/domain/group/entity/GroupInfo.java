@@ -1,4 +1,4 @@
-package com.team1.moim.domain.moim.entity;
+package com.team1.moim.domain.group.entity;
 
 import com.team1.moim.domain.member.entity.Member;
 import jakarta.persistence.Column;
@@ -20,15 +20,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MoimInfo {
+public class GroupInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // 모임 식별 번호
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "moim_id")
-    private Moim moim;
+    @JoinColumn(name = "groups_id")
+    private Group group;
 
     // 회원 ID
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,6 +44,5 @@ public class MoimInfo {
     @Builder.Default
     @Column(nullable = false)
     private String isAgreed = "N";
-
 
 }
