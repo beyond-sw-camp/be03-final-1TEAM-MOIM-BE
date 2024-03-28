@@ -35,6 +35,10 @@ public class SecurityConfig {
             "/api/auth",
             "/api/auth/**"
     };
+    private static final String[] MOIM_API_URL = {
+            "/api/group",
+            "/api/group/**",
+    };
 
     private final LoginService loginService;
     private final JwtProvider jwtProvider;
@@ -85,15 +89,6 @@ public class SecurityConfig {
         return new ProviderManager(provider);
     }
 
-    private static final String[] AUTH_API_URL = {
-            "/api/auth",
-            "/api/auth/**"
-    };
-
-    private static final String[] MOIM_API_URL = {
-            "/api/group",
-            "/api/group/**",
-    };
     @Bean
     public LoginSuccessHandler loginSuccessHandler() {
         return new LoginSuccessHandler(jwtProvider, memberRepository);
