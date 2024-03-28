@@ -15,4 +15,20 @@ public class EmitterRepository {
         emitters.put(email, emitter);
     }
 
+//    public void save(String email, SseEmitter emitter) {
+//        emitters.put(email, emitter);
+//    }
+
+    public void deleteByEmail(String email) {
+        emitters.remove(email);
+    }
+
+    public SseEmitter get(String email) {
+        return emitters.get(email);
+    }
+    public int getEmitterSize(){
+        return emitters.size();
+    }
+
+    public boolean containKey(String email){return emitters.containsKey(email);}
 }

@@ -8,12 +8,15 @@ import com.team1.moim.domain.event.entity.*;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
+import com.team1.moim.domain.member.entity.Member;
+import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,13 +34,14 @@ public class EventService {
     private static final String FILE_TYPE = "events";
 
     private final EventRepository eventRepository;
+    private final MemberRepository memberRepository;
     private final ToDoListRepository toDoListRepository;
     private final RepeatRepository repeatRepository;
     private final S3Service s3Service;
 
     public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow();
         System.out.println("일정이 추가 됩니다.");
         System.out.println("repeat = " + repeatValue);
         Matrix matrix;
@@ -49,7 +53,7 @@ public class EventService {
         if (request.getFile() != null) {
             fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
         }
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatYn());
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatYn(), member);
         eventRepository.save(event);
 //        ToDoList 추가
         if (toDoListRequests != null) {
@@ -79,8 +83,8 @@ public class EventService {
 
     @Async
     public EventResponse RepeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow();
         System.out.println("메소드에 들어옴");
         System.out.println("repeatValue = " + repeatValue);
         Matrix matrix;
@@ -132,7 +136,7 @@ public class EventService {
         String newEndDate = calculatedEndDate.toString();
 //        그리고 repeat도 넣어주기
 
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, request.getRepeatYn());
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, request.getRepeatYn(), member);
         eventRepository.save(event);
 
 //        ToDoList 추가

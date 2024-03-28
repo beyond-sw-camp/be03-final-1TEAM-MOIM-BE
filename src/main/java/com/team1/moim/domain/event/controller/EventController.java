@@ -31,7 +31,7 @@ public class EventController {
     }
 
     // 일정 등록
-    @Secured("USER")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
                                                                     @Valid EventRequest request,

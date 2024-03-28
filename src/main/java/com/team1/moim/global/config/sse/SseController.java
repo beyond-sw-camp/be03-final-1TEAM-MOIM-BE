@@ -32,7 +32,7 @@ public class SseController {
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect() throws ServiceUnavailableException {
         // 1. SSE 연결하기
-        SseEmitter emitter = new SseEmitter(60 * 1000L);//만료시간 설정 30초
+        SseEmitter emitter = new SseEmitter(60*1000L);//만료시간 설정 30초
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        sseService.add(authentication.getName(),emitter);
         String email = "bbb";
@@ -40,10 +40,40 @@ public class SseController {
         try {
             // 최초 연결시 메시지를 안 보내면 503 Service Unavailable 에러 발생
             emitter.send(SseEmitter.event().name("connect").data("connected!"));
-        } catch (IOException e) {
+        }catch (IOException e){
             throw new ServiceUnavailableException();
         }
         return ResponseEntity.ok(emitter);
 
+        // 2. 캐싱 처리된 못 받은 알람 connection 완료시 밀어주기.
+//        if(Boolean.TRUE.equals(redisTemplate2.hasKey(authentication.getName()))){
+//            ListOperations<String,Object> valueOperations = redisTemplate2.opsForList();
+//            //System.out.println(valueOperations.size(authentication.getName()));
+//            Long size = valueOperations.size(authentication.getName());
+//            List<FeedBackNotificationRes> feedBackNotificationResList = valueOperations.range(authentication.getName(),0,size-1)
+//                    .stream()
+//                    .map(a->(FeedBackNotificationRes)a)
+//                    .collect(Collectors.toList());
+//            UserIdPassword userIdPassword = userRepository.findByEmail(authentication.getName()).orElseThrow(
+//                    ()-> new TheFitBizException(ErrorCode.NOT_FOUND_MEMBER));
+//            if(userIdPassword.getRole().equals(Role.MEMBER)){
+//                for(FeedBackNotificationRes feedBackNotificationRes : feedBackNotificationResList) {
+//                    sendLastInfoToMember(authentication.getName(), feedBackNotificationRes);
+//                }
+//            }else if(userIdPassword.getRole().equals(Role.TRAINER)){
+//                for(FeedBackNotificationRes feedBackNotificationRes : feedBackNotificationResList) {
+//                    sendLastInfoToTrainer(authentication.getName(), feedBackNotificationRes);
+//                }
+//            }
+//            redisTemplate2.delete(authentication.getName());
+//        }
     }
+
+//    public void sendToTrainer(String trainerEmail, String type,String uploadDate,String memberName) {
+//        ChannelTopic channel = new ChannelTopic(trainerEmail);
+//        String message = type+"_"+uploadDate+"_"+memberName+"_"+trainerEmail+"_sendToTrainer";
+//        redisPublisher.publish(channel, message);
+//    }
+
+
 }

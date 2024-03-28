@@ -35,4 +35,14 @@ public class SseService {
         });
         return emitter;
     }
+
+    SseEmitter get(String email){
+        return emitterRepository.get(email);
+    }
+
+    boolean containKey(String email){
+        return emitterRepository.containKey(email);
+    }
+
+
 }
