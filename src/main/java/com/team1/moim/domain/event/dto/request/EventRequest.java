@@ -36,7 +36,7 @@ public class EventRequest {
     private String alarmYn;
 
 
-    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl, String repeatYn, Member member){
+    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl, String repeatYn, Member member, String alarmYn){
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime LocalStart = LocalDateTime.parse(startDate);
         LocalDateTime LocalEnd = LocalDateTime.parse(endDate);
@@ -51,6 +51,7 @@ public class EventRequest {
                 .fileUrl(fileUrl)
                 .repeatYn(repeatYn)
                 .member(member)
+                .alarmYn(alarmYn)
                 .build();
     }
 

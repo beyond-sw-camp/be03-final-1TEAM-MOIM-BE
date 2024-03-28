@@ -15,10 +15,6 @@ public class EmitterRepository {
         emitters.put(email, emitter);
     }
 
-//    public void save(String email, SseEmitter emitter) {
-//        emitters.put(email, emitter);
-//    }
-
     public void deleteByEmail(String email) {
         emitters.remove(email);
     }

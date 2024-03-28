@@ -1,10 +1,12 @@
 package com.team1.moim.domain.event.service;
 
+import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.*;
+import com.team1.moim.domain.event.repository.AlarmRepository;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
@@ -37,10 +39,12 @@ public class EventService {
     private final MemberRepository memberRepository;
     private final ToDoListRepository toDoListRepository;
     private final RepeatRepository repeatRepository;
+    private final AlarmRepository alarmRepository;
     private final S3Service s3Service;
 
-    public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue) {
+    public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, List<AlarmRequest> alarmRequests) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info(email);
         Member member = memberRepository.findByEmail(email).orElseThrow();
         System.out.println("일정이 추가 됩니다.");
         System.out.println("repeat = " + repeatValue);
@@ -53,7 +57,7 @@ public class EventService {
         if (request.getFile() != null) {
             fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
         }
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatYn(), member);
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatYn(), member, request.getAlarmYn());
         eventRepository.save(event);
 //        ToDoList 추가
         if (toDoListRequests != null) {
@@ -75,6 +79,17 @@ public class EventService {
             Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
             repeatRepository.save(repeatEntity);
             RepeatCreate(request, toDoListRequests, repeatValue);
+        }
+//        Alarm 추가
+        if(alarmRequests != null && request.getAlarmYn().equals("Y")) {
+            for (AlarmRequest alarmRequest : alarmRequests) {
+                Alarmtype alarmtype;
+                if (alarmRequest.getAlarmType().equals("M")) alarmtype = Alarmtype.M;
+                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = Alarmtype.H;
+                else alarmtype = Alarmtype.D;
+                Alarm alarm = alarmRequest.toEntity(alarmtype, alarmRequest.getSetTime(), event);
+                alarmRepository.save(alarm);
+            }
         }
 
         return EventResponse.from(event);
@@ -136,7 +151,7 @@ public class EventService {
         String newEndDate = calculatedEndDate.toString();
 //        그리고 repeat도 넣어주기
 
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, request.getRepeatYn(), member);
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, request.getRepeatYn(), member, request.getAlarmYn());
         eventRepository.save(event);
 
 //        ToDoList 추가
