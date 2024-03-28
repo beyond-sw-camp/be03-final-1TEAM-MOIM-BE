@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -128,6 +129,7 @@ public class JwtProvider {
      * 헤더에 담겨져 올 때, 앞에 "Bearer "이 붙어서 오기 때문에, 제거해주는 스트림 사용(""로 replace)
      */
     public Optional<String> extractRefreshToken(HttpServletRequest request){
+        log.info("extractRefreshToken() 진입");
         return Optional.ofNullable(request.getHeader(refreshHeader))
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
@@ -138,7 +140,9 @@ public class JwtProvider {
      * 헤더에 담겨져 올 때, 앞에 "Bearer "이 붙어서 오기 때문에, 제거해주는 스트림 사용(""로 replace)
      */
     public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(accessHeader))
+        log.info("extractAccessToken() 진입");
+        // HttpHeaders를 통해 헤더에 Authorization을 넣어줌 (중요)
+        return Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
                 .filter(accessToken -> accessToken.startsWith(BEARER))
                 .map(accessToken -> accessToken.replace(BEARER, ""));
     }
@@ -153,6 +157,7 @@ public class JwtProvider {
      * 에러 발생 시 401 UNAUTHORIZED 에러 발생
      */
     public Optional<String> extractEmail(String accessToken) throws IOException {
+        log.info("extractEmail() 진입 / 이메일 추출 시작");
         try {
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey))
                     .build() // 반환된 빌더로 JWT verifier 생성
@@ -195,8 +200,10 @@ public class JwtProvider {
      * 헤더의 토큰을 HS512 인증 방식을 통해 디코딩 후 유효성 확인
      */
     public boolean isTokenValid(String token){
+        log.info("isTokenValid() 진입");
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
+            log.info("토큰이 유효합니다.");
             return true;
         } catch (Exception e){
             log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
