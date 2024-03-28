@@ -45,7 +45,7 @@ public class Member extends BaseTimeEntity {
         this.role = role;
     }
 
-    public void withdraw(){
+    public void withdraw() {
         this.deleteYn = "Y";
     }
 

@@ -35,6 +35,10 @@ public class SecurityConfig {
             "/api/auth",
             "/api/auth/**"
     };
+    private static final String[] MOIM_API_URL = {
+            "/api/group",
+            "/api/group/**",
+    };
 
     private final LoginService loginService;
     private final JwtProvider jwtProvider;
@@ -58,6 +62,7 @@ public class SecurityConfig {
                                 .requestMatchers("/" ).permitAll()
                                 .requestMatchers(EVENT_API_URL).permitAll()
                                 .requestMatchers(AUTH_API_URL).permitAll()
+                                .requestMatchers(MOIM_API_URL).permitAll()
                                 .anyRequest()
                                 .authenticated()
                 )
