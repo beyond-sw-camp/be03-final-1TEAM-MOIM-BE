@@ -1,8 +1,6 @@
 package com.team1.moim.domain.auth.service;
 
-import com.team1.moim.domain.auth.dto.request.LoginRequest;
 import com.team1.moim.domain.auth.dto.request.SignUpRequest;
-import com.team1.moim.domain.auth.dto.response.LoginResponse;
 import com.team1.moim.domain.member.dto.response.MemberResponse;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.entity.Role;
@@ -55,34 +53,9 @@ public class AuthService {
         } else {
             imageUrl = s3Service.getDefaultImage(FILE_TYPE);
         }
-        Member newMember = request.toEntity(passwordEncoder, Role.ROLE_USER, imageUrl);
+        Member newMember = request.toEntity(passwordEncoder, Role.USER, imageUrl);
 
         return MemberResponse.from(memberRepository.save(newMember));
-    }
-
-    @Transactional
-    public LoginResponse login(LoginRequest loginRequest) {
-        // Email 존재 여부 Check
-        Member member = memberRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(EmailNotFoundException::new);
-
-        // 계정 삭제 여부 Check
-        if(member.getDeleteYn().equals("Y")) {
-            throw new MemberNotFoundException();
-        }
-
-        // Password 일치 여부 Check
-        if (!passwordEncoder.matches(loginRequest.getPassword(), member.getPassword())){
-            throw new PasswordNotMatchException();
-        }
-
-        String token = jwtProvider.createToken(member.getEmail(),
-                member.getRole().toString());
-
-        return LoginResponse.builder()
-                .id(member.getId())
-                .token(token)
-                .build();
     }
   
     @Async

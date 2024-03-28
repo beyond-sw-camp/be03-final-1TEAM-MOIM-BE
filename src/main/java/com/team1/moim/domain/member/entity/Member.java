@@ -18,7 +18,7 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    // 소셜 로그인 유저의 경우 비밀번호가 필요 없으므로, nullable
     private String password;
 
     @Column(unique = true, nullable = false)
