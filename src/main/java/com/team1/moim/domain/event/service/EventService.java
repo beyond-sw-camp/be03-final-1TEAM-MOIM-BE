@@ -49,7 +49,7 @@ public class EventService {
         if (request.getFile() != null) {
             fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
         }
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatYn());
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatParent());
         eventRepository.save(event);
 //        ToDoList 추가
         if (toDoListRequests != null) {
@@ -70,7 +70,7 @@ public class EventService {
             System.out.println("반복일정이 추가됩니다.");
             Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
             repeatRepository.save(repeatEntity);
-            RepeatCreate(request, toDoListRequests, repeatValue);
+            RepeatCreate(request, toDoListRequests, repeatValue, event.getId());
         }
 
         return EventResponse.from(event);
@@ -78,7 +78,7 @@ public class EventService {
 
 
     @Async
-    public EventResponse RepeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue) {
+    public EventResponse RepeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, Long repeatParent) {
 //        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Member member = memberRepository.findByEmail(email).orElseThrow();
         System.out.println("메소드에 들어옴");
@@ -132,7 +132,7 @@ public class EventService {
         String newEndDate = calculatedEndDate.toString();
 //        그리고 repeat도 넣어주기
 
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, request.getRepeatYn());
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, repeatParent);
         eventRepository.save(event);
 
 //        ToDoList 추가
@@ -143,13 +143,23 @@ public class EventService {
             }
         }
 
+        Repeat_type newRepeat;
+        if (repeatValue.getReapetType().equals("Y")) newRepeat = Repeat_type.Y;
+        else if (request.getMatrix().equals("M")) newRepeat = Repeat_type.M;
+        else if (request.getMatrix().equals("W")) newRepeat = Repeat_type.W;
+        else newRepeat = Repeat_type.D;
+
+        System.out.println("반복일정이 추가됩니다.");
+        Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
+        repeatRepository.save(repeatEntity);
+
         // 만약 현재 반복일정 보다 1년뒤(반복일정 타입별이 Y인걸로 가정 하면)인 nextStartDate가 반복 종료일보다 전이면 RepeatCreate를 다시 호출한다.
         LocalDate repeatEndDate = LocalDate.parse(repeatValue.getReapet_end_date());
         if (repeatEndDate.isAfter(ChronoLocalDate.from(nextStartDate))){
             EventRequest newRequest = request.changeDateRequest(request, newStartDate, newEndDate);
             System.out.println("반복 한번 더");
             System.out.println("newRequest = " + newRequest);
-            RepeatCreate(newRequest, toDoListRequests, repeatValue);
+            RepeatCreate(newRequest, toDoListRequests, repeatValue, repeatParent);
         }
 
 
