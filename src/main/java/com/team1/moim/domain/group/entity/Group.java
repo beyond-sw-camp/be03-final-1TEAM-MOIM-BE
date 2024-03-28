@@ -2,6 +2,7 @@ package com.team1.moim.domain.group.entity;
 
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.global.config.BaseTimeEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,10 +11,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -83,6 +87,9 @@ public class Group extends BaseTimeEntity {
     // 삭제여부 (Y, N)
     @Column(nullable = false)
     private String isDeleted = "N";
+
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<GroupInfo> groupInfos = new ArrayList<>();
 
     @Builder
     public Group(String title, String contents, int runningTime, LocalDate expectStartDate,
