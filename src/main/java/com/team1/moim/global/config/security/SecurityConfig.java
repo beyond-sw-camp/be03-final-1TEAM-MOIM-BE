@@ -30,10 +30,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String[] EVENT_API_URL = {
-            "/api/events",
-            "/api/events/**"
-    };
+    private static final String[] EVENT_API_URL = {};
     private static final String[] AUTH_API_URL = {
             "/api/auth",
             "/api/auth/**"
@@ -73,7 +70,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
+  
     @Bean
     public PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
