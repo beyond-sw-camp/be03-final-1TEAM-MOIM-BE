@@ -50,19 +50,6 @@ public class AuthController {
                         authService.signUp(signUpRequest)
                 ));
     }
-
-    // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<ApiSuccessResponse<LoginResponse>> login(HttpServletRequest request,
-                                                                   @Valid @RequestBody LoginRequest loginRequest){
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiSuccessResponse.of(
-                        HttpStatus.OK,
-                        request.getServletPath(),
-                        authService.login(loginRequest)));
-    }
   
     @PostMapping("/send-email")
     public ResponseEntity<ApiSuccessResponse<EmailResponse>> send(HttpServletRequest request,

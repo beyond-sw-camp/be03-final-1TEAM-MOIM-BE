@@ -67,7 +67,7 @@ public class Event extends BaseTimeEntity {
     private String alarmYn = "N";
 
     @Builder
-    public Event(String title, String memo, LocalDateTime startDate, LocalDateTime endDate, String place, Matrix matrix, String fileUrl) {
+    public Event(String title, String memo, LocalDateTime startDate, LocalDateTime endDate, String place, Matrix matrix, String fileUrl, String repeatYn) {
         this.title = title;
         this.memo = memo;
         this.startDate = startDate;
@@ -75,13 +75,14 @@ public class Event extends BaseTimeEntity {
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;
+        this.repeatYn = repeatYn;
     }
 
     // 일정 수정
     public void update(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime LocalStart = LocalDateTime.parse(startDate, formatter);
-        LocalDateTime LocalEnd = LocalDateTime.parse(endDate, formatter);
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime LocalStart = LocalDateTime.parse(startDate);
+        LocalDateTime LocalEnd = LocalDateTime.parse(endDate);
 
         this.title = title;
         this.memo = memo;
