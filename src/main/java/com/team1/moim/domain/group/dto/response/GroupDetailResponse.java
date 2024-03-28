@@ -15,6 +15,7 @@ public class GroupDetailResponse {
     private LocalDateTime voteDeadline;
     private String contents;
     private String filePath;
+    private int participants;
 
     public static GroupDetailResponse from(Group group) {
         return GroupDetailResponse.builder()
@@ -25,6 +26,7 @@ public class GroupDetailResponse {
                 .voteDeadline(group.getVoteDeadline())
                 .contents(group.getContents())
                 .filePath(group.getFilePath())
+                .participants(group.getParticipants())
                 .build();
     }
 }

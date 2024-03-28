@@ -82,7 +82,7 @@ public class Group extends BaseTimeEntity {
     private String isConfirmed = "N";
 
     // 참여자수
-    private int voters;
+    private int participants;
 
     // 삭제여부 (Y, N)
     @Column(nullable = false)
@@ -94,7 +94,7 @@ public class Group extends BaseTimeEntity {
     @Builder
     public Group(String title, String contents, int runningTime, LocalDate expectStartDate,
                  LocalDate expectEndDate, LocalTime expectStartTime, LocalTime expectEndTime, String place,
-                 String filePath, LocalDateTime voteDeadline, LocalDateTime confirmedDate, int voters) {
+                 String filePath, LocalDateTime voteDeadline, LocalDateTime confirmedDate, int participants) {
         this.title = title;
         this.contents = contents;
         this.runningTime = runningTime;
@@ -106,7 +106,7 @@ public class Group extends BaseTimeEntity {
         this.filePath = filePath;
         this.voteDeadline = voteDeadline;
         this.confirmedDate = confirmedDate;
-        this.voters = voters;
+        this.participants = participants;
     }
 
     public void delete() {

@@ -2,6 +2,7 @@ package com.team1.moim.domain.group.controller;
 
 import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
 import com.team1.moim.domain.group.dto.request.GroupRequest;
+import com.team1.moim.domain.group.dto.response.FindConfirmedGroupResponse;
 import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
 import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.service.GroupService;
@@ -75,5 +76,19 @@ public class GroupController {
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
                         groupService.findPendingGroup(groupId)));
+    }
+
+    // 모임 조회(일정 확정 후)
+    @GetMapping("/confirmed/{groupId}")
+    public ResponseEntity<ApiSuccessResponse<FindConfirmedGroupResponse>> findConfirmedGroup(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long groupId) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        groupService.findConfirmedGroup(groupId)));
     }
 }

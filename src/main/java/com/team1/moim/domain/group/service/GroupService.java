@@ -1,5 +1,6 @@
 package com.team1.moim.domain.group.service;
 
+import com.team1.moim.domain.group.dto.response.FindConfirmedGroupResponse;
 import com.team1.moim.domain.group.exception.GroupInfoNotFoundException;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
@@ -44,7 +45,8 @@ public class GroupService {
                 groupRequest.getExpectEndTime(),
                 groupRequest.getVoteDeadline(),
                 groupRequest.getContents(),
-                groupRequest.getFilePath()
+                groupRequest.getFilePath(),
+                groupInfoRequests
         );
 
         groupRepository.save(group);
@@ -77,5 +79,13 @@ public class GroupService {
         Group pendingGroup = groupRepository.findByIsConfirmedAndIsDeletedAndId("N", "N", id)
                 .orElseThrow(GroupNotFoundException::new);
         return FindPendingGroupResponse.from(pendingGroup);
+    }
+
+    // 모임 조회(일정 확정 후)
+    @Transactional
+    public FindConfirmedGroupResponse findConfirmedGroup(Long id) {
+        Group confirmedGroup = groupRepository.findByIsConfirmedAndIsDeletedAndId("Y", "N", id)
+                .orElseThrow(GroupNotFoundException::new);
+        return FindConfirmedGroupResponse.from(confirmedGroup);
     }
 }

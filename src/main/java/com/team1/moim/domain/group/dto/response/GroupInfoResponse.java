@@ -10,7 +10,6 @@ public class GroupInfoResponse {
     private Long id;
     private String email;
     private String nickname;
-    private String isVoted;
     private String isAgreed;
 
     public static GroupInfoResponse from(GroupInfo groupInfo) {
@@ -18,7 +17,6 @@ public class GroupInfoResponse {
                 .id(groupInfo.getId())
                 .email(groupInfo.getMember().getEmail())
                 .nickname(groupInfo.getMember().getNickname())
-                .isVoted(groupInfo.getIsVoted())
                 .isAgreed(groupInfo.getIsAgreed())
                 .build();
     }

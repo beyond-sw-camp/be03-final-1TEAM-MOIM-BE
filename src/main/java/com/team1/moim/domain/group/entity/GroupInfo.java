@@ -35,11 +35,6 @@ public class GroupInfo {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    // 투표 현황
-    @Builder.Default
-    @Column(nullable = false)
-    private String isVoted = "N";
-
     // 동의 여부
     @Builder.Default
     @Column(nullable = false)

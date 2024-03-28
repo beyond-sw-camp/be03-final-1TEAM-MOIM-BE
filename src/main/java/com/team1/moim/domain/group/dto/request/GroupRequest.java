@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -43,6 +44,8 @@ public class GroupRequest {
 
     private String filePath;
 
+    private int participants;
+
     public static Group toEntity(String title,
                                  String place,
                                  int runningTime,
@@ -52,7 +55,9 @@ public class GroupRequest {
                                  String expectEndTime,
                                  String voteDeadline,
                                  String contents,
-                                 String filePath) {
+                                 String filePath,
+                                 List<GroupInfoRequest> requests) {
+
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -76,6 +81,12 @@ public class GroupRequest {
                 .voteDeadline(parsedVoteDeadline)
                 .contents(contents)
                 .filePath(filePath)
+                .participants(calculateParticipants(requests))
                 .build();
+    }
+    
+    // 참여자 수 계산
+    private static int calculateParticipants(List<GroupInfoRequest> requests) {
+        return requests == null ? 0 : requests.size();
     }
 }
