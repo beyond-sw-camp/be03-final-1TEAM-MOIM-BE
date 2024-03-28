@@ -64,7 +64,4 @@ public class EventController {
                         servRequest.getServletPath(),
                         ("삭제되었습니다.")));
     }
-
-
-
 }
