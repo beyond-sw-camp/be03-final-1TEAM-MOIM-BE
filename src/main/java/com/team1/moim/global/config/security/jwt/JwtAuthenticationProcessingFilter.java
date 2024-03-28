@@ -52,6 +52,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 return; // 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행 시킴)
             }
         }
+        log.info("NO_CHECK_URL PASS");
 
         // 요청 헤더에서 RT 호출
         // RT가 없거나 유효하지 않으면(DB에 저장된 RT와 다르다면) null 반환
@@ -60,6 +61,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         String refreshToken = jwtProvider.extractRefreshToken(request)
                 .filter(jwtProvider::isTokenValid)
                 .orElse(null);
+
+        log.info("Refresh Token 정보: {}", refreshToken);
 
         // RT가 요청 헤더에 존재하면, 사용자의 AT가 만료됐기 때문에,
         // RT까지 보낸 것이므로, 요청 헤더의 RT가 DB의 RT가 일치하는 지 검증하고,
@@ -107,6 +110,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                         throw new RuntimeException(e);
                     }
                 });
+        log.info("Authentication 객체에 대한 인증 허가 처리 완료");
         filterChain.doFilter(request, response);
     }
 
@@ -137,6 +141,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                         authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info("saveAuthentication() 종료");
     }
 
     /**
