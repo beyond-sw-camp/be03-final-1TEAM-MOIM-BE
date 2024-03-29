@@ -30,12 +30,12 @@ public class EventRequest {
 
     private MultipartFile file;
 
-    private String repeatYn;
+    private Long repeatParent;
 
     private String alarmYn;
 
 
-    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl, String repeatYn){
+    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl, Long repeatParent){
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime LocalStart = LocalDateTime.parse(startDate);
         LocalDateTime LocalEnd = LocalDateTime.parse(endDate);
@@ -48,7 +48,7 @@ public class EventRequest {
                 .place(place)
                 .matrix(matrix)
                 .fileUrl(fileUrl)
-                .repeatYn(repeatYn)
+                .repeatParent(repeatParent)
                 .build();
     }
 
@@ -65,7 +65,7 @@ public class EventRequest {
         newRequest.setPlace(request.getPlace());
         newRequest.setMatrix(request.getMatrix());
         newRequest.setFile(request.getFile());
-        newRequest.setRepeatYn(request.getRepeatYn());
+        newRequest.setRepeatParent(request.getRepeatParent());
         newRequest.setAlarmYn(request.getAlarmYn());
 
         // 수정된 객체 반환

@@ -19,7 +19,7 @@ public class EventResponse {
     private Matrix matrix;
     private String fileUrl;
     private String deleteYn;
-    private String repeatYn;
+    private Long repeatParent;
     private String alarmYn;
 
     public static EventResponse from(Event event){
@@ -33,7 +33,7 @@ public class EventResponse {
                 .matrix(event.getMatrix())
                 .fileUrl(event.getFileUrl())
                 .deleteYn(event.getDeleteYn())
-                .repeatYn(event.getRepeatYn())
+                .repeatParent(event.getRepeatParent())
                 .alarmYn(event.getAlarmYn())
                 .build();
     }
