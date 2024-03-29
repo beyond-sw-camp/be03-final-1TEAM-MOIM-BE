@@ -1,6 +1,7 @@
 package com.team1.moim.domain.group.dto.request;
 
 import com.team1.moim.domain.group.entity.Group;
+import com.team1.moim.domain.member.entity.Member;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -8,12 +9,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 public class GroupRequest {
+
+    private Member member;
 
     @NotEmpty(message = "제목을 입력하세요")
     private String title;
@@ -43,7 +47,10 @@ public class GroupRequest {
 
     private String filePath;
 
-    public static Group toEntity(String title,
+    private int participants;
+
+    public static Group toEntity(Member member,
+                                 String title,
                                  String place,
                                  int runningTime,
                                  String expectStartDate,
@@ -52,7 +59,9 @@ public class GroupRequest {
                                  String expectEndTime,
                                  String voteDeadline,
                                  String contents,
-                                 String filePath) {
+                                 String filePath,
+                                 List<GroupInfoRequest> requests) {
+
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -66,6 +75,7 @@ public class GroupRequest {
         LocalDateTime parsedVoteDeadline = LocalDateTime.parse(voteDeadline, dateTimeFormatter);
 
         return Group.builder()
+                .member(member)
                 .title(title)
                 .place(place)
                 .runningTime(runningTime)
@@ -76,6 +86,12 @@ public class GroupRequest {
                 .voteDeadline(parsedVoteDeadline)
                 .contents(contents)
                 .filePath(filePath)
+                .participants(calculateParticipants(requests))
                 .build();
+    }
+    
+    // 참여자 수 계산
+    private static int calculateParticipants(List<GroupInfoRequest> requests) {
+        return requests == null ? 0 : requests.size();
     }
 }

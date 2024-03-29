@@ -8,28 +8,28 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class GroupDetailResponse {
+public class ListGroupResponse {
     private Long id;
     private Member member;
-    private String isConfirmed;
     private String title;
-    private String place;
+    private int runningTime;
     private LocalDateTime voteDeadline;
-    private String contents;
-    private String filePath;
+    private LocalDateTime confirmedDate;
     private int participants;
+    private String isConfirmed;
+    private String isDeleted;
 
-    public static GroupDetailResponse from(Group group) {
-        return GroupDetailResponse.builder()
+    public static ListGroupResponse from(Group group) {
+        return ListGroupResponse.builder()
                 .id(group.getId())
                 .member(group.getMember())
-                .isConfirmed(group.getIsConfirmed())
                 .title(group.getTitle())
-                .place(group.getPlace())
+                .runningTime(group.getRunningTime())
                 .voteDeadline(group.getVoteDeadline())
-                .contents(group.getContents())
-                .filePath(group.getFilePath())
+                .confirmedDate(group.getConfirmedDate())
                 .participants(group.getParticipants())
+                .isConfirmed(group.getIsConfirmed())
+                .isDeleted(group.getIsDeleted())
                 .build();
     }
 }
