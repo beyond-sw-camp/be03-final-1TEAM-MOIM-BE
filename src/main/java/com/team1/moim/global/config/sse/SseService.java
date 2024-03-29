@@ -53,8 +53,15 @@ public class SseService {
         return emitter;
     }
 
-    SseEmitter get(String email){
-        return emitterRepository.get(email);
+    public void sendEventAlarm(String email, NotificationResponse notificationResponse){
+        try {
+            emitterRepository.get(email).send(SseEmitter.event()
+                    .name("sendEventAlarm")
+                    .data(notificationResponse));
+        } catch (IOException e){
+//            emitterRepository.deleteById(emitterId);
+            throw new RuntimeException(e);
+        }
     }
 
     boolean containKey(String email){

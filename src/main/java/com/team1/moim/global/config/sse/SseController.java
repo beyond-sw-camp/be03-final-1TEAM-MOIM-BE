@@ -35,7 +35,7 @@ public class SseController {
 //    SSE 연결
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect() throws ServiceUnavailableException {
-        SseEmitter emitter = new SseEmitter(60*1000L);// 만료시간 설정 30초
+        SseEmitter emitter = new SseEmitter(3600*1000L);// 만료시간 설정 30초
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info(email);
         sseService.add(email, emitter);
