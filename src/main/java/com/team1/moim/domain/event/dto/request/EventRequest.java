@@ -2,6 +2,7 @@ package com.team1.moim.domain.event.dto.request;
 
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.entity.Matrix;
+import com.team1.moim.domain.member.entity.Member;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,9 +35,17 @@ public class EventRequest {
 
     private String alarmYn;
 
+    public static Event toEntity(String title, 
+                                 String memo, 
+                                 String startDate, 
+                                 String endDate, 
+                                 String place, 
+                                 Matrix matrix, 
+                                 String fileUrl, 
+                                 Long repeatParent, 
+                                 Member member, 
+                                 String alarmYn){
 
-    public static Event toEntity(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl, Long repeatParent){
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime LocalStart = LocalDateTime.parse(startDate);
         LocalDateTime LocalEnd = LocalDateTime.parse(endDate);
 
@@ -48,6 +57,8 @@ public class EventRequest {
                 .place(place)
                 .matrix(matrix)
                 .fileUrl(fileUrl)
+                .member(member)
+                .alarmYn(alarmYn)
                 .repeatParent(repeatParent)
                 .build();
     }

@@ -1,5 +1,6 @@
 package com.team1.moim.domain.event.controller;
 
+import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,13 +37,14 @@ public class EventController {
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
                                                                     @Valid EventRequest request,
                                                                     @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests,
-                                                                    @RequestPart(value = "repeat",required = false) RepeatRequest repeatValue){
+                                                                    @RequestPart(value = "repeat",required = false) RepeatRequest repeatValue,
+                                                                    @RequestPart(value = "alarmRequest",required = false) List<AlarmRequest> alarmRequest){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        eventService.create(request, toDoListRequests, repeatValue)));
+                        eventService.create(request, toDoListRequests, repeatValue, alarmRequest)));
     }
 
 

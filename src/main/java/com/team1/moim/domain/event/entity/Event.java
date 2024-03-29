@@ -1,5 +1,6 @@
 package com.team1.moim.domain.event.entity;
 
+import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.global.config.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -21,9 +22,9 @@ public class Event extends BaseTimeEntity {
     private Long id;
 
 //    회원ID
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "member_id", nullable = false)
-//    private Member member;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
 //    제목
     @Column(nullable = false)
@@ -67,7 +68,16 @@ public class Event extends BaseTimeEntity {
     private String alarmYn = "N";
 
     @Builder
-    public Event(String title, String memo, LocalDateTime startDate, LocalDateTime endDate, String place, Matrix matrix, String fileUrl, Long repeatParent) {
+    public Event(String title, 
+                 String memo, 
+                 LocalDateTime startDate, 
+                 LocalDateTime endDate, 
+                 String place, 
+                 Matrix matrix, 
+                 String fileUrl, 
+                 Long repeatParent, 
+                 Member member, 
+                 String alarmYn) {
         this.title = title;
         this.memo = memo;
         this.startDate = startDate;
@@ -75,12 +85,14 @@ public class Event extends BaseTimeEntity {
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;
+        this.member = member;
+        this.alarmYn = alarmYn;
         this.repeatParent = repeatParent;
     }
 
     // 일정 수정
     public void update(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        
         LocalDateTime LocalStart = LocalDateTime.parse(startDate);
         LocalDateTime LocalEnd = LocalDateTime.parse(endDate);
 

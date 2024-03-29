@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class EventResponse {
     private Long id;
+    private String nickname;
     private String title;
     private String memo;
     private LocalDateTime startDate;
@@ -35,6 +36,7 @@ public class EventResponse {
                 .deleteYn(event.getDeleteYn())
                 .repeatParent(event.getRepeatParent())
                 .alarmYn(event.getAlarmYn())
+                .nickname(event.getMember().getNickname())
                 .build();
     }
 

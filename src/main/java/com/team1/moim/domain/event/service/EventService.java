@@ -1,19 +1,27 @@
 package com.team1.moim.domain.event.service;
 
+import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.*;
+import com.team1.moim.domain.event.repository.AlarmRepository;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
+import com.team1.moim.domain.member.entity.Member;
+import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
+import com.team1.moim.global.config.sse.NotificationResponse;
+import com.team1.moim.global.config.sse.SseService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,13 +39,18 @@ public class EventService {
     private static final String FILE_TYPE = "events";
 
     private final EventRepository eventRepository;
+    private final MemberRepository memberRepository;
     private final ToDoListRepository toDoListRepository;
     private final RepeatRepository repeatRepository;
+    private final AlarmRepository alarmRepository;
     private final S3Service s3Service;
+    private final SseService sseService;
 
-    public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow();
+    public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, List<AlarmRequest> alarmRequests) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info(email);
+        Member member = memberRepository.findByEmail(email).orElseThrow();
+
         log.info("일정이 추가 됩니다.");
         Matrix matrix;
         if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
@@ -48,9 +61,10 @@ public class EventService {
         if (request.getFile() != null) {
             fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
         }
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatParent());
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl, request.getRepeatParent(), member, request.getAlarmYn());
         eventRepository.save(event);
-//        ToDoList 추가
+  
+//      ToDoList 추가
         if (toDoListRequests != null) {
             for (ToDoListRequest toDoListRequest : toDoListRequests) {
                 ToDoList toDoList = toDoListRequest.toEntity(toDoListRequest.getContents(), toDoListRequest.getIsChecked(), event);
@@ -71,15 +85,24 @@ public class EventService {
             repeatRepository.save(repeatEntity);
             repeatCreate(request, toDoListRequests, repeatValue, event.getId());
         }
-
+//        Alarm 추가
+        if(alarmRequests != null && request.getAlarmYn().equals("Y")) {
+            for (AlarmRequest alarmRequest : alarmRequests) {
+                AlarmType alarmtype;
+                if (alarmRequest.getAlarmType().equals("M")) alarmtype = AlarmType.M;
+                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = AlarmType.H;
+                else alarmtype = AlarmType.D;
+                Alarm alarm = alarmRequest.toEntity(alarmtype, alarmRequest.getSetTime(), event);
+                alarmRepository.save(alarm);
+            }
+        }
         return EventResponse.from(event);
     }
 
-
     @Async
     public EventResponse repeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, Long repeatParent) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow();
         Matrix matrix;
         if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
         else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
@@ -129,7 +152,7 @@ public class EventService {
         String newEndDate = calculatedEndDate.toString();
 //        그리고 repeat도 넣어주기
 
-        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, repeatParent);
+        Event event = EventRequest.toEntity(request.getTitle(), request.getMemo(), newStartDate, newEndDate, request.getPlace(), matrix, fileUrl, repeatParent, member, request.getAlarmYn());
         eventRepository.save(event);
 
 //        ToDoList 추가
@@ -274,7 +297,36 @@ public class EventService {
             }
 
         }
+    }
 
-
+    // 알림 전송 스케줄러
+    @Transactional
+    @Scheduled(cron = "0 0/1 * * * *") // 매분마다 실행
+    public void eventSchedule() {
+        List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
+        for(Event event : events) {
+            List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
+            for(Alarm alarm : alarms) {
+                if(alarm.getAlarmtype() == AlarmType.D) {
+                    if(event.getStartDate().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                        Member member = alarm.getEvent().getMember();
+                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        alarm.sendCheck("Y");
+                    }
+                } else if (alarm.getAlarmtype() == AlarmType.H) {
+                    if (event.getStartDate().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                        Member member = alarm.getEvent().getMember();
+                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        alarm.sendCheck("Y");
+                    }
+                } else if (alarm.getAlarmtype() == AlarmType.M) {
+                    if (event.getStartDate().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                        Member member = alarm.getEvent().getMember();
+                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        alarm.sendCheck("Y");
+                    }
+                }
+            }
+        }
     }
 }
