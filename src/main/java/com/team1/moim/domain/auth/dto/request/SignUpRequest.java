@@ -23,12 +23,19 @@ public class SignUpRequest {
     private MultipartFile profileImage;
 
     public Member toEntity(PasswordEncoder passwordEncoder, Role role, String imageUrl){
+        String finalPassword = null;
+        if (password != null){
+            finalPassword = passwordEncoder.encode(password);
+        }
+
         return Member.builder()
                 .email(email)
-                .password(passwordEncoder.encode(password))
+                .password(finalPassword)
                 .nickname(nickname)
                 .profileImage(imageUrl)
                 .role(role)
+                .socialType(null)
+                .socialId(null)
                 .build();
     }
 }

@@ -8,6 +8,9 @@ import com.team1.moim.global.config.security.login.filter.CustomJsonUsernamePass
 import com.team1.moim.global.config.security.login.handler.LoginFailureHandler;
 import com.team1.moim.global.config.security.login.handler.LoginSuccessHandler;
 import com.team1.moim.global.config.security.login.service.LoginService;
+import com.team1.moim.global.config.security.oauth2.handler.OAuth2LoginFailureHandler;
+import com.team1.moim.global.config.security.oauth2.handler.OAuth2LoginSuccessHandler;
+import com.team1.moim.global.config.security.oauth2.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,6 +47,9 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
     private final ObjectMapper objectMapper;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
@@ -55,7 +61,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
 
-                // 기본 인증 로그인 사용 안하므로 disable
+                // 기본 인증 로그인 사용 안하고 JWT 로그인 사용하므로 disable
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequest ->
                         authorizeRequest
@@ -67,11 +73,20 @@ public class SecurityConfig {
                                 .authenticated()
                 )
                 // 세션을 사용하지 않는 설정 추가
-                .sessionManagement((sessionManagement) ->
+                .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                )
                 // Custom Filter 추가 (UsernamePasswordAuthenticationFilter 실행 전에 jwtAuthFilter를 실행)
+                // addFilterAfter(A,B): B필터 이후에 A 필터가 동작하도록 하는 메서드
                 .addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
+
+                // addFilterBefore(A,B): B필터 이전에 A필터가 동작하도록 하는 메서드
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)
                 .build();
     }

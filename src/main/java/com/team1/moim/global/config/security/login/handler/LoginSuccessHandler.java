@@ -34,6 +34,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
+        log.info("onAuthenticationSuccess() 진입");
         String email = extractUsername(authentication); // 인증 정보에서 Username(email) 추출
         String role = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new)
@@ -55,6 +56,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     }
 
     private String extractUsername(Authentication authentication){
+        log.info("extractUsername() 진입");
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return userDetails.getUsername();
     }
