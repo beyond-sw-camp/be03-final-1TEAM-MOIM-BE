@@ -60,6 +60,8 @@ public class EventController {
                         eventService.update(eventId, request)));
     }
 
+
+
     // 일정 삭제
 //    @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/{eventId}")

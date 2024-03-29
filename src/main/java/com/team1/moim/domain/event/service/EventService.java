@@ -9,10 +9,10 @@ import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.global.config.s3.S3Service;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -20,11 +20,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -183,7 +180,9 @@ public class EventService {
         else if (request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
         else matrix = Matrix.Q4;
         event.update(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl);
+
         return EventResponse.from(event);
+
     }
 
     @Transactional
@@ -191,6 +190,7 @@ public class EventService {
         System.out.println("delete");
         Event event = eventRepository.findById(eventId).orElseThrow();
         event.delete();
+
     }
 
     @Transactional

@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class ToDoListRequest {
+
     @NotEmpty(message = "내용이 비어있으면 안됩니다.")
     private String contents;
 

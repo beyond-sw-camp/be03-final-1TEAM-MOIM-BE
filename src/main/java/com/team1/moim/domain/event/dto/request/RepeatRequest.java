@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 
 @Data
 public class RepeatRequest {
+
     @NotEmpty(message = "반복타입이 비어있으면 안됩니다.")
     private String reapetType;
 
