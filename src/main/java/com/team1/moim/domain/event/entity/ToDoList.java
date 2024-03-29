@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,6 +34,12 @@ public class ToDoList extends BaseTimeEntity {
     @Builder
     public ToDoList(Event event, String contents, String isChecked) {
         this.event = event;
+        this.contents = contents;
+        this.isChecked = isChecked;
+    }
+
+    //투두리스트 수정
+    public void update(String contents, String isChecked) {
         this.contents = contents;
         this.isChecked = isChecked;
     }

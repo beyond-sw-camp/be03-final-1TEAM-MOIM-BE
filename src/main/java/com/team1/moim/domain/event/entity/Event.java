@@ -60,15 +60,24 @@ public class Event extends BaseTimeEntity {
     private String deleteYn = "N";
 
 //    반복여부
-    @Column(nullable = false)
-    private String repeatYn = "N";
+    @Column
+    private Long repeatParent;
 
 //    알림여부
     @Column(nullable = false)
     private String alarmYn = "N";
 
     @Builder
-    public Event(String title, String memo, LocalDateTime startDate, LocalDateTime endDate, String place, Matrix matrix, String fileUrl, String repeatYn, Member member, String alarmYn) {
+    public Event(String title, 
+                 String memo, 
+                 LocalDateTime startDate, 
+                 LocalDateTime endDate, 
+                 String place, 
+                 Matrix matrix, 
+                 String fileUrl, 
+                 Long repeatParent, 
+                 Member member, 
+                 String alarmYn) {
         this.title = title;
         this.memo = memo;
         this.startDate = startDate;
@@ -76,14 +85,14 @@ public class Event extends BaseTimeEntity {
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;
-        this.repeatYn = repeatYn;
         this.member = member;
         this.alarmYn = alarmYn;
+        this.repeatParent = repeatParent;
     }
 
     // 일정 수정
     public void update(String title, String memo, String startDate, String endDate, String place, Matrix matrix, String fileUrl) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        
         LocalDateTime LocalStart = LocalDateTime.parse(startDate);
         LocalDateTime LocalEnd = LocalDateTime.parse(endDate);
 

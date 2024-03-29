@@ -9,18 +9,18 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class FindPendingGroupResponse {
+public class FindConfirmedGroupResponse {
 
     private Long id;
     private String isConfirmed;
     private String title;
     private List<GroupInfoResponse> groupInfos;
     private String place;
-    private LocalDateTime voteDeadline;
+    private LocalDateTime confirmedDate;
     private String contents;
     private String filePath;
 
-    public static FindPendingGroupResponse from(Group group) {
+    public static FindConfirmedGroupResponse from(Group group) {
         // 1. group.getGroupInfos()는 Group 객체에서 GroupInfo 객체의 리스트를 가져옴
         // 2. stream()은 리스트를 스트림으로 변환.
         // 3. map(GroupInfoResponse::from)은 각 GroupInfo 객체를 받아 GroupInfoResponse 객체를 생성
@@ -29,13 +29,13 @@ public class FindPendingGroupResponse {
                 .map(GroupInfoResponse::from)
                 .collect(Collectors.toList());
 
-        return FindPendingGroupResponse.builder()
+        return FindConfirmedGroupResponse.builder()
                 .id(group.getId())
                 .isConfirmed(group.getIsConfirmed())
                 .title(group.getTitle())
                 .groupInfos(groupInfos)
                 .place(group.getPlace())
-                .voteDeadline(group.getVoteDeadline())
+                .confirmedDate(group.getConfirmedDate())
                 .contents(group.getContents())
                 .filePath(group.getFilePath())
                 .build();

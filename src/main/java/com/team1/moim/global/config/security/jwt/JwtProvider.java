@@ -3,6 +3,7 @@ package com.team1.moim.global.config.security.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.security.jwt.exception.JwtAccessDeniedException;
@@ -169,7 +170,7 @@ public class JwtProvider {
         }
     }
 
-    public Optional<String> extractRole(String accessToken, HttpServletResponse response) throws IOException {
+    public Optional<String> extractRole(String accessToken) {
         try {
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey))
                     .build() // 반환된 빌더로 JWT verifier 생성
@@ -186,9 +187,12 @@ public class JwtProvider {
      * Oauth 로그인 성공 시 처리하는 LoginSuccessHandler에서 사용할 예정
      */
     public void updateRefreshToken(String email, String refreshToken){
+        log.info("updateRefreshToken() 진입");
         try {
-            memberRepository.findByEmail(email)
-                    .ifPresent(member -> member.updateRefreshToken(refreshToken));
+            Member findMember = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+            findMember.updateRefreshToken(refreshToken);
+            memberRepository.saveAndFlush(findMember); // DB에 Refresh Token 저장
+            log.info("Refresh Token 갱신");
         } catch (Exception e){
             throw new MemberNotFoundException();
         }

@@ -3,6 +3,6 @@ package com.team1.moim.domain.event.entity;
 import lombok.Getter;
 
 @Getter
-public enum Repeat_type {
+public enum RepeatType {
     Y, M, W, D
 }

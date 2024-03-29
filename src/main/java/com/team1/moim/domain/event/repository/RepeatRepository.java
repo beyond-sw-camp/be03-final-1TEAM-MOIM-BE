@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RepeatRepository extends JpaRepository<Repeat, Long> {
+    Repeat findByEventId(Long eventId);
 }

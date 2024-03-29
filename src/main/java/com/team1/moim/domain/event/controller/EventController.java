@@ -32,7 +32,7 @@ public class EventController {
     }
 
     // 일정 등록
-    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
                                                                     @Valid EventRequest request,
@@ -50,7 +50,7 @@ public class EventController {
 
 
     // 일정 수정
-    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/{eventId}")
     public ResponseEntity<ApiSuccessResponse<EventResponse>> update(HttpServletRequest servRequest,
                                                                     @PathVariable(name = "eventId") Long eventId,
@@ -63,12 +63,27 @@ public class EventController {
                         eventService.update(eventId, request)));
     }
 
+
+
     // 일정 삭제
-    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/{eventId}")
     public ResponseEntity<ApiSuccessResponse<String>> delete(HttpServletRequest servRequest,
                                                              @PathVariable(name = "eventId") Long eventId) {
         eventService.delete(eventId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servRequest.getServletPath(),
+                        ("삭제되었습니다.")));
+    }
+
+//   반복일정의 삭제
+    @DeleteMapping("/repeat/{eventId}")
+    public ResponseEntity<ApiSuccessResponse<String>> deleteRepeat(HttpServletRequest servRequest,
+                                                             @PathVariable(name = "eventId") Long eventId,
+                                                             @RequestParam("deleteType") String deleteType) {                                                                                             
+        eventService.repeatDelete(eventId, deleteType);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
