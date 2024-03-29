@@ -214,13 +214,13 @@ public class EventService {
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {
-                    if(event.getStartDate().minusDays(alarm.getSetTime()).isAfter(LocalDateTime.now())) {
+                    if(event.getStartDate().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");
                     }
                 } else if (alarm.getAlarmtype() == AlarmType.H) {
-                    if (event.getStartDate().minusHours(alarm.getSetTime()).isAfter(LocalDateTime.now())) {
+                    if (event.getStartDate().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");
