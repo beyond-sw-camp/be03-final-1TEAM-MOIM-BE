@@ -15,16 +15,21 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class SseService {
+
+    private static final Long TIMEOUT = 60 * 60 * 1000L; // 1시간
     private final EmitterRepository emitterRepository;
-    private final MemberRepository memberRepository;
 
     @Autowired
     public SseService(EmitterRepository emitterRepository, MemberRepository memberRepository) {
         this.emitterRepository = emitterRepository;
-        this.memberRepository = memberRepository;
     }
 
-    SseEmitter add(String email,SseEmitter emitter) throws ServiceUnavailableException {
+    SseEmitter add(String email) throws ServiceUnavailableException {
+        /**
+         Emitter는 발신기라는 뜻
+         SSE 연결을 위해서 유효 시간이 담긴 SseEmitter 객체를 만들어 반환해야 한다.
+         */
+        SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료시간 설정
         // 현재 저장된 emitter의 수를 조회하여 자동 삭제를 확인
 //        System.out.println(emitterRepository.getEmitterSize());
         emitterRepository.save(email,emitter);
