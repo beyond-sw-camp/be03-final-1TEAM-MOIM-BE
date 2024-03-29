@@ -1,6 +1,7 @@
 package com.team1.moim.domain.group.dto.request;
 
 import com.team1.moim.domain.group.entity.Group;
+import com.team1.moim.domain.member.entity.Member;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class GroupRequest {
+
+    private Member member;
 
     @NotEmpty(message = "제목을 입력하세요")
     private String title;
@@ -46,7 +49,8 @@ public class GroupRequest {
 
     private int participants;
 
-    public static Group toEntity(String title,
+    public static Group toEntity(Member member,
+                                 String title,
                                  String place,
                                  int runningTime,
                                  String expectStartDate,
@@ -71,6 +75,7 @@ public class GroupRequest {
         LocalDateTime parsedVoteDeadline = LocalDateTime.parse(voteDeadline, dateTimeFormatter);
 
         return Group.builder()
+                .member(member)
                 .title(title)
                 .place(place)
                 .runningTime(runningTime)

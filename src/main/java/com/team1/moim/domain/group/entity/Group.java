@@ -92,9 +92,10 @@ public class Group extends BaseTimeEntity {
     private List<GroupInfo> groupInfos = new ArrayList<>();
 
     @Builder
-    public Group(String title, String contents, int runningTime, LocalDate expectStartDate,
+    public Group(Member member, String title, String contents, int runningTime, LocalDate expectStartDate,
                  LocalDate expectEndDate, LocalTime expectStartTime, LocalTime expectEndTime, String place,
                  String filePath, LocalDateTime voteDeadline, LocalDateTime confirmedDate, int participants) {
+        this.member = member;
         this.title = title;
         this.contents = contents;
         this.runningTime = runningTime;
@@ -111,5 +112,9 @@ public class Group extends BaseTimeEntity {
 
     public void delete() {
         this.isDeleted = "Y";
+    }
+
+    public void setConfirmed() {
+        this.isConfirmed = "Y";
     }
 }

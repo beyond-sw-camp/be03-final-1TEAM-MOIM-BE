@@ -2,6 +2,9 @@ package com.team1.moim.domain.group.repository;
 
 import com.team1.moim.domain.group.entity.Group;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,4 +17,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
             @Param("isConfirmed") String isConfirmed,
             @Param("isDeleted") String isDeleted,
             @Param("id") Long id);
+
+    Page<Group> findAll(Specification<Group> spec, Pageable pageable);
 }
