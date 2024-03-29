@@ -74,12 +74,12 @@ public class EventController {
                         servRequest.getServletPath(),
                         ("삭제되었습니다.")));
     }
+
 //   반복일정의 삭제
     @DeleteMapping("/repeat/{eventId}")
     public ResponseEntity<ApiSuccessResponse<String>> deleteRepeat(HttpServletRequest servRequest,
                                                              @PathVariable(name = "eventId") Long eventId,
-                                                                @RequestParam("deleteType") String deleteType)
-                                                                                                            {
+                                                             @RequestParam("deleteType") String deleteType) {                                                                                             
         eventService.repeatDelete(eventId, deleteType);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
@@ -87,6 +87,4 @@ public class EventController {
                         servRequest.getServletPath(),
                         ("삭제되었습니다.")));
     }
-
-
 }
