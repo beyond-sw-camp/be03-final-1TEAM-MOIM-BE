@@ -81,7 +81,6 @@ public class EventController {
                                                                 @RequestParam("deleteType") String deleteType)
                                                                                                             {
         eventService.repeatDelete(eventId, deleteType);
-        System.out.println("deleteType = " + deleteType);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,

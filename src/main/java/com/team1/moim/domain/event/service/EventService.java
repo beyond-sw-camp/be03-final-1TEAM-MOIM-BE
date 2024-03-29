@@ -9,7 +9,6 @@ import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.global.config.s3.S3Service;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +38,7 @@ public class EventService {
     public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue) {
 //        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Member member = memberRepository.findByEmail(email).orElseThrow();
-        System.out.println("일정이 추가 됩니다.");
-        System.out.println("repeat = " + repeatValue);
+        log.info("일정이 추가 됩니다.");
         Matrix matrix;
         if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
         else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
@@ -62,16 +60,16 @@ public class EventService {
 //        Repeat추가, 다음 반복일정 만드는 메소드 호출
         if (repeatValue != null) {
 
-            Repeat_type newRepeat;
-            if (repeatValue.getReapetType().equals("Y")) newRepeat = Repeat_type.Y;
-            else if (request.getMatrix().equals("M")) newRepeat = Repeat_type.M;
-            else if (request.getMatrix().equals("W")) newRepeat = Repeat_type.W;
-            else newRepeat = Repeat_type.D;
+            RepeatType newRepeat;
+            if (repeatValue.getReapetType().equals("Y")) newRepeat = RepeatType.Y;
+            else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
+            else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
+            else newRepeat = RepeatType.D;
 
-            System.out.println("반복일정이 추가됩니다.");
+            log.info("반복일정이 추가됩니다.");
             Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
             repeatRepository.save(repeatEntity);
-            RepeatCreate(request, toDoListRequests, repeatValue, event.getId());
+            repeatCreate(request, toDoListRequests, repeatValue, event.getId());
         }
 
         return EventResponse.from(event);
@@ -79,7 +77,7 @@ public class EventService {
 
 
     @Async
-    public EventResponse RepeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, Long repeatParent) {
+    public EventResponse repeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, Long repeatParent) {
 //        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Member member = memberRepository.findByEmail(email).orElseThrow();
         Matrix matrix;
@@ -108,7 +106,7 @@ public class EventService {
             calculatedStartDate = startDate.plusYears(1); // 현재 반복일정에 들어갈 시작일자
             calculatedEndDate = startDate.plusYears(1);
             nextStartDate = calculatedStartDate.plusYears(1); // 현재 반복일정 바로 뒤에 또 들어갈 일자를 미리 계산함
-            System.out.println("nextStartDate = " + nextStartDate);
+
 
         } else if (repeatValue.getReapetType().equals("M")) {
             // 1달 후
@@ -142,11 +140,11 @@ public class EventService {
             }
         }
 
-        Repeat_type newRepeat;
-        if (repeatValue.getReapetType().equals("Y")) newRepeat = Repeat_type.Y;
-        else if (request.getMatrix().equals("M")) newRepeat = Repeat_type.M;
-        else if (request.getMatrix().equals("W")) newRepeat = Repeat_type.W;
-        else newRepeat = Repeat_type.D;
+        RepeatType newRepeat;
+        if (repeatValue.getReapetType().equals("Y")) newRepeat = RepeatType.Y;
+        else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
+        else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
+        else newRepeat = RepeatType.D;
         
         Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
         repeatRepository.save(repeatEntity);
@@ -155,7 +153,7 @@ public class EventService {
         LocalDate repeatEndDate = LocalDate.parse(repeatValue.getReapet_end_date());
         if (repeatEndDate.isAfter(ChronoLocalDate.from(nextStartDate))){
             EventRequest newRequest = request.changeDateRequest(request, newStartDate, newEndDate);
-            RepeatCreate(newRequest, toDoListRequests, repeatValue, repeatParent);
+            repeatCreate(newRequest, toDoListRequests, repeatValue, repeatParent);
         }
         
         return EventResponse.from(event);
@@ -187,7 +185,7 @@ public class EventService {
 
     @Transactional
     public void delete(Long eventId) {
-        System.out.println("delete");
+        log.info("delete");
         Event event = eventRepository.findById(eventId).orElseThrow();
         event.delete();
 
@@ -197,29 +195,28 @@ public class EventService {
     public void repeatDelete(Long eventId, String deleteType) {
 
 //        현재 이벤트
-        System.out.println("deleteType = " + deleteType);
+        log.info("deleteType = " + deleteType);
         Event event = eventRepository.findById(eventId).orElseThrow();
         // 현재 이벤트 지우기
         event.delete();
-        System.out.println("event = " + event);
+
         Long repeatParentId = event.getRepeatParent();
         // 모든 자식 이벤트
         if(event.getRepeatParent() == null) {
             repeatParentId = event.getId();
         }
-        List<Event> allEvent1 = eventRepository.findByRepeatParent(repeatParentId);
+
         //같은 repeatParentId 를 가지고 있는 모든 이벤트
-        ArrayList<Event> allEvent = new ArrayList<>(allEvent1);
+        List<Event> allEvent = new ArrayList<>(eventRepository.findByRepeatParent(repeatParentId));
+
         //부모 이벤트
         Event parentEvent = eventRepository.findById(repeatParentId).orElseThrow();
 
-        System.out.println("allEvent = " +allEvent);
-        System.out.println("allEvent.size() = " + allEvent.size());
 
 
         // 반복되는 일정 모두를 지움
         if(deleteType.equals("all")){
-            System.out.println("allEvent = " + allEvent);
+
             parentEvent.delete();
 
             for (int i = 0; i < allEvent.size(); i++) {
@@ -243,12 +240,11 @@ public class EventService {
                 }
             }
             // 모든 반복일정의 반복종료일자 변경하기
-            System.out.println("lastest_end_date = " + lastest_end_date);
             //부모객체와 모든 자식객체의 반복 종료일 고치기
-            Repeat parentRepeat = repeatRepository.findByEvent_Id(repeatParentId);
+            Repeat parentRepeat = repeatRepository.findByEventId(repeatParentId);
             parentRepeat.changeEndDate(lastest_end_date);
             for (int i = 0; i < allEvent.size(); i++) {
-                Repeat repeat = repeatRepository.findByEvent_Id(allEvent.get(i).getId());
+                Repeat repeat = repeatRepository.findByEventId(allEvent.get(i).getId());
                 repeat.changeEndDate(lastest_end_date);
             }
 
@@ -269,7 +265,7 @@ public class EventService {
             //현재 일정이 반복하는 일정 중 마지막 일정과 같다면 모든 반복데이터에 마지막 날짜를 바꿔줘야 함
             if(lastDate == event.getStartDate()){
                 for (int i = 0; i < allEvent.size(); i++) {
-                    Repeat repeatTemp = repeatRepository.findByEvent_Id(allEvent.get(i).getId());
+                    Repeat repeatTemp = repeatRepository.findByEventId(allEvent.get(i).getId());
                     repeatTemp.changeEndDate(LocalDate.from(newLastDate));
 
                 }
