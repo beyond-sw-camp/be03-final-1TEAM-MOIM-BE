@@ -12,6 +12,7 @@ import com.team1.moim.global.config.s3.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -81,8 +85,6 @@ public class EventService {
     public EventResponse RepeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, Long repeatParent) {
 //        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Member member = memberRepository.findByEmail(email).orElseThrow();
-        System.out.println("메소드에 들어옴");
-        System.out.println("repeatValue = " + repeatValue);
         Matrix matrix;
         if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
         else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
@@ -148,8 +150,7 @@ public class EventService {
         else if (request.getMatrix().equals("M")) newRepeat = Repeat_type.M;
         else if (request.getMatrix().equals("W")) newRepeat = Repeat_type.W;
         else newRepeat = Repeat_type.D;
-
-        System.out.println("반복일정이 추가됩니다.");
+        
         Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
         repeatRepository.save(repeatEntity);
 
@@ -157,12 +158,9 @@ public class EventService {
         LocalDate repeatEndDate = LocalDate.parse(repeatValue.getReapet_end_date());
         if (repeatEndDate.isAfter(ChronoLocalDate.from(nextStartDate))){
             EventRequest newRequest = request.changeDateRequest(request, newStartDate, newEndDate);
-            System.out.println("반복 한번 더");
-            System.out.println("newRequest = " + newRequest);
             RepeatCreate(newRequest, toDoListRequests, repeatValue, repeatParent);
         }
-
-
+        
         return EventResponse.from(event);
     }
 
@@ -190,7 +188,97 @@ public class EventService {
 
     @Transactional
     public void delete(Long eventId) {
+        System.out.println("delete");
         Event event = eventRepository.findById(eventId).orElseThrow();
         event.delete();
+    }
+
+    @Transactional
+    public void repeatDelete(Long eventId, String deleteType) {
+
+//        현재 이벤트
+        System.out.println("deleteType = " + deleteType);
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        // 현재 이벤트 지우기
+        event.delete();
+        System.out.println("event = " + event);
+        Long repeatParentId = event.getRepeatParent();
+        // 모든 자식 이벤트
+        if(event.getRepeatParent() == null) {
+            repeatParentId = event.getId();
+        }
+        List<Event> allEvent1 = eventRepository.findByRepeatParent(repeatParentId);
+        //같은 repeatParentId 를 가지고 있는 모든 이벤트
+        ArrayList<Event> allEvent = new ArrayList<>(allEvent1);
+        //부모 이벤트
+        Event parentEvent = eventRepository.findById(repeatParentId).orElseThrow();
+
+        System.out.println("allEvent = " +allEvent);
+        System.out.println("allEvent.size() = " + allEvent.size());
+
+
+        // 반복되는 일정 모두를 지움
+        if(deleteType.equals("all")){
+            System.out.println("allEvent = " + allEvent);
+            parentEvent.delete();
+
+            for (int i = 0; i < allEvent.size(); i++) {
+                Event repeatEvent = eventRepository.findById(allEvent.get(i).getId()).orElseThrow();
+                repeatEvent.delete();
+            }
+
+
+            // 지우고자 하는 반복 일정 이후를 모두 지움
+        } else if (deleteType.equals("after")) {
+
+            // 일정이 지워지고 난후 그 직전 날짜 구하기
+            LocalDate lastest_end_date = LocalDate.parse("0001-01-01");
+            // 현재일정 이후의 일정 구하기
+            for (int i = 0; i < allEvent.size(); i++) {
+                Event event1 = allEvent.get(i);
+                if (event1.getStartDate().isAfter(event.getStartDate())||event1.getStartDate()==event.getStartDate()){ // 현재 일정보다 이후인것은 모두 삭제
+                    event1.delete();
+                }else{ // 현재 일정보다 이전인 모든 일정은 모두 반복 종료일을 바꿔주기....
+                    lastest_end_date = LocalDate.from(event1.getStartDate());
+                }
+            }
+            // 모든 반복일정의 반복종료일자 변경하기
+            System.out.println("lastest_end_date = " + lastest_end_date);
+            //부모객체와 모든 자식객체의 반복 종료일 고치기
+            Repeat parentRepeat = repeatRepository.findByEvent_Id(repeatParentId);
+            parentRepeat.changeEndDate(lastest_end_date);
+            for (int i = 0; i < allEvent.size(); i++) {
+                Repeat repeat = repeatRepository.findByEvent_Id(allEvent.get(i).getId());
+                repeat.changeEndDate(lastest_end_date);
+            }
+
+            // 현재 한가지 일정만 지우기
+        }else{
+            // 만약 뒤의 일정이 없다면 모든 반복일정의 "반복 일정 종료일을"을 바로 직전으로 바꾸기
+            LocalDateTime lastDate = event.getStartDate();
+            LocalDateTime newLastDate = LocalDateTime.parse("0001-01-01T00:00:00"); // 새롭게 바뀔 반복 종료일
+            for (int i = 0; i < allEvent.size(); i++) {
+                Event event1 = allEvent.get(i);
+                if(event1.getStartDate().isAfter(event.getStartDate())||event1.getStartDate()==event.getStartDate()){
+                    lastDate = event1.getStartDate();
+                }else if(newLastDate.isBefore(event1.getStartDate())){
+                    newLastDate = event1.getStartDate();
+                }
+            }
+
+            //현재 일정이 반복하는 일정 중 마지막 일정과 같다면 모든 반복데이터에 마지막 날짜를 바꿔줘야 함
+            if(lastDate == event.getStartDate()){
+                for (int i = 0; i < allEvent.size(); i++) {
+                    Repeat repeatTemp = repeatRepository.findByEvent_Id(allEvent.get(i).getId());
+                    repeatTemp.changeEndDate(LocalDate.from(newLastDate));
+
+                }
+                Repeat repeatParent = repeatRepository.findById(repeatParentId).orElseThrow();
+                repeatParent.changeEndDate(LocalDate.from(newLastDate));
+            }
+
+        }
+
+
     }
 }

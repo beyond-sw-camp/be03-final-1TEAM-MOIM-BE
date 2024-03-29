@@ -41,4 +41,10 @@ public class Repeat {
         this.reapet_end_date = reapet_end_date;
     }
 
+    //일정 종료일 변경
+    public void changeEndDate(LocalDate repeat_end_date) {
+        this.reapet_end_date = repeat_end_date;
+    }
+
+
 }

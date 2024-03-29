@@ -6,6 +6,7 @@ import com.team1.moim.domain.event.entity.Repeat;
 import com.team1.moim.domain.event.entity.Repeat_type;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
