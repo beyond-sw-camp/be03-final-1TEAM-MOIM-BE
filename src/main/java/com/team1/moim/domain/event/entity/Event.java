@@ -22,7 +22,7 @@ public class Event extends BaseTimeEntity {
     private Long id;
 
 //    회원ID
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 

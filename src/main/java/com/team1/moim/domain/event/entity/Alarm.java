@@ -14,7 +14,7 @@ public class Alarm extends BaseTimeEntity {
     private Long id;
 
     //    일정ID
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
@@ -25,12 +25,21 @@ public class Alarm extends BaseTimeEntity {
     //    알림타입
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Alarmtype alarmtype;
+    private AlarmType alarmtype;
+
+    //    알림전송여부
+    @Column(nullable = false)
+    private String sendYn = "N";
 
     @Builder
-    public Alarm(Alarmtype alarmtype, int setTime, Event event) {
+    public Alarm(AlarmType alarmtype, int setTime, Event event) {
         this.event = event;
         this.alarmtype = alarmtype;
         this.setTime = setTime;
+    }
+
+//    알림 전송 체크
+    public void sendCheck(String sendYn) {
+        this.sendYn = sendYn;
     }
 }

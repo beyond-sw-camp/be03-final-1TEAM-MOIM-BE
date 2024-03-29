@@ -13,18 +13,20 @@ import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
+import com.team1.moim.global.config.sse.NotificationResponse;
+import com.team1.moim.global.config.sse.SseService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -41,6 +43,7 @@ public class EventService {
     private final RepeatRepository repeatRepository;
     private final AlarmRepository alarmRepository;
     private final S3Service s3Service;
+    private final SseService sseService;
 
     public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, List<AlarmRequest> alarmRequests) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -83,15 +86,14 @@ public class EventService {
 //        Alarm 추가
         if(alarmRequests != null && request.getAlarmYn().equals("Y")) {
             for (AlarmRequest alarmRequest : alarmRequests) {
-                Alarmtype alarmtype;
-                if (alarmRequest.getAlarmType().equals("M")) alarmtype = Alarmtype.M;
-                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = Alarmtype.H;
-                else alarmtype = Alarmtype.D;
+                AlarmType alarmtype;
+                if (alarmRequest.getAlarmType().equals("M")) alarmtype = AlarmType.M;
+                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = AlarmType.H;
+                else alarmtype = AlarmType.D;
                 Alarm alarm = alarmRequest.toEntity(alarmtype, alarmRequest.getSetTime(), event);
                 alarmRepository.save(alarm);
             }
         }
-
         return EventResponse.from(event);
     }
 
@@ -202,4 +204,36 @@ public class EventService {
         Event event = eventRepository.findById(eventId).orElseThrow();
         event.delete();
     }
+
+    // 알림 전송 스케줄러
+    @Transactional
+    @Scheduled(cron = "0 0/1 * * * *") // 매분마다 실행
+    public void eventSchedule() {
+        List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
+        for(Event event : events) {
+            List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
+            for(Alarm alarm : alarms) {
+                if(alarm.getAlarmtype() == AlarmType.D) {
+                    if(event.getStartDate().minusDays(alarm.getSetTime()).isAfter(LocalDateTime.now())) {
+                        Member member = alarm.getEvent().getMember();
+                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        alarm.sendCheck("Y");
+                    }
+                } else if (alarm.getAlarmtype() == AlarmType.H) {
+                    if (event.getStartDate().minusHours(alarm.getSetTime()).isAfter(LocalDateTime.now())) {
+                        Member member = alarm.getEvent().getMember();
+                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        alarm.sendCheck("Y");
+                    }
+                } else if (alarm.getAlarmtype() == AlarmType.M) {
+                    if (event.getStartDate().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                        Member member = alarm.getEvent().getMember();
+                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        alarm.sendCheck("Y");
+                    }
+                }
+            }
+        }
+    }
+
 }
