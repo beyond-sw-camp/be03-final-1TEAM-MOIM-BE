@@ -16,6 +16,7 @@ import com.team1.moim.domain.group.repository.GroupRepository;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
+import com.team1.moim.global.config.s3.S3Service;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
@@ -39,6 +40,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupInfoRepository groupInfoRepository;
     private final MemberRepository memberRepository;
+    private final S3Service s3Service;
 
     // 모임 생성하기
     @Transactional
@@ -50,8 +52,13 @@ public class GroupService {
         // 로그인한 사용자의 이메일로 Member를 조회
         Member loginedMember = memberRepository.findByEmail(loginEmail)
                 .orElseThrow(MemberNotFoundException::new);
-
         groupRequest.setMember(loginedMember);
+
+        // 첨부파일
+        String filePath = null;
+        if (groupRequest.getFilePath() != null) {
+            filePath = s3Service.uploadFile("groups", groupRequest.getFilePath());
+        }
 
         Group group = GroupRequest.toEntity(
                 groupRequest.getMember(),
@@ -64,7 +71,7 @@ public class GroupService {
                 groupRequest.getExpectEndTime(),
                 groupRequest.getVoteDeadline(),
                 groupRequest.getContents(),
-                groupRequest.getFilePath(),
+                filePath,
                 groupInfoRequests
         );
 
