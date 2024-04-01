@@ -1,17 +1,15 @@
 package com.team1.moim.domain.group.dto.request;
 
 import com.team1.moim.domain.group.entity.Group;
+import com.team1.moim.domain.group.util.DateTimeFormatterUtil;
 import com.team1.moim.domain.member.entity.Member;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @NoArgsConstructor
@@ -45,7 +43,7 @@ public class GroupRequest {
 
     private String contents;
 
-    private String filePath;
+    private MultipartFile filePath;
 
     private int participants;
 
@@ -62,28 +60,16 @@ public class GroupRequest {
                                  String filePath,
                                  List<GroupInfoRequest> requests) {
 
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-        LocalDate parsedStartDate = LocalDate.parse(expectStartDate, dateFormatter);
-        LocalDate parsedEndDate = LocalDate.parse(expectEndDate, dateFormatter);
-
-        LocalTime parsedStartTime = LocalTime.parse(expectStartTime, timeFormatter);
-        LocalTime parsedEndTime = LocalTime.parse(expectEndTime, timeFormatter);
-
-        LocalDateTime parsedVoteDeadline = LocalDateTime.parse(voteDeadline, dateTimeFormatter);
-
         return Group.builder()
                 .member(member)
                 .title(title)
                 .place(place)
                 .runningTime(runningTime)
-                .expectStartDate(parsedStartDate)
-                .expectEndDate(parsedEndDate)
-                .expectStartTime(parsedStartTime)
-                .expectEndTime(parsedEndTime)
-                .voteDeadline(parsedVoteDeadline)
+                .expectStartDate(DateTimeFormatterUtil.parseDate(expectStartDate))
+                .expectEndDate(DateTimeFormatterUtil.parseDate(expectEndDate))
+                .expectStartTime(DateTimeFormatterUtil.parseTime(expectStartTime))
+                .expectEndTime(DateTimeFormatterUtil.parseTime(expectEndTime))
+                .voteDeadline(DateTimeFormatterUtil.parseDateTime(voteDeadline))
                 .contents(contents)
                 .filePath(filePath)
                 .participants(calculateParticipants(requests))
