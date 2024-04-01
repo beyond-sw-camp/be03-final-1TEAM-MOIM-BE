@@ -1,13 +1,10 @@
-package com.team1.moim.global.config.sse;
+package com.team1.moim.global.config.sse.dto.response;
 
-import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.Alarm;
-import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.member.entity.Member;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
