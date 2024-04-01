@@ -11,6 +11,7 @@ import com.team1.moim.domain.group.entity.Group;
 import com.team1.moim.domain.group.entity.GroupInfo;
 import com.team1.moim.domain.group.exception.GroupInfoNotFoundException;
 import com.team1.moim.domain.group.exception.GroupNotFoundException;
+import com.team1.moim.domain.group.exception.ParticipantRequiredException;
 import com.team1.moim.domain.group.repository.GroupInfoRepository;
 import com.team1.moim.domain.group.repository.GroupRepository;
 import com.team1.moim.domain.member.entity.Member;
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,47 +48,39 @@ public class GroupService {
     @Transactional
     public GroupDetailResponse create(
             GroupRequest groupRequest,
-            List<GroupInfoRequest> groupInfoRequests,
-            String loginEmail) {
+            List<GroupInfoRequest> groupInfoRequests) {
 
-        // 로그인한 사용자의 이메일로 Member를 조회
-        Member loginedMember = memberRepository.findByEmail(loginEmail)
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 호스트 조회
+        Member host = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
-        groupRequest.setMember(loginedMember);
+
+        if (groupInfoRequests == null || groupInfoRequests.isEmpty()) {
+            throw new ParticipantRequiredException();
+        }
+
+        Group newGroup = groupRequest.toEntity(host, groupInfoRequests);
+
+        for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
+            log.info("참여자 존재여부 확인");
+            Member participant = memberRepository.findByEmail(groupInfoRequest.getMemberEmail())
+                    .orElseThrow(MemberNotFoundException::new);
+            log.info("참여자 이메일: {}", participant.getEmail());
+            GroupInfo groupInfo = groupInfoRequest.toEntity(participant);
+            groupInfo.attachGroup(newGroup);
+        }
 
         // 첨부파일
         String filePath = null;
         if (groupRequest.getFilePath() != null) {
+            log.info("S3에 이미지 업로드: {}", filePath);
             filePath = s3Service.uploadFile("groups", groupRequest.getFilePath());
         }
 
-        Group group = GroupRequest.toEntity(
-                groupRequest.getMember(),
-                groupRequest.getTitle(),
-                groupRequest.getPlace(),
-                groupRequest.getRunningTime(),
-                groupRequest.getExpectStartDate(),
-                groupRequest.getExpectEndDate(),
-                groupRequest.getExpectStartTime(),
-                groupRequest.getExpectEndTime(),
-                groupRequest.getVoteDeadline(),
-                groupRequest.getContents(),
-                filePath,
-                groupInfoRequests
-        );
+        newGroup.setFilePath(filePath);
 
-        groupRepository.save(group);
-
-        if (groupInfoRequests != null) {
-            for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
-                Member member = memberRepository.findByEmail(groupInfoRequest.getMemberEmail())
-                        .orElseThrow(MemberNotFoundException::new);
-                GroupInfo groupInfo = GroupInfoRequest.toEntity(group, member);
-                groupInfoRepository.save(groupInfo);
-            }
-        }
-
-        return GroupDetailResponse.from(group);
+        return GroupDetailResponse.from(groupRepository.save(newGroup));
     }
 
     // 모임 삭제
