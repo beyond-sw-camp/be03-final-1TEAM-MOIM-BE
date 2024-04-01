@@ -15,8 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class GroupRequest {
 
-    private Member member;
-
     @NotEmpty(message = "제목을 입력하세요")
     private String title;
 
@@ -45,20 +43,7 @@ public class GroupRequest {
 
     private MultipartFile filePath;
 
-    private int participants;
-
-    public static Group toEntity(Member member,
-                                 String title,
-                                 String place,
-                                 int runningTime,
-                                 String expectStartDate,
-                                 String expectEndDate,
-                                 String expectStartTime,
-                                 String expectEndTime,
-                                 String voteDeadline,
-                                 String contents,
-                                 String filePath,
-                                 List<GroupInfoRequest> requests) {
+    public Group toEntity(Member member, List<GroupInfoRequest> requests) {
 
         return Group.builder()
                 .member(member)
@@ -71,13 +56,7 @@ public class GroupRequest {
                 .expectEndTime(DateTimeFormatterUtil.parseTime(expectEndTime))
                 .voteDeadline(DateTimeFormatterUtil.parseDateTime(voteDeadline))
                 .contents(contents)
-                .filePath(filePath)
-                .participants(calculateParticipants(requests))
+                .participants(requests.size())
                 .build();
-    }
-    
-    // 참여자 수 계산
-    private static int calculateParticipants(List<GroupInfoRequest> requests) {
-        return requests == null ? 0 : requests.size();
     }
 }

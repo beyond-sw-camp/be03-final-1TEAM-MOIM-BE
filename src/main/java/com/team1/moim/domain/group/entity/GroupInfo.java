@@ -48,4 +48,9 @@ public class GroupInfo {
     public void delete() {
         this.isDeleted = "Y";
     }
+
+    public void attachGroup(Group group){
+        this.group = group;
+        group.getGroupInfos().add(this);
+    }
 }
