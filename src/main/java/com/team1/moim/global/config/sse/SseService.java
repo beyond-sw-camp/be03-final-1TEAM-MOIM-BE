@@ -34,9 +34,7 @@ public class SseService {
              System.out.println(email);
             emitterRepository.deleteByEmail(email);
         });
-        /*
-        Register code to invoke when the async request times out. This method is called from a container thread when an async request times out.
-         */
+
         emitter.onTimeout(()->{
             emitterRepository.get(email).complete();
         });
