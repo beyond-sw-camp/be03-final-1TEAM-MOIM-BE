@@ -1,23 +1,19 @@
 package com.team1.moim.domain.group.dto.request;
 
 import com.team1.moim.domain.group.entity.Group;
+import com.team1.moim.domain.group.util.DateTimeFormatterUtil;
 import com.team1.moim.domain.member.entity.Member;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @NoArgsConstructor
 public class GroupRequest {
-
-    private Member member;
 
     @NotEmpty(message = "제목을 입력하세요")
     private String title;
@@ -45,53 +41,22 @@ public class GroupRequest {
 
     private String contents;
 
-    private String filePath;
+    private MultipartFile filePath;
 
-    private int participants;
-
-    public static Group toEntity(Member member,
-                                 String title,
-                                 String place,
-                                 int runningTime,
-                                 String expectStartDate,
-                                 String expectEndDate,
-                                 String expectStartTime,
-                                 String expectEndTime,
-                                 String voteDeadline,
-                                 String contents,
-                                 String filePath,
-                                 List<GroupInfoRequest> requests) {
-
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-        LocalDate parsedStartDate = LocalDate.parse(expectStartDate, dateFormatter);
-        LocalDate parsedEndDate = LocalDate.parse(expectEndDate, dateFormatter);
-
-        LocalTime parsedStartTime = LocalTime.parse(expectStartTime, timeFormatter);
-        LocalTime parsedEndTime = LocalTime.parse(expectEndTime, timeFormatter);
-
-        LocalDateTime parsedVoteDeadline = LocalDateTime.parse(voteDeadline, dateTimeFormatter);
+    public Group toEntity(Member member, List<GroupInfoRequest> requests) {
 
         return Group.builder()
                 .member(member)
                 .title(title)
                 .place(place)
                 .runningTime(runningTime)
-                .expectStartDate(parsedStartDate)
-                .expectEndDate(parsedEndDate)
-                .expectStartTime(parsedStartTime)
-                .expectEndTime(parsedEndTime)
-                .voteDeadline(parsedVoteDeadline)
+                .expectStartDate(DateTimeFormatterUtil.parseDate(expectStartDate))
+                .expectEndDate(DateTimeFormatterUtil.parseDate(expectEndDate))
+                .expectStartTime(DateTimeFormatterUtil.parseTime(expectStartTime))
+                .expectEndTime(DateTimeFormatterUtil.parseTime(expectEndTime))
+                .voteDeadline(DateTimeFormatterUtil.parseDateTime(voteDeadline))
                 .contents(contents)
-                .filePath(filePath)
-                .participants(calculateParticipants(requests))
+                .participants(requests.size())
                 .build();
-    }
-    
-    // 참여자 수 계산
-    private static int calculateParticipants(List<GroupInfoRequest> requests) {
-        return requests == null ? 0 : requests.size();
     }
 }

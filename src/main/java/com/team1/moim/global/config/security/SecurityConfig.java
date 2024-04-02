@@ -34,7 +34,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 public class SecurityConfig {
 
     private static final String[] EVENT_API_URL = {
-            "/connect"
+            "/connect",
             "api/events",
             "api/events/**",
             "api/events/repeat/"

@@ -18,10 +18,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 @Entity
 @Getter
@@ -68,6 +66,7 @@ public class Group extends BaseTimeEntity {
     private String place;
 
     // 첨부파일 경로
+    @Setter
     private String filePath;
 
     // 투표 마감 시간
@@ -88,13 +87,13 @@ public class Group extends BaseTimeEntity {
     @Column(nullable = false)
     private String isDeleted = "N";
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GroupInfo> groupInfos = new ArrayList<>();
 
     @Builder
     public Group(Member member, String title, String contents, int runningTime, LocalDate expectStartDate,
-                 LocalDate expectEndDate, LocalTime expectStartTime, LocalTime expectEndTime, String place,
-                 String filePath, LocalDateTime voteDeadline, LocalDateTime confirmedDate, int participants) {
+                 LocalDate expectEndDate, LocalTime expectStartTime, LocalTime expectEndTime,
+                 String place, LocalDateTime voteDeadline, LocalDateTime confirmedDate, int participants) {
         this.member = member;
         this.title = title;
         this.contents = contents;
@@ -104,7 +103,6 @@ public class Group extends BaseTimeEntity {
         this.expectStartTime = expectStartTime;
         this.expectEndTime = expectEndTime;
         this.place = place;
-        this.filePath = filePath;
         this.voteDeadline = voteDeadline;
         this.confirmedDate = confirmedDate;
         this.participants = participants;

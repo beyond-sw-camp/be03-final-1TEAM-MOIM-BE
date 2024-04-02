@@ -47,14 +47,12 @@ public class GroupController {
             @Valid GroupRequest groupRequest,
             @RequestPart(value = "groupInfoRequests", required = false) List<GroupInfoRequest> groupInfoRequests) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
-                        groupService.create(groupRequest, groupInfoRequests, email)));
+                        groupService.create(groupRequest, groupInfoRequests)));
     }
 
     // 모임 삭제
