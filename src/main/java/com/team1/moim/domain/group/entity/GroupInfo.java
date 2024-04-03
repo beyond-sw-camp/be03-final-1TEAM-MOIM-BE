@@ -36,9 +36,11 @@ public class GroupInfo {
     private Member member;
 
     // 동의 여부
+    // P(Pending)이면 알림은 갔지만 등록 또는 거절을 누르지 않은 상태
+    // Y이면 등록을 누른 상태
+    // N이면 참여를 거절한 상태
     @Builder.Default
-    @Column(nullable = false)
-    private String isAgreed = "N";
+    private String isAgreed = "P";
 
     // 삭제여부 (Y, N)
     @Column(nullable = false)

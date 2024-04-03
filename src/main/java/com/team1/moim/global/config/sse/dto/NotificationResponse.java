@@ -1,4 +1,4 @@
-package com.team1.moim.global.config.sse.dto.response;
+package com.team1.moim.global.config.sse.dto;
 
 import com.team1.moim.domain.event.entity.Alarm;
 import com.team1.moim.domain.member.entity.Member;

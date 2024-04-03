@@ -1,6 +1,7 @@
 package com.team1.moim.domain.group.repository;
 
 import com.team1.moim.domain.group.entity.Group;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,4 +20,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
             @Param("id") Long id);
 
     Page<Group> findAll(Specification<Group> spec, Pageable pageable);
+
+    List<Group> findByIsDeleted(String isDeleted);
 }

@@ -13,7 +13,7 @@ import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
-import com.team1.moim.global.config.sse.dto.response.NotificationResponse;
+import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.service.SseService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

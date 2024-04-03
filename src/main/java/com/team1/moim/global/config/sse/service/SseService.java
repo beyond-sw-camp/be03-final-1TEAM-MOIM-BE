@@ -1,13 +1,13 @@
 package com.team1.moim.global.config.sse.service;
 
 import com.team1.moim.domain.member.repository.MemberRepository;
-import com.team1.moim.global.config.sse.dto.response.NotificationResponse;
+import com.team1.moim.global.config.sse.dto.GroupScheduledNotificationResponse;
+import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
 import java.io.IOException;
 import javax.naming.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -68,19 +68,14 @@ public class SseService {
         }
     }
 
-    boolean containKey(String email) {
-        return emitterRepository.containKey(email);
-    }
-
-    public void send(Object data, String email, SseEmitter sseEmitter) {
+    public void sendGroupAlarm(String email, GroupScheduledNotificationResponse notificationResponse) {
         try {
-            log.info("send to client {}:[{}]", email, data);
-            sseEmitter.send(SseEmitter.event().id(email).data(data, MediaType.APPLICATION_JSON));
-        } catch (IOException | IllegalStateException e) {
-            // 만료된 emitter로 send() 메서드를 호출하면 IllegalStateException 발생
-            // 에러 발생 시 해당 emitter를 삭제
-            log.error("IOException or IllegalStateException is occured. ", e);
+            emitterRepository.get(email).send(SseEmitter.event()
+                    .name("sendGroupAlarm")
+                    .data(notificationResponse));
+        } catch (IOException e) {
             emitterRepository.deleteByEmail(email);
+            throw new RuntimeException(e);
         }
     }
 }

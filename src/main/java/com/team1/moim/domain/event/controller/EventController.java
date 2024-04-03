@@ -9,15 +9,19 @@ import com.team1.moim.domain.event.service.EventService;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
@@ -37,8 +41,8 @@ public class EventController {
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
                                                                     @Valid EventRequest request,
                                                                     @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests,
-                                                                    @RequestPart(value = "repeat",required = false) RepeatRequest repeatValue,
-                                                                    @RequestPart(value = "alarmRequest",required = false) List<AlarmRequest> alarmRequest){
+                                                                    @RequestPart(value = "repeat", required = false) RepeatRequest repeatValue,
+                                                                    @RequestPart(value = "alarmRequest", required = false) List<AlarmRequest> alarmRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
@@ -46,7 +50,6 @@ public class EventController {
                         servRequest.getServletPath(),
                         eventService.create(request, toDoListRequests, repeatValue, alarmRequest)));
     }
-
 
 
     // 일정 수정
@@ -64,7 +67,6 @@ public class EventController {
     }
 
 
-
     // 일정 삭제
 //    @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/{eventId}")
@@ -78,11 +80,11 @@ public class EventController {
                         ("삭제되었습니다.")));
     }
 
-//   반복일정의 삭제
+    //   반복일정의 삭제
     @DeleteMapping("/repeat/{eventId}")
     public ResponseEntity<ApiSuccessResponse<String>> deleteRepeat(HttpServletRequest servRequest,
-                                                             @PathVariable(name = "eventId") Long eventId,
-                                                             @RequestParam("deleteType") String deleteType) {                                                                                             
+                                                                   @PathVariable(name = "eventId") Long eventId,
+                                                                   @RequestParam("deleteType") String deleteType) {
         eventService.repeatDelete(eventId, deleteType);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(

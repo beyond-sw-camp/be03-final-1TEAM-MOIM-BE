@@ -1,5 +1,6 @@
 package com.team1.moim.domain.group.controller;
 
+import com.team1.moim.domain.group.dto.request.GroupCreateAlarmRequest;
 import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
 import com.team1.moim.domain.group.dto.request.GroupRequest;
 import com.team1.moim.domain.group.dto.request.GroupSearchRequest;
@@ -8,6 +9,7 @@ import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
 import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.dto.response.ListGroupResponse;
 import com.team1.moim.domain.group.service.GroupService;
+import com.team1.moim.global.config.sse.service.SseService;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -33,10 +35,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class GroupController {
 
     private final GroupService groupService;
+    private final SseService sseService;
 
     @Autowired
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, SseService sseService) {
         this.groupService = groupService;
+        this.sseService = sseService;
     }
 
     // 모임 생성
@@ -45,14 +49,19 @@ public class GroupController {
     public ResponseEntity<ApiSuccessResponse<GroupDetailResponse>> createGroup(
             HttpServletRequest httpServletRequest,
             @Valid GroupRequest groupRequest,
-            @RequestPart(value = "groupInfoRequests", required = false) List<GroupInfoRequest> groupInfoRequests) {
+            @RequestPart(value = "groupInfoRequests", required = false) List<GroupInfoRequest> groupInfoRequests,
+            @RequestPart(value = "alarmRequest", required = false) List<GroupCreateAlarmRequest> groupCreateAlarmRequests) {
+
+//        for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
+//            String memberEmail = groupInfoRequest.getMemberEmail();
+//        }
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
-                        groupService.create(groupRequest, groupInfoRequests)));
+                        groupService.create(groupRequest, groupInfoRequests, groupCreateAlarmRequests)));
     }
 
     // 모임 삭제
