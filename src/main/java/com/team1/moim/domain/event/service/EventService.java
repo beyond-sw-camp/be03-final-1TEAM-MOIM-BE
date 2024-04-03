@@ -75,7 +75,7 @@ public class EventService {
         if (repeatValue != null) {
 
             RepeatType newRepeat;
-            if (repeatValue.getReapetType().equals("Y")) newRepeat = RepeatType.Y;
+            if (repeatValue.getRepeatType().equals("Y")) newRepeat = RepeatType.Y;
             else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
             else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
             else newRepeat = RepeatType.D;
@@ -101,8 +101,13 @@ public class EventService {
 
     @Async
     public EventResponse repeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, Long repeatParent) {
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info(email);
         Member member = memberRepository.findByEmail(email).orElseThrow();
+
+        log.info("일정이 추가 됩니다.");
+
         Matrix matrix;
         if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
         else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
@@ -124,24 +129,24 @@ public class EventService {
 //        다음에 또 반복을 할지 판별하게 해주는 변수
         LocalDateTime nextStartDate = null;
         // 단위마다 추가하는 로직
-        if (repeatValue.getReapetType().equals("Y")) {
+        if (repeatValue.getRepeatType().equals("Y")) {
             // 1년 후
             calculatedStartDate = startDate.plusYears(1); // 현재 반복일정에 들어갈 시작일자
             calculatedEndDate = startDate.plusYears(1);
             nextStartDate = calculatedStartDate.plusYears(1); // 현재 반복일정 바로 뒤에 또 들어갈 일자를 미리 계산함
 
 
-        } else if (repeatValue.getReapetType().equals("M")) {
+        } else if (repeatValue.getRepeatType().equals("M")) {
             // 1달 후
             calculatedStartDate = startDate.plusMonths(1);
             calculatedEndDate = startDate.plusMonths(1);
             nextStartDate = calculatedStartDate.plusMonths(1);
-        } else if (repeatValue.getReapetType().equals("W")) {
+        } else if (repeatValue.getRepeatType().equals("W")) {
             // 1주 후
             calculatedStartDate = startDate.plusWeeks(1);
             calculatedEndDate = startDate.plusWeeks(1);
             nextStartDate = calculatedStartDate.plusWeeks(1);
-        } else if (repeatValue.getReapetType().equals("D")) {
+        } else if (repeatValue.getRepeatType().equals("D")) {
             // 1일 후
             calculatedStartDate = startDate.plusDays(1);
             calculatedEndDate = startDate.plusDays(1);
@@ -164,7 +169,7 @@ public class EventService {
         }
 
         RepeatType newRepeat;
-        if (repeatValue.getReapetType().equals("Y")) newRepeat = RepeatType.Y;
+        if (repeatValue.getRepeatType().equals("Y")) newRepeat = RepeatType.Y;
         else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
         else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
         else newRepeat = RepeatType.D;
@@ -305,6 +310,7 @@ public class EventService {
     public void eventSchedule() {
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
         for(Event event : events) {
+            if(event.getStartDate().isBefore(LocalDateTime.now())) continue;
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {

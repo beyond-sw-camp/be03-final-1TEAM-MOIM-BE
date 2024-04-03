@@ -1,13 +1,16 @@
 package com.team1.moim.domain.event.repository;
 
 import com.team1.moim.domain.event.entity.Event;
+import com.team1.moim.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByDeleteYnAndAlarmYn(String deleteYn, String alarmYn);
     List<Event> findByRepeatParent(Long repeatParent);
+    List<Event> findByMember(Member member);
 }

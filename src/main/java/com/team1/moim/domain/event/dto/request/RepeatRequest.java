@@ -13,18 +13,18 @@ import java.time.LocalDate;
 public class RepeatRequest {
 
     @NotEmpty(message = "반복타입이 비어있으면 안됩니다.")
-    private String reapetType;
+    private String repeatType;
 
     @NotEmpty(message = "반복 종료일자가 비어있으면 안됩니다.")
     private String repeat_end_date;
 
-    public static Repeat toEntity(RepeatType reapetType, String repeat_end_date, Event event){
+    public static Repeat toEntity(RepeatType repeatType, String repeat_end_date, Event event){
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDate LocalEndDate = LocalDate.parse(repeat_end_date);
 
 
         return Repeat.builder()
-                .repeatType(reapetType)
+                .repeatType(repeatType)
                 .repeat_end_date(LocalEndDate)
                 .event(event)
                 .build();
