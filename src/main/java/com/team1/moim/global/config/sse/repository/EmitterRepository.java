@@ -1,10 +1,10 @@
-package com.team1.moim.global.config.sse;
-
-import org.springframework.stereotype.Repository;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+package com.team1.moim.global.config.sse.repository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Repository
 public class EmitterRepository {
@@ -15,6 +15,10 @@ public class EmitterRepository {
         emitters.put(email, emitter);
     }
 
+    public Optional<SseEmitter> findByEmail(String email) {
+        return Optional.ofNullable(emitters.get(email));
+    }
+
     public void deleteByEmail(String email) {
         emitters.remove(email);
     }
@@ -22,9 +26,12 @@ public class EmitterRepository {
     public SseEmitter get(String email) {
         return emitters.get(email);
     }
+
     public int getEmitterSize(){
         return emitters.size();
     }
 
-    public boolean containKey(String email){return emitters.containsKey(email);}
+    public boolean containKey(String email){
+        return emitters.containsKey(email);
+    }
 }
