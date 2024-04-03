@@ -305,6 +305,7 @@ public class EventService {
     public void eventSchedule() {
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
         for(Event event : events) {
+            if(event.getStartDate().isBefore(LocalDateTime.now())) continue;
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {
