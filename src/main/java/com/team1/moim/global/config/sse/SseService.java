@@ -30,7 +30,7 @@ public class SseService {
         emitterRepository.save(email,emitter);
 
         emitter.onCompletion(()->{
-            // 만일 emitter가 만료되면 삭제한다.
+            // 만일 emitter가 만료되면 삭제
              System.out.println(email);
             emitterRepository.deleteByEmail(email);
         });

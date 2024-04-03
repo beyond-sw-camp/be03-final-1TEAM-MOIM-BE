@@ -303,9 +303,12 @@ public class EventService {
     @Transactional
     @Scheduled(cron = "0 0/1 * * * *") // 매분마다 실행
     public void eventSchedule() {
+        // 삭제되지 않고, 알림 설정한 일정LiST
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
         for(Event event : events) {
+            // 과거 일정은 알림 X
             if(event.getStartDate().isBefore(LocalDateTime.now())) continue;
+            // 이미 전송한 알림 재전송 X
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {
