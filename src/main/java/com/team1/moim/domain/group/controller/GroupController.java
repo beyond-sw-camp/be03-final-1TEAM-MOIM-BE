@@ -52,10 +52,6 @@ public class GroupController {
             @RequestPart(value = "groupInfoRequests", required = false) List<GroupInfoRequest> groupInfoRequests,
             @RequestPart(value = "alarmRequest", required = false) List<GroupCreateAlarmRequest> groupCreateAlarmRequests) {
 
-//        for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
-//            String memberEmail = groupInfoRequest.getMemberEmail();
-//        }
-
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(

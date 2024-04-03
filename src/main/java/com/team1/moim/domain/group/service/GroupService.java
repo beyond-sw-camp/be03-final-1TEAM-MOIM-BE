@@ -62,18 +62,13 @@ public class GroupService {
             List<GroupInfoRequest> groupInfoRequests,
             List<GroupCreateAlarmRequest> groupCreateAlarmRequests) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member host = getHostByEmail();
 
-        // 호스트 조회
-        Member host = memberRepository.findByEmail(email)
-                .orElseThrow(MemberNotFoundException::new);
-
+        // 참여자 정보
         if (groupInfoRequests == null || groupInfoRequests.isEmpty()) {
             throw new ParticipantRequiredException();
         }
-
         Group newGroup = groupRequest.toEntity(host, groupInfoRequests);
-
         for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
             log.info("참여자 존재여부 확인");
             Member participant = memberRepository.findByEmail(groupInfoRequest.getMemberEmail())
@@ -90,17 +85,16 @@ public class GroupService {
             filePath = s3Service.uploadFile("groups", groupRequest.getFilePath());
         }
         newGroup.setFilePath(filePath);
-
         groupRepository.save(newGroup);
 
         // 모임 생성 완료와 동시에 참여자들에게 알림 전송
-        String hostname = newGroup.getMember().getNickname();
+        String hostname = host.getNickname();
         String groupTitle = newGroup.getTitle();
-        String message = String.format("%s님이 %s 모임에 초대했습니다. 참여하시겠습니까?", hostname, groupTitle);
-        log.info("최초 메시지는 여기에요! " + message);
+        String message = String.format("%s님이 \"%s\" 모임에 초대했습니다. 참여하시겠습니까?", hostname, groupTitle);
+        log.info("메시지 내용 확인: " + message);
         for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
             String participantEmail = groupInfoRequest.getMemberEmail();
-            log.info("참여자 이메일 정보!!!" + participantEmail);
+            log.info("참여자 이메일 주소: " + participantEmail);
             sseService.sendInstantAlarm(participantEmail, message);
         }
 
@@ -126,6 +120,12 @@ public class GroupService {
         }
 
         return GroupDetailResponse.from(newGroup);
+    }
+
+    // 호스트 이메일
+    private Member getHostByEmail() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
     }
 
     // 모임 삭제
