@@ -1,7 +1,7 @@
 package com.team1.moim.global.config.sse.service;
 
 import com.team1.moim.domain.member.repository.MemberRepository;
-import com.team1.moim.global.config.sse.dto.GroupScheduledNotificationResponse;
+import com.team1.moim.global.config.sse.dto.GroupNotificationResponse;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
 import java.io.IOException;
@@ -68,11 +68,22 @@ public class SseService {
         }
     }
 
-    public void sendGroupAlarm(String email, GroupScheduledNotificationResponse notificationResponse) {
+    public void sendGroupAlarm(String email, GroupNotificationResponse notificationResponse) {
         try {
             emitterRepository.get(email).send(SseEmitter.event()
                     .name("sendGroupAlarm")
                     .data(notificationResponse));
+        } catch (IOException e) {
+            emitterRepository.deleteByEmail(email);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendInstantAlarm(String email, String message) {
+        try {
+            emitterRepository.get(email).send(SseEmitter.event()
+                    .name("sendInstantAlarm")
+                    .data(message));
         } catch (IOException e) {
             emitterRepository.deleteByEmail(email);
             throw new RuntimeException(e);

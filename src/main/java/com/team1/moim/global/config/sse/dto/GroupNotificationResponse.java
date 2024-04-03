@@ -7,13 +7,13 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class GroupScheduledNotificationResponse {
+public class GroupNotificationResponse {
     private String hostname;                // 호스트명
     private String message;                 // 알림 메시지
     private String title;                   // 모임명
     private LocalDateTime voteDeadline;     // 마감시간
 
-    public static GroupScheduledNotificationResponse from(GroupAlarm groupAlarm) {
+    public static GroupNotificationResponse from(GroupAlarm groupAlarm) {
 
         String hostName = groupAlarm.getGroup().getMember().getNickname();
         String title = groupAlarm.getGroup().getTitle();
@@ -21,7 +21,7 @@ public class GroupScheduledNotificationResponse {
 
         String message = MessageCreator.createMessage(groupAlarm);
 
-        return GroupScheduledNotificationResponse.builder()
+        return GroupNotificationResponse.builder()
                 .hostname(hostName)
                 .message(message)
                 .title(title)

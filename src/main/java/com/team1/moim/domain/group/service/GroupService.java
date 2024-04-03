@@ -23,7 +23,7 @@ import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
-import com.team1.moim.global.config.sse.dto.GroupScheduledNotificationResponse;
+import com.team1.moim.global.config.sse.dto.GroupNotificationResponse;
 import com.team1.moim.global.config.sse.service.SseService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -94,7 +94,15 @@ public class GroupService {
         groupRepository.save(newGroup);
 
         // 모임 생성 완료와 동시에 참여자들에게 알림 전송
-
+        String hostname = newGroup.getMember().getNickname();
+        String groupTitle = newGroup.getTitle();
+        String message = String.format("%s님이 %s 모임에 초대했습니다. 참여하시겠습니까?", hostname, groupTitle);
+        log.info("최초 메시지는 여기에요! " + message);
+        for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
+            String participantEmail = groupInfoRequest.getMemberEmail();
+            log.info("참여자 이메일 정보!!!" + participantEmail);
+            sseService.sendInstantAlarm(participantEmail, message);
+        }
 
         // Deadline 임박에 대한 알림 추가(여러 개의 알림 등록 가능)
         if (groupCreateAlarmRequests != null) {
@@ -235,7 +243,7 @@ public class GroupService {
         List<GroupInfo> participants = groupInfoRepository.findByGroupAndIsAgreedAndIsDeleted(
                 groupAlarm.getGroup(), "P", "N");
         for (GroupInfo participant : participants) {
-            sseService.sendGroupAlarm(participant.getMember().getEmail(), GroupScheduledNotificationResponse.from(groupAlarm));
+            sseService.sendGroupAlarm(participant.getMember().getEmail(), GroupNotificationResponse.from(groupAlarm));
         }
         groupAlarm.sendCheck("Y");
     }
