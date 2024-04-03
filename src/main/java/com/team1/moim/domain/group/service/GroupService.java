@@ -1,12 +1,11 @@
 package com.team1.moim.domain.group.service;
 
+import com.amazonaws.services.ec2.model.transform.EgressOnlyInternetGatewayStaxUnmarshaller;
 import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
 import com.team1.moim.domain.group.dto.request.GroupRequest;
 import com.team1.moim.domain.group.dto.request.GroupSearchRequest;
-import com.team1.moim.domain.group.dto.response.FindConfirmedGroupResponse;
-import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
-import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
-import com.team1.moim.domain.group.dto.response.ListGroupResponse;
+import com.team1.moim.domain.group.dto.request.GroupVotedRequest;
+import com.team1.moim.domain.group.dto.response.*;
 import com.team1.moim.domain.group.entity.Group;
 import com.team1.moim.domain.group.entity.GroupInfo;
 import com.team1.moim.domain.group.exception.GroupInfoNotFoundException;
@@ -14,6 +13,7 @@ import com.team1.moim.domain.group.exception.GroupNotFoundException;
 import com.team1.moim.domain.group.exception.ParticipantRequiredException;
 import com.team1.moim.domain.group.repository.GroupInfoRepository;
 import com.team1.moim.domain.group.repository.GroupRepository;
+import com.team1.moim.domain.group.util.DateTimeFormatterUtil;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
@@ -23,8 +23,11 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -155,4 +158,53 @@ public class GroupService {
                 .collect(Collectors.toList());
         return groups;
     }
+
+    @Transactional
+    public void voted(GroupVotedRequest groupVotedRequest, Long groupId, String loginEmail) {
+        // 현재 투표한 그룹
+        Group group = groupRepository.findById(groupId).orElseThrow();
+
+        // 해당 그룹인포 리스트
+        List<GroupInfo> groupInfoList =  groupInfoRepository.findByGroup(group).orElseThrow(GroupInfoNotFoundException::new);
+
+        // 현재 투표한 사람을 찾아서 바꾸기
+        for (GroupInfo groupInfo : groupInfoList) {
+            if(groupInfo.getMember().getEmail().equals(loginEmail)){
+                groupInfo.vote(groupVotedRequest.getIsAgreed());
+            }
+        }
+
+        // 게스트가 투표를 다했는지 확인, 했으면 확정으로 변경 + 알람보내기
+        int votedParticipants = 0; // 현재 투표를 한 사람의 수
+        for (GroupInfo groupInfo : groupInfoList) {
+            if (groupInfo.getIsAgreed() != "P") {
+                votedParticipants++;
+            }
+        }
+
+        if(group.getParticipants() == votedParticipants){
+            // 호스트에게 확정 시키라고 알람 가기
+
+            // 시간 추천 알고리즘 메소드
+
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

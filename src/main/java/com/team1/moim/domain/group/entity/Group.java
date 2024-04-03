@@ -115,4 +115,6 @@ public class Group extends BaseTimeEntity {
     public void setConfirmed() {
         this.isConfirmed = "Y";
     }
+
+
 }

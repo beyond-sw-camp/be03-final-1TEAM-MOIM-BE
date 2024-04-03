@@ -35,10 +35,10 @@ public class GroupInfo {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    // 동의 여부
+    // 동의 여부, 아무것도 안했을때 : P
     @Builder.Default
     @Column(nullable = false)
-    private String isAgreed = "N";
+    private String isAgreed = "P";
 
     // 삭제여부 (Y, N)
     @Column(nullable = false)
@@ -52,5 +52,9 @@ public class GroupInfo {
     public void attachGroup(Group group){
         this.group = group;
         group.getGroupInfos().add(this);
+    }
+
+    public void vote(String agree){
+        this.isAgreed = agree;
     }
 }

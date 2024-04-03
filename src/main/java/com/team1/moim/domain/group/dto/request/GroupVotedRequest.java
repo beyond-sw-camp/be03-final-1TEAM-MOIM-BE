@@ -3,17 +3,21 @@ package com.team1.moim.domain.group.dto.request;
 import com.team1.moim.domain.group.entity.Group;
 import com.team1.moim.domain.group.entity.GroupInfo;
 import com.team1.moim.domain.member.entity.Member;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class GroupInfoRequest {
+@NoArgsConstructor
+@AllArgsConstructor
+public class GroupVotedRequest {
+    private String isAgreed;
 
-    private String memberEmail;
-
-    public GroupInfo toEntity(Member member) {
+    public GroupInfo toEntity(Group group, Member member, String isAgreed) {
         return GroupInfo.builder()
+                .group(group)
+                .isAgreed(isAgreed)
                 .member(member)
                 .build();
     }
-
 }

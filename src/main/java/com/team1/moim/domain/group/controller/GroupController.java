@@ -3,12 +3,11 @@ package com.team1.moim.domain.group.controller;
 import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
 import com.team1.moim.domain.group.dto.request.GroupRequest;
 import com.team1.moim.domain.group.dto.request.GroupSearchRequest;
-import com.team1.moim.domain.group.dto.response.FindConfirmedGroupResponse;
-import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
-import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
-import com.team1.moim.domain.group.dto.response.ListGroupResponse;
+import com.team1.moim.domain.group.dto.request.GroupVotedRequest;
+import com.team1.moim.domain.group.dto.response.*;
 import com.team1.moim.domain.group.service.GroupService;
 import com.team1.moim.global.dto.ApiSuccessResponse;
+import jakarta.servlet.ServletRegistration;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -116,6 +115,23 @@ public class GroupController {
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
                         groupService.findGroups(groupSearchRequest, pageable, email)));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/voted/{groupId}")
+    public ResponseEntity<ApiSuccessResponse<String>> voted(
+            HttpServletRequest httpServletRequest,
+            @Valid GroupVotedRequest groupVotedRequest,
+            @PathVariable Long groupId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        groupService.voted(groupVotedRequest, groupId, email);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        ("투표가 성공적으로 완료되었습니다.")));
     }
 
 }

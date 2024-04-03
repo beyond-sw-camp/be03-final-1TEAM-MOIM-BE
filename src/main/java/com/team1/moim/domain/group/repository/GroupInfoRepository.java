@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GroupInfoRepository extends JpaRepository<GroupInfo, Long> {
     Optional<List<GroupInfo>> findByGroup(Group group);
+
+
 }

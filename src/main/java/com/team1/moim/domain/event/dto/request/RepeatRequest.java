@@ -16,11 +16,11 @@ public class RepeatRequest {
     private String reapetType;
 
     @NotEmpty(message = "반복 종료일자가 비어있으면 안됩니다.")
-    private String reapet_end_date;
+    private String repeat_end_date;
 
-    public static Repeat toEntity(RepeatType reapetType, String reapet_end_date, Event event){
+    public static Repeat toEntity(RepeatType reapetType, String repeat_end_date, Event event){
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDate LocalEndDate = LocalDate.parse(reapet_end_date);
+        LocalDate LocalEndDate = LocalDate.parse(repeat_end_date);
 
 
         return Repeat.builder()

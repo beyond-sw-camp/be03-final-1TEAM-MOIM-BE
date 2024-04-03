@@ -81,7 +81,7 @@ public class EventService {
             else newRepeat = RepeatType.D;
 
             log.info("반복일정이 추가됩니다.");
-            Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
+            Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getRepeat_end_date(),event);
             repeatRepository.save(repeatEntity);
             repeatCreate(request, toDoListRequests, repeatValue, event.getId());
         }
@@ -169,11 +169,11 @@ public class EventService {
         else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
         else newRepeat = RepeatType.D;
         
-        Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
+        Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getRepeat_end_date(),event);
         repeatRepository.save(repeatEntity);
 
         // 만약 현재 반복일정 보다 1년뒤(반복일정 타입별이 Y인걸로 가정 하면)인 nextStartDate가 반복 종료일보다 전이면 RepeatCreate를 다시 호출한다.
-        LocalDate repeatEndDate = LocalDate.parse(repeatValue.getReapet_end_date());
+        LocalDate repeatEndDate = LocalDate.parse(repeatValue.getRepeat_end_date());
         if (repeatEndDate.isAfter(ChronoLocalDate.from(nextStartDate))){
             EventRequest newRequest = request.changeDateRequest(request, newStartDate, newEndDate);
             repeatCreate(newRequest, toDoListRequests, repeatValue, repeatParent);
