@@ -115,21 +115,5 @@ public class GroupController {
                         groupService.findGroups(groupSearchRequest, pageable, email)));
     }
 
-//    @PreAuthorize("hasRole('ROLE_USER')")
-//    @PostMapping("/voted/{groupId}")
-//    public ResponseEntity<ApiSuccessResponse<String>> vote(
-//            HttpServletRequest httpServletRequest,
-//            @Valid GroupVotedRequest groupVotedRequest,
-//            @PathVariable Long groupId) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//
-//        groupService.voted(groupVotedRequest, groupId, email);
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .body(ApiSuccessResponse.of(
-//                        HttpStatus.OK,
-//                        httpServletRequest.getServletPath(),
-//                        ("투표가 성공적으로 완료되었습니다.")));
-//    }
 
 }
