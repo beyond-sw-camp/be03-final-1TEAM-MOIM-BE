@@ -1,12 +1,16 @@
-package com.team1.moim.global.config.sse;
+package com.team1.moim.global.config.sse.service;
 
+
+import com.team1.moim.domain.member.repository.MemberRepository;
+import com.team1.moim.global.config.sse.dto.GroupNotificationResponse;
+import com.team1.moim.global.config.sse.dto.NotificationResponse;
+import com.team1.moim.global.config.sse.repository.EmitterRepository;
+import java.io.IOException;
+import javax.naming.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import javax.naming.ServiceUnavailableException;
-import java.io.IOException;
 
 @Component
 @Slf4j
@@ -41,26 +45,42 @@ public class SseService {
         try {
             // 최초 연결시 메시지를 안 보내면 503 Service Unavailable 에러 발생
             emitter.send(SseEmitter.event().name("connect").data(email + " connected!"));
-        }catch (IOException e){
+        } catch (IOException e) {
             throw new ServiceUnavailableException();
         }
         return emitter;
     }
 
-    public void sendEventAlarm(String email, NotificationResponse notificationResponse){
+    public void sendEventAlarm(String email, NotificationResponse notificationResponse) {
         try {
             emitterRepository.get(email).send(SseEmitter.event()
                     .name("sendEventAlarm")
                     .data(notificationResponse));
-        } catch (IOException e){
+        } catch (IOException e) {
 //            emitterRepository.deleteById(emitterId);
             throw new RuntimeException(e);
         }
     }
 
-    boolean containKey(String email){
-        return emitterRepository.containKey(email);
+    public void sendGroupAlarm(String email, GroupNotificationResponse notificationResponse) {
+        try {
+            emitterRepository.get(email).send(SseEmitter.event()
+                    .name("sendGroupAlarm")
+                    .data(notificationResponse));
+        } catch (IOException e) {
+            emitterRepository.deleteByEmail(email);
+            throw new RuntimeException(e);
+        }
     }
 
-
+    public void sendInstantAlarm(String email, String message) {
+        try {
+            emitterRepository.get(email).send(SseEmitter.event()
+                    .name("sendInstantAlarm")
+                    .data(message));
+        } catch (IOException e) {
+            emitterRepository.deleteByEmail(email);
+            throw new RuntimeException(e);
+        }
+    }
 }
