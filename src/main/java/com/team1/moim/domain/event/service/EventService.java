@@ -75,13 +75,13 @@ public class EventService {
         if (repeatValue != null) {
 
             RepeatType newRepeat;
-            if (repeatValue.getReapetType().equals("Y")) newRepeat = RepeatType.Y;
+            if (repeatValue.getRepeatType().equals("Y")) newRepeat = RepeatType.Y;
             else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
             else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
             else newRepeat = RepeatType.D;
 
             log.info("반복일정이 추가됩니다.");
-            Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
+            Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getRepeat_end_date(),event);
             repeatRepository.save(repeatEntity);
             repeatCreate(request, toDoListRequests, repeatValue, event.getId());
         }
@@ -101,8 +101,13 @@ public class EventService {
 
     @Async
     public EventResponse repeatCreate(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, Long repeatParent) {
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info(email);
         Member member = memberRepository.findByEmail(email).orElseThrow();
+
+        log.info("일정이 추가 됩니다.");
+
         Matrix matrix;
         if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
         else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
@@ -124,24 +129,24 @@ public class EventService {
 //        다음에 또 반복을 할지 판별하게 해주는 변수
         LocalDateTime nextStartDate = null;
         // 단위마다 추가하는 로직
-        if (repeatValue.getReapetType().equals("Y")) {
+        if (repeatValue.getRepeatType().equals("Y")) {
             // 1년 후
             calculatedStartDate = startDate.plusYears(1); // 현재 반복일정에 들어갈 시작일자
             calculatedEndDate = startDate.plusYears(1);
             nextStartDate = calculatedStartDate.plusYears(1); // 현재 반복일정 바로 뒤에 또 들어갈 일자를 미리 계산함
 
 
-        } else if (repeatValue.getReapetType().equals("M")) {
+        } else if (repeatValue.getRepeatType().equals("M")) {
             // 1달 후
             calculatedStartDate = startDate.plusMonths(1);
             calculatedEndDate = startDate.plusMonths(1);
             nextStartDate = calculatedStartDate.plusMonths(1);
-        } else if (repeatValue.getReapetType().equals("W")) {
+        } else if (repeatValue.getRepeatType().equals("W")) {
             // 1주 후
             calculatedStartDate = startDate.plusWeeks(1);
             calculatedEndDate = startDate.plusWeeks(1);
             nextStartDate = calculatedStartDate.plusWeeks(1);
-        } else if (repeatValue.getReapetType().equals("D")) {
+        } else if (repeatValue.getRepeatType().equals("D")) {
             // 1일 후
             calculatedStartDate = startDate.plusDays(1);
             calculatedEndDate = startDate.plusDays(1);
@@ -164,16 +169,16 @@ public class EventService {
         }
 
         RepeatType newRepeat;
-        if (repeatValue.getReapetType().equals("Y")) newRepeat = RepeatType.Y;
+        if (repeatValue.getRepeatType().equals("Y")) newRepeat = RepeatType.Y;
         else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
         else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
         else newRepeat = RepeatType.D;
         
-        Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getReapet_end_date(),event);
+        Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getRepeat_end_date(),event);
         repeatRepository.save(repeatEntity);
 
         // 만약 현재 반복일정 보다 1년뒤(반복일정 타입별이 Y인걸로 가정 하면)인 nextStartDate가 반복 종료일보다 전이면 RepeatCreate를 다시 호출한다.
-        LocalDate repeatEndDate = LocalDate.parse(repeatValue.getReapet_end_date());
+        LocalDate repeatEndDate = LocalDate.parse(repeatValue.getRepeat_end_date());
         if (repeatEndDate.isAfter(ChronoLocalDate.from(nextStartDate))){
             EventRequest newRequest = request.changeDateRequest(request, newStartDate, newEndDate);
             repeatCreate(newRequest, toDoListRequests, repeatValue, repeatParent);
@@ -256,10 +261,10 @@ public class EventService {
             // 현재일정 이후의 일정 구하기
             for (int i = 0; i < allEvent.size(); i++) {
                 Event event1 = allEvent.get(i);
-                if (event1.getStartDate().isAfter(event.getStartDate())||event1.getStartDate()==event.getStartDate()){ // 현재 일정보다 이후인것은 모두 삭제
+                if (event1.getStartDateTime().isAfter(event.getStartDateTime())||event1.getStartDateTime()==event.getStartDateTime()){ // 현재 일정보다 이후인것은 모두 삭제
                     event1.delete();
                 }else{ // 현재 일정보다 이전인 모든 일정은 모두 반복 종료일을 바꿔주기....
-                    lastest_end_date = LocalDate.from(event1.getStartDate());
+                    lastest_end_date = LocalDate.from(event1.getStartDateTime());
                 }
             }
             // 모든 반복일정의 반복종료일자 변경하기
@@ -274,19 +279,19 @@ public class EventService {
             // 현재 한가지 일정만 지우기
         }else{
             // 만약 뒤의 일정이 없다면 모든 반복일정의 "반복 일정 종료일을"을 바로 직전으로 바꾸기
-            LocalDateTime lastDate = event.getStartDate();
+            LocalDateTime lastDate = event.getStartDateTime();
             LocalDateTime newLastDate = LocalDateTime.parse("0001-01-01T00:00:00"); // 새롭게 바뀔 반복 종료일
             for (int i = 0; i < allEvent.size(); i++) {
                 Event event1 = allEvent.get(i);
-                if(event1.getStartDate().isAfter(event.getStartDate())||event1.getStartDate()==event.getStartDate()){
-                    lastDate = event1.getStartDate();
-                }else if(newLastDate.isBefore(event1.getStartDate())){
-                    newLastDate = event1.getStartDate();
+                if(event1.getStartDateTime().isAfter(event.getStartDateTime())||event1.getStartDateTime()==event.getStartDateTime()){
+                    lastDate = event1.getStartDateTime();
+                }else if(newLastDate.isBefore(event1.getStartDateTime())){
+                    newLastDate = event1.getStartDateTime();
                 }
             }
 
             //현재 일정이 반복하는 일정 중 마지막 일정과 같다면 모든 반복데이터에 마지막 날짜를 바꿔줘야 함
-            if(lastDate == event.getStartDate()){
+            if(lastDate == event.getStartDateTime()){
                 for (int i = 0; i < allEvent.size(); i++) {
                     Repeat repeatTemp = repeatRepository.findByEventId(allEvent.get(i).getId());
                     repeatTemp.changeEndDate(LocalDate.from(newLastDate));
@@ -305,22 +310,23 @@ public class EventService {
     public void eventSchedule() {
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
         for(Event event : events) {
+            if(event.getStartDateTime().isBefore(LocalDateTime.now())) continue;
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {
-                    if(event.getStartDate().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                    if(event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");
                     }
                 } else if (alarm.getAlarmtype() == AlarmType.H) {
-                    if (event.getStartDate().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                    if (event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");
                     }
                 } else if (alarm.getAlarmtype() == AlarmType.M) {
-                    if (event.getStartDate().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                    if (event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");

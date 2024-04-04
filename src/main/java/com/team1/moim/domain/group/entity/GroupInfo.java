@@ -40,6 +40,7 @@ public class GroupInfo {
     // Y이면 등록을 누른 상태
     // N이면 참여를 거절한 상태
     @Builder.Default
+    @Column(nullable = false)
     private String isAgreed = "P";
 
     // 삭제여부 (Y, N)
@@ -54,5 +55,9 @@ public class GroupInfo {
     public void attachGroup(Group group){
         this.group = group;
         group.getGroupInfos().add(this);
+    }
+
+    public void vote(String agree){
+        this.isAgreed = agree;
     }
 }

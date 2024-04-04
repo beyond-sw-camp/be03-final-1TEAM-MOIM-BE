@@ -60,6 +60,23 @@ public class S3Service {
         return uploadFileUrl;
     }
 
+    // S3에 업로드 된 파일 삭제
+    public String deleteFile(String uploadFilePath){
+
+        String key = uploadFilePath.substring(52);
+        log.info("key: {}", key);
+        String result = "Delete Success: " + uploadFilePath;
+
+        try {
+            log.info("파일 경로: {}", uploadFilePath);
+            amazonS3Client.deleteObject(bucket, key);
+        } catch (Exception e){
+            log.debug("파일 삭제 실패", e);
+        }
+
+        return result;
+    }
+
     public String getUrl(String keyName){
         return amazonS3Client.getUrl(bucket, keyName).toString();
     }

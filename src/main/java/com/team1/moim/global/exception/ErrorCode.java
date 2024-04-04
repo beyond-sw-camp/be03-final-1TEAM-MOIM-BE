@@ -16,6 +16,8 @@ public enum ErrorCode {
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 모임입니다."),
     GROUP_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 모임 게스트입니다."),
     PARTICIPANT_REQUIRED(HttpStatus.BAD_REQUEST, "모임 참여자를 1명 이상 등록해야 합니다."),
+    PARTICIPANT_INFO_NOT_MATCH(HttpStatus.BAD_REQUEST, "모임 참여자 정보가 일치하지 않습니다."),
+    ALREADY_VOTED(HttpStatus.BAD_REQUEST, "이미 투표하였습니다."),
 
     // Member
     EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다."),

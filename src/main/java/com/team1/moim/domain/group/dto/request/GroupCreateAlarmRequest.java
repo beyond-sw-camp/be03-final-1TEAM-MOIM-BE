@@ -23,11 +23,9 @@ public class GroupCreateAlarmRequest {
 //    @NotEmpty(message = "알림 타입은 비어있을 수 없습니다.")
 //    private String alarmType;
 
-    public static GroupAlarm toEntity(
-            Group group,
-            int deadlineAlarm,
-            GroupAlarmTimeType groupAlarmTimeType,
-            GroupAlarmType groupAlarmType) {
+    public GroupAlarm toEntity(Group group,
+                               GroupAlarmTimeType groupAlarmTimeType,
+                               GroupAlarmType groupAlarmType) {
         return GroupAlarm.builder()
                 .group(group)
                 .deadlineAlarm(deadlineAlarm)

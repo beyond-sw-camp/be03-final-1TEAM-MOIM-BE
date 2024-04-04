@@ -37,7 +37,7 @@ public class SecurityConfig {
             "/connect",
             "api/events",
             "api/events/**",
-            "api/events/repeat/"
+//            "api/events/repeat/"
     };
     private static final String[] AUTH_API_URL = {
             "/api/auth",
