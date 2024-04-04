@@ -1,5 +1,6 @@
 package com.team1.moim.global.config.sse.service;
 
+
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.sse.dto.GroupNotificationResponse;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
@@ -19,33 +20,26 @@ public class SseService {
     private final EmitterRepository emitterRepository;
 
     @Autowired
-    public SseService(EmitterRepository emitterRepository, MemberRepository memberRepository) {
+    public SseService(EmitterRepository emitterRepository) {
         this.emitterRepository = emitterRepository;
     }
 
-    public SseEmitter add(String email) throws ServiceUnavailableException {
-        /**
-         Emitter는 발신기라는 뜻
-         SSE 연결을 위해서 유효 시간이 담긴 SseEmitter 객체를 만들어 반환해야 한다.
-         */
-        SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료시간 설정
+    SseEmitter add(String email) throws ServiceUnavailableException {
+
+        //  SSE 연결을 위해서 만료 시간이 담긴 SseEmitter 객체를 만들어 반환해야 함
+        SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료 시간 설정
+
         // 현재 저장된 emitter의 수를 조회하여 자동 삭제를 확인
-//        System.out.println(emitterRepository.getEmitterSize());
-        emitterRepository.save(email, emitter);
-        /*
-        Register code to invoke when the async request completes.
-        This method is called from a container thread when an async request completed for any reason including timeout and network error.
-        This method is useful for detecting that a ResponseBodyEmitter instance is no longer usable.
-        */
-        emitter.onCompletion(() -> {
-            // 만일 emitter가 만료되면 삭제한다.
-            System.out.println(email);
+//        log.info("emitter size: " + emitterRepository.getEmitterSize());
+        emitterRepository.save(email,emitter);
+
+        emitter.onCompletion(()->{
+            // 만일 emitter가 만료되면 삭제
+             System.out.println(email);
             emitterRepository.deleteByEmail(email);
         });
-        /*
-        Register code to invoke when the async request times out. This method is called from a container thread when an async request times out.
-         */
-        emitter.onTimeout(() -> {
+
+        emitter.onTimeout(()->{
             emitterRepository.get(email).complete();
         });
         try {
