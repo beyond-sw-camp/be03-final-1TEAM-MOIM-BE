@@ -27,12 +27,10 @@ import java.util.List;
 public class GroupController {
 
     private final GroupService groupService;
-    private final SseService sseService;
 
     @Autowired
-    public GroupController(GroupService groupService, SseService sseService) {
+    public GroupController(GroupService groupService) {
         this.groupService = groupService;
-        this.sseService = sseService;
     }
 
     // 모임 생성
@@ -114,6 +112,4 @@ public class GroupController {
                         httpServletRequest.getServletPath(),
                         groupService.findGroups(groupSearchRequest, pageable, email)));
     }
-
-
 }

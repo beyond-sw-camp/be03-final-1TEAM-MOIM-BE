@@ -1,6 +1,7 @@
 package com.team1.moim.domain.notification.controller;
 
 import com.team1.moim.domain.notification.dto.response.VoteResponse;
+import com.team1.moim.domain.notification.service.NotificationService;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

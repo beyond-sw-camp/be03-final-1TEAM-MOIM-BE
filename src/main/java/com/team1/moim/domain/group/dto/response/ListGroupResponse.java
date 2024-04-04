@@ -26,7 +26,7 @@ public class ListGroupResponse {
                 .title(group.getTitle())
                 .runningTime(group.getRunningTime())
                 .voteDeadline(group.getVoteDeadline())
-                .confirmedDate(group.getConfirmedDate())
+                .confirmedDate(group.getConfirmedDateTime())
                 .participants(group.getParticipants())
                 .isConfirmed(group.getIsConfirmed())
                 .isDeleted(group.getIsDeleted())

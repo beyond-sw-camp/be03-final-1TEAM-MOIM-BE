@@ -2,24 +2,14 @@ package com.team1.moim.domain.group.entity;
 
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.global.config.BaseTimeEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.*;
 
 @Entity
 @Getter
@@ -74,7 +64,7 @@ public class Group extends BaseTimeEntity {
     private LocalDateTime voteDeadline;
 
     // 최종 확정 일정
-    private LocalDateTime confirmedDate;
+    private LocalDateTime confirmedDateTime;
 
     // 확정 여부 (Y, N)
     @Column(nullable = false)
@@ -93,7 +83,7 @@ public class Group extends BaseTimeEntity {
     @Builder
     public Group(Member member, String title, String contents, int runningTime, LocalDate expectStartDate,
                  LocalDate expectEndDate, LocalTime expectStartTime, LocalTime expectEndTime,
-                 String place, LocalDateTime voteDeadline, LocalDateTime confirmedDate, int participants) {
+                 String place, LocalDateTime voteDeadline, LocalDateTime confirmedDateTime, int participants) {
         this.member = member;
         this.title = title;
         this.contents = contents;
@@ -104,7 +94,7 @@ public class Group extends BaseTimeEntity {
         this.expectEndTime = expectEndTime;
         this.place = place;
         this.voteDeadline = voteDeadline;
-        this.confirmedDate = confirmedDate;
+        this.confirmedDateTime = confirmedDateTime;
         this.participants = participants;
     }
 
@@ -112,7 +102,11 @@ public class Group extends BaseTimeEntity {
         this.isDeleted = "Y";
     }
 
-    public void setConfirmed() {
+    public void confirm() {
         this.isConfirmed = "Y";
+    }
+
+    public void setConfirmedDateTime(LocalDateTime confirmedDateTime){
+        this.confirmedDateTime = confirmedDateTime;
     }
 }

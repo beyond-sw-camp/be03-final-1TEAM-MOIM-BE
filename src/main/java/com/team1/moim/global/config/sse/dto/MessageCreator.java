@@ -26,7 +26,7 @@ public class MessageCreator {
             message = "초대한 모든 사용자가 참여를 완료했습니다.";
         } else if (groupAlarm.getGroupAlarmType() == MOIM_TIME_CONFIRMED) {
             String formattedDateTime = DateTimeConverter.localDateTimeToString(
-                    groupAlarm.getGroup().getConfirmedDate());
+                    groupAlarm.getGroup().getConfirmedDateTime());
 
             StringJoiner joiner = new StringJoiner(" ");
             joiner.add("모임 시간이 확정되었습니다.")

@@ -1,4 +1,4 @@
-package com.team1.moim.domain.notification.controller;
+package com.team1.moim.domain.notification.service;
 
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.repository.EventRepository;
@@ -7,11 +7,13 @@ import com.team1.moim.domain.group.entity.GroupInfo;
 import com.team1.moim.domain.group.exception.AlreadyVotedException;
 import com.team1.moim.domain.group.exception.ParticipantInfoNotMatchException;
 import com.team1.moim.domain.group.repository.GroupInfoRepository;
+import com.team1.moim.domain.group.repository.GroupRepository;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.GroupInfoNotFoundException;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.notification.dto.response.VoteResponse;
+import com.team1.moim.global.config.sse.dto.GroupNotification;
 import com.team1.moim.global.config.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class NotificationService {
 
+    private final GroupRepository groupRepository;
     private final GroupInfoRepository groupInfoRepository;
     private final MemberRepository memberRepository;
     private final EventRepository eventRepository;
@@ -58,10 +61,62 @@ public class NotificationService {
         // 변경 사항(동의 여부) 반영
         GroupInfo savedGroupInfo = groupInfoRepository.save(findGroupInfo);
 
+        Group group = savedGroupInfo.getGroup();
+
         if (checkVoteStatus(savedGroupInfo.getGroup())){
             log.info("모임 참여자 전원 투표 완료!");
             List<LocalDateTime> recommendEvents = meetingScheduler(savedGroupInfo.getGroup());
             log.info("추천 일정: " + recommendEvents);
+            List<GroupInfo> agreedParticipants =
+                    groupInfoRepository.findByGroupAndIsAgreed(savedGroupInfo.getGroup(), "Y");
+
+            // 모일 수 있는 시간이 없다면, 모두에게 모일 수 없다는 알림 발송
+            if (recommendEvents.isEmpty()){
+                String groupTitle = savedGroupInfo.getGroup().getTitle();
+                String message = groupTitle + " 모임이 취소되었습니다.";
+
+                // Group 확정 및 삭제 처리
+                group.confirm();
+                group.delete();
+
+                groupRepository.save(group);
+
+                // 호스트도 알림 발송
+                sseService.sendGroupNotification(group.getMember().getEmail(),
+                        GroupNotification.from(group, message));
+
+                for (GroupInfo agreedParticipant : agreedParticipants){
+                    sseService.sendGroupNotification(agreedParticipant.getMember().getEmail(),
+                            GroupNotification.from(group, message));
+                }
+
+                // 모일 수 있는 일정이 1개라면 자동으로 모임을 확정 짓고 모두에게 알림 전송
+            } else if (recommendEvents.size() == 1){
+                String groupTitle = savedGroupInfo.getGroup().getTitle();
+                String message = groupTitle + " 모임이 확정 되었습니다.";
+
+                // Group 확정 처리
+                group.confirm();
+                group.setConfirmedDateTime(recommendEvents.get(0));
+                groupRepository.save(group);
+
+                // 호스트도 알림 발송
+                sseService.sendGroupNotification(group.getMember().getEmail(),
+                        GroupNotification.from(group, message));
+
+                for (GroupInfo agreedParticipant : agreedParticipants){
+                    sseService.sendGroupNotification(agreedParticipant.getMember().getEmail(),
+                            GroupNotification.from(group, message));
+                }
+                // 추천 일정이 여러개라면 모임 확정 알림을 호스트 에게만 전송
+            } else {
+                String groupTitle = savedGroupInfo.getGroup().getTitle();
+                String message = groupTitle + " 모임을 확정해주세요";
+
+                // 호스트한테만 알림 발송
+                sseService.sendGroupNotification(group.getMember().getEmail(),
+                        GroupNotification.from(group, message));
+            }
         }
 
         return VoteResponse.from(savedGroupInfo, findParticipant);
@@ -80,7 +135,7 @@ public class NotificationService {
     }
 
     // 시간추천 알고리즘
-    public List<LocalDateTime> meetingScheduler(Group group){
+    private List<LocalDateTime> meetingScheduler(Group group){
 
         LocalDate expect_start_date = group.getExpectStartDate();
         LocalDate expect_end_date = group.getExpectEndDate();

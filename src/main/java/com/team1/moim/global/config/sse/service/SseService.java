@@ -1,6 +1,5 @@
 package com.team1.moim.global.config.sse.service;
 
-import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.sse.dto.GroupNotification;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
@@ -63,28 +62,6 @@ public class SseService {
         }
     }
 
-//    public void sendGroupAlarm(String email, GroupNotificationScheduler notificationResponse) {
-//        try {
-//            emitterRepository.get(email).send(SseEmitter.event()
-//                    .name("sendGroupAlarm")
-//                    .data(notificationResponse));
-//        } catch (IOException e) {
-//            emitterRepository.deleteByEmail(email);
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-//    public void sendInstantAlarm(GroupNotificationScheduler groupNotificationScheduler) {
-//        try {
-//            emitterRepository.get(groupNotificationScheduler.get).send(SseEmitter.event()
-//                    .name("sendInstantAlarm")
-//                    .data(message));
-//        } catch (IOException e) {
-//            emitterRepository.deleteByEmail(email);
-//            throw new RuntimeException(e);
-//        }
-//    }
-
     public void sendGroupNotification(String memberEmail,
                                       GroupNotification groupNotification){
         try {
@@ -97,4 +74,15 @@ public class SseService {
             throw new RuntimeException(e);
         }
     }
+
+    //    public void sendGroupAlarm(String email, GroupNotificationScheduler notificationResponse) {
+//        try {
+//            emitterRepository.get(email).send(SseEmitter.event()
+//                    .name("sendGroupAlarm")
+//                    .data(notificationResponse));
+//        } catch (IOException e) {
+//            emitterRepository.deleteByEmail(email);
+//            throw new RuntimeException(e);
+//        }
+//    }
 }
