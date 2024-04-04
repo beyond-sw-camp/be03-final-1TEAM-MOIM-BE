@@ -24,7 +24,7 @@ public class SseService {
         this.emitterRepository = emitterRepository;
     }
 
-    SseEmitter add(String email) throws ServiceUnavailableException {
+    public SseEmitter add(String email) throws ServiceUnavailableException {
 
         //  SSE 연결을 위해서 만료 시간이 담긴 SseEmitter 객체를 만들어 반환해야 함
         SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료 시간 설정
