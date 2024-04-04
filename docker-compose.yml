@@ -6,7 +6,7 @@ services:
     ports:
       - 6379:6379
   moim-be:
-    image: moim-be:v1
+    image: moim-be
     build:
       context: .
       dockerfile: Dockerfile
