@@ -90,7 +90,7 @@ public class GroupService {
             String participantEmail = groupInfo.getMember().getEmail();
             log.info("참여자 이메일 주소: " + participantEmail);
             sseService.sendGroupNotification(participantEmail,
-                    GroupNotification.from(groupInfo, message));
+                    GroupNotification.from(newGroup, message));
         }
 
         // Deadline 임박에 대한 알림 추가(여러 개의 알림 등록 가능)

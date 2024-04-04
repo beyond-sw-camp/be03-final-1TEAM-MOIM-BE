@@ -35,7 +35,7 @@ public class FindConfirmedGroupResponse {
                 .title(group.getTitle())
                 .groupInfos(groupInfos)
                 .place(group.getPlace())
-                .confirmedDate(group.getConfirmedDate())
+                .confirmedDate(group.getConfirmedDateTime())
                 .contents(group.getContents())
                 .filePath(group.getFilePath())
                 .build();
