@@ -1,16 +1,16 @@
 package com.team1.moim.global.config.sse.service;
 
-
 import com.team1.moim.domain.member.repository.MemberRepository;
-import com.team1.moim.global.config.sse.dto.GroupNotificationResponse;
+import com.team1.moim.global.config.sse.dto.GroupNotification;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
-import java.io.IOException;
-import javax.naming.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import javax.naming.ServiceUnavailableException;
+import java.io.IOException;
 
 @Component
 @Slf4j
@@ -24,18 +24,19 @@ public class SseService {
         this.emitterRepository = emitterRepository;
     }
 
-    SseEmitter add(String email) throws ServiceUnavailableException {
-
-        //  SSE 연결을 위해서 만료 시간이 담긴 SseEmitter 객체를 만들어 반환해야 함
-        SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료 시간 설정
-
+    public SseEmitter add(String email) throws ServiceUnavailableException {
+        /**
+         Emitter는 발신기라는 뜻
+         SSE 연결을 위해서 유효 시간이 담긴 SseEmitter 객체를 만들어 반환해야 한다.
+         */
+        SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료시간 설정
         // 현재 저장된 emitter의 수를 조회하여 자동 삭제를 확인
 //        log.info("emitter size: " + emitterRepository.getEmitterSize());
         emitterRepository.save(email,emitter);
 
         emitter.onCompletion(()->{
             // 만일 emitter가 만료되면 삭제
-             System.out.println(email);
+            log.info("Emitter 유효 시간이 만료된 이메일: {}", email);
             emitterRepository.deleteByEmail(email);
         });
 
@@ -62,24 +63,37 @@ public class SseService {
         }
     }
 
-    public void sendGroupAlarm(String email, GroupNotificationResponse notificationResponse) {
-        try {
-            emitterRepository.get(email).send(SseEmitter.event()
-                    .name("sendGroupAlarm")
-                    .data(notificationResponse));
-        } catch (IOException e) {
-            emitterRepository.deleteByEmail(email);
-            throw new RuntimeException(e);
-        }
-    }
+//    public void sendGroupAlarm(String email, GroupNotificationScheduler notificationResponse) {
+//        try {
+//            emitterRepository.get(email).send(SseEmitter.event()
+//                    .name("sendGroupAlarm")
+//                    .data(notificationResponse));
+//        } catch (IOException e) {
+//            emitterRepository.deleteByEmail(email);
+//            throw new RuntimeException(e);
+//        }
+//    }
 
-    public void sendInstantAlarm(String email, String message) {
+//    public void sendInstantAlarm(GroupNotificationScheduler groupNotificationScheduler) {
+//        try {
+//            emitterRepository.get(groupNotificationScheduler.get).send(SseEmitter.event()
+//                    .name("sendInstantAlarm")
+//                    .data(message));
+//        } catch (IOException e) {
+//            emitterRepository.deleteByEmail(email);
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+    public void sendGroupNotification(String memberEmail,
+                                      GroupNotification groupNotification){
         try {
-            emitterRepository.get(email).send(SseEmitter.event()
-                    .name("sendInstantAlarm")
-                    .data(message));
-        } catch (IOException e) {
-            emitterRepository.deleteByEmail(email);
+            emitterRepository.get(memberEmail)
+                    .send(SseEmitter.event()
+                            .name("sendToParticipant")
+                            .data(groupNotification)
+                    );
+        } catch (IOException e){
             throw new RuntimeException(e);
         }
     }

@@ -8,9 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Getter
@@ -36,11 +34,11 @@ public class Event extends BaseTimeEntity {
 
 //    시작일자
     @Column(nullable = false)
-    private LocalDateTime startDate;
+    private LocalDateTime startDateTime;
 
 //    종료일자
     @Column(nullable = false)
-    private LocalDateTime endDate;
+    private LocalDateTime endDateTime;
 
 //    장소
     @Column
@@ -70,8 +68,8 @@ public class Event extends BaseTimeEntity {
     @Builder
     public Event(String title, 
                  String memo, 
-                 LocalDateTime startDate, 
-                 LocalDateTime endDate, 
+                 LocalDateTime startDateTime,
+                 LocalDateTime endDateTime,
                  String place, 
                  Matrix matrix, 
                  String fileUrl, 
@@ -80,8 +78,8 @@ public class Event extends BaseTimeEntity {
                  String alarmYn) {
         this.title = title;
         this.memo = memo;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;
@@ -98,8 +96,8 @@ public class Event extends BaseTimeEntity {
 
         this.title = title;
         this.memo = memo;
-        this.startDate = LocalStart;
-        this.endDate = LocalEnd;
+        this.startDateTime = LocalStart;
+        this.endDateTime = LocalEnd;
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;

@@ -9,11 +9,7 @@ import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
 import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.dto.response.ListGroupResponse;
 import com.team1.moim.domain.group.entity.Group;
-import com.team1.moim.domain.group.entity.GroupAlarm;
-import com.team1.moim.domain.group.entity.GroupAlarmTimeType;
-import com.team1.moim.domain.group.entity.GroupAlarmType;
 import com.team1.moim.domain.group.entity.GroupInfo;
-import com.team1.moim.domain.group.exception.GroupInfoNotFoundException;
 import com.team1.moim.domain.group.exception.GroupNotFoundException;
 import com.team1.moim.domain.group.exception.ParticipantRequiredException;
 import com.team1.moim.domain.group.repository.GroupAlarmRepository;
@@ -23,25 +19,20 @@ import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
-import com.team1.moim.global.config.sse.dto.GroupNotificationResponse;
+import com.team1.moim.global.config.sse.dto.GroupNotification;
 import com.team1.moim.global.config.sse.service.SseService;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -68,6 +59,7 @@ public class GroupService {
         if (groupInfoRequests == null || groupInfoRequests.isEmpty()) {
             throw new ParticipantRequiredException();
         }
+
         Group newGroup = groupRequest.toEntity(host, groupInfoRequests);
         for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
             log.info("참여자 존재여부 확인");
@@ -92,40 +84,37 @@ public class GroupService {
         String groupTitle = newGroup.getTitle();
         String message = String.format("%s님이 \"%s\" 모임에 초대했습니다. 참여하시겠습니까?", hostname, groupTitle);
         log.info("메시지 내용 확인: " + message);
-        for (GroupInfoRequest groupInfoRequest : groupInfoRequests) {
-            String participantEmail = groupInfoRequest.getMemberEmail();
+
+        List<GroupInfo> groupInfos = groupInfoRepository.findByGroup(newGroup);
+        for (GroupInfo groupInfo : groupInfos) {
+            String participantEmail = groupInfo.getMember().getEmail();
             log.info("참여자 이메일 주소: " + participantEmail);
-            sseService.sendInstantAlarm(participantEmail, message);
+            sseService.sendGroupNotification(participantEmail,
+                    GroupNotification.from(groupInfo, message));
         }
 
         // Deadline 임박에 대한 알림 추가(여러 개의 알림 등록 가능)
-        if (groupCreateAlarmRequests != null) {
-            for (GroupCreateAlarmRequest groupCreateAlarmRequest : groupCreateAlarmRequests) {
-                GroupAlarmTimeType groupAlarmTimeType;
-                if (groupCreateAlarmRequest.getAlarmTimeType().equals("MIN")) {
-                    groupAlarmTimeType = GroupAlarmTimeType.MIN;
-                } else if (groupCreateAlarmRequest.getAlarmTimeType().equals("HOUR")) {
-                    groupAlarmTimeType = GroupAlarmTimeType.HOUR;
-                } else {
-                    groupAlarmTimeType = GroupAlarmTimeType.DAY;
-                }
-
-                GroupAlarm groupAlarm = GroupCreateAlarmRequest.toEntity(
-                        newGroup,
-                        groupCreateAlarmRequest.getDeadlineAlarm(),
-                        groupAlarmTimeType,
-                        GroupAlarmType.MOIM_DEADLINE);
-                groupAlarmRepository.save(groupAlarm);
-            }
-        }
+//        if (groupCreateAlarmRequests != null) {
+//            for (GroupCreateAlarmRequest groupCreateAlarmRequest : groupCreateAlarmRequests) {
+//                GroupAlarmTimeType groupAlarmTimeType;
+//                if (groupCreateAlarmRequest.getAlarmTimeType().equals("MIN")) {
+//                    groupAlarmTimeType = GroupAlarmTimeType.MIN;
+//                } else if (groupCreateAlarmRequest.getAlarmTimeType().equals("HOUR")) {
+//                    groupAlarmTimeType = GroupAlarmTimeType.HOUR;
+//                } else {
+//                    groupAlarmTimeType = GroupAlarmTimeType.DAY;
+//                }
+//
+//                GroupAlarm groupAlarm = GroupCreateAlarmRequest.toEntity(
+//                        newGroup,
+//                        groupCreateAlarmRequest.getDeadlineAlarm(),
+//                        groupAlarmTimeType,
+//                        GroupAlarmType.MOIM_DEADLINE);
+//                groupAlarmRepository.save(groupAlarm);
+//            }
+//        }
 
         return GroupDetailResponse.from(newGroup);
-    }
-
-    // 호스트 이메일
-    private Member getHostByEmail() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
     }
 
     // 모임 삭제
@@ -133,8 +122,7 @@ public class GroupService {
     public void delete(Long id) {
         Group group = groupRepository.findById(id).orElseThrow(GroupNotFoundException::new);
         group.delete();
-        for (GroupInfo groupInfo : groupInfoRepository.findByGroup(group)
-                .orElseThrow(GroupInfoNotFoundException::new)) {
+        for (GroupInfo groupInfo : groupInfoRepository.findByGroup(group)) {
             groupInfo.delete();
         }
     }
@@ -201,50 +189,9 @@ public class GroupService {
         return groups;
     }
 
-    // 그룹 알림 전송 스케줄러
-    // 모임 참여 결정에 대한 마감 시간 알림을 제공한다.
-    @Transactional
-    @Scheduled(cron = "0 0/1 * * * *")
-    public void scheduleGroupAlarm() {
-        // 삭제되지 않은 그룹을 검색
-        List<Group> groups = groupRepository.findByIsDeleted("N");
-        for (Group group : groups) {
-            // 모임 알림 중에서 스케줄러가 필요한 알림은 데드라인 마감 알림 밖에 없다.
-            // 그 중에서 아직 알림을 보내지 않은 것을 선택한다.
-            List<GroupAlarm> groupAlarms = groupAlarmRepository
-                    .findByGroupAlarmTypeAndSendYn(GroupAlarmType.MOIM_DEADLINE, "N");
-
-            for (GroupAlarm groupAlarm : groupAlarms) {
-
-                // 알림을 Day 타입으로 한 경우
-                if (groupAlarm.getGroupAlarmTimeType() == GroupAlarmTimeType.DAY
-                        && groupAlarm.getGroup().getVoteDeadline().minusDays(groupAlarm.getDeadlineAlarm()).isBefore(LocalDateTime.now())) {
-                    sendAlarmForParticipants(groupAlarm);
-                }
-
-                // 알림을 시간(H) 타입으로 한 경우
-                else if (groupAlarm.getGroupAlarmTimeType() == GroupAlarmTimeType.HOUR
-                        && group.getVoteDeadline().minusHours(groupAlarm.getDeadlineAlarm()).isBefore(LocalDateTime.now())) {
-                    sendAlarmForParticipants(groupAlarm);
-                }
-
-                // 알림을 분(M) 타입으로 한 경우
-                else if (groupAlarm.getGroupAlarmTimeType() == GroupAlarmTimeType.MIN
-                        && group.getVoteDeadline().minusMinutes(groupAlarm.getDeadlineAlarm()).isBefore(LocalDateTime.now())) {
-                    sendAlarmForParticipants(groupAlarm);
-                }
-            }
-        }
-
-    }
-
-    private void sendAlarmForParticipants(GroupAlarm groupAlarm) {
-        // 알림은 아직 참여 또는 거절을 선택하지 않은 상태이고, 존재하는 유저한테만 보내야 한다.
-        List<GroupInfo> participants = groupInfoRepository.findByGroupAndIsAgreedAndIsDeleted(
-                groupAlarm.getGroup(), "P", "N");
-        for (GroupInfo participant : participants) {
-            sseService.sendGroupAlarm(participant.getMember().getEmail(), GroupNotificationResponse.from(groupAlarm));
-        }
-        groupAlarm.sendCheck("Y");
+    // 호스트 이메일
+    private Member getHostByEmail() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
     }
 }

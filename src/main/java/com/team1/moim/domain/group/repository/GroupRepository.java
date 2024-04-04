@@ -22,4 +22,5 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Page<Group> findAll(Specification<Group> spec, Pageable pageable);
 
     List<Group> findByIsDeleted(String isDeleted);
+    List<Group> findByIsConfirmedAndIsDeleted(String isConfirmed, String isDeleted);
 }

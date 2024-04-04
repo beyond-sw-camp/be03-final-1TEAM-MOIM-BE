@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ public class EventController {
     }
 
     // 일정 등록
-//    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
                                                                     @Valid EventRequest request,
@@ -51,9 +52,8 @@ public class EventController {
                         eventService.create(request, toDoListRequests, repeatValue, alarmRequest)));
     }
 
-
     // 일정 수정
-//    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/{eventId}")
     public ResponseEntity<ApiSuccessResponse<EventResponse>> update(HttpServletRequest servRequest,
                                                                     @PathVariable(name = "eventId") Long eventId,
@@ -66,9 +66,8 @@ public class EventController {
                         eventService.update(eventId, request)));
     }
 
-
     // 일정 삭제
-//    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/{eventId}")
     public ResponseEntity<ApiSuccessResponse<String>> delete(HttpServletRequest servRequest,
                                                              @PathVariable(name = "eventId") Long eventId) {
@@ -80,7 +79,8 @@ public class EventController {
                         ("삭제되었습니다.")));
     }
 
-    //   반복일정의 삭제
+//   반복일정의 삭제
+    @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/repeat/{eventId}")
     public ResponseEntity<ApiSuccessResponse<String>> deleteRepeat(HttpServletRequest servRequest,
                                                                    @PathVariable(name = "eventId") Long eventId,
