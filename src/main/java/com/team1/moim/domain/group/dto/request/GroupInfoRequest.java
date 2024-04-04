@@ -14,4 +14,5 @@ public class GroupInfoRequest {
                 .member(member)
                 .build();
     }
+
 }
