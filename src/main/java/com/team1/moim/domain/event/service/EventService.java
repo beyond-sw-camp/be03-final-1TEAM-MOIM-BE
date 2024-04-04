@@ -308,7 +308,7 @@ public class EventService {
         for(Event event : events) {
             // 과거 일정은 알림 X
             if(event.getStartDate().isBefore(LocalDateTime.now())) continue;
-            // 이미 전송한 알림 재전송 X
+            // 이미 전송한 알림 X
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {
