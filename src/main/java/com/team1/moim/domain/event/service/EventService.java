@@ -308,6 +308,7 @@ public class EventService {
     @Transactional
     @Scheduled(cron = "0 0/1 * * * *") // 매분마다 실행
     public void eventSchedule() {
+        // 삭제되지 않고, 알림 설정한 일정LiST
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
         for(Event event : events) {
             if(event.getStartDateTime().isBefore(LocalDateTime.now())) continue;

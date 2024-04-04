@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GroupInfoRepository extends JpaRepository<GroupInfo, Long> {
-    Optional<List<GroupInfo>> findByGroup(Group group);
-    List<GroupInfo> findByGroupAndIsAgreedAndIsDeleted(Group group, String isAgreed, String isDeleted);
+    List<GroupInfo> findByGroup(Group group);
+    List<GroupInfo> findByGroupAndIsAgreed(Group group, String isAgreed);
 }
