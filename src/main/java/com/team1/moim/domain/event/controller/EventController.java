@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequestMapping("/api/events")
-
 public class EventController {
 
     private final EventService eventService;
@@ -97,7 +96,6 @@ public class EventController {
 
 
     @PostMapping("/getHoliday")
-    @ResponseBody
     public ResponseEntity<ArrayList<HashMap<String, Object>>> holidayInfoApi(String year, String month) {
 
         log.info("year = " + year);
