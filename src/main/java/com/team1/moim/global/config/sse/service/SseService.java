@@ -16,6 +16,7 @@ import java.io.IOException;
 public class SseService {
 
     private static final Long TIMEOUT = 60 * 60 * 1000L; // 1시간
+
     private final EmitterRepository emitterRepository;
 
     @Autowired
@@ -55,7 +56,6 @@ public class SseService {
                     .name("sendEventAlarm")
                     .data(notificationResponse));
         } catch (IOException e) {
-//            emitterRepository.deleteById(emitterId);
             throw new RuntimeException(e);
         }
     }
