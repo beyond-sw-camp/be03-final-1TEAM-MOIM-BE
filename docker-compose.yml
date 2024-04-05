@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  # 이메일 인증
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+  moim-be:
+    image: moim-be
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis

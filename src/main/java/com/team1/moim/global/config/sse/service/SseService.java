@@ -24,11 +24,9 @@ public class SseService {
     }
 
     public SseEmitter add(String email) throws ServiceUnavailableException {
-        /**
-         Emitter는 발신기라는 뜻
-         SSE 연결을 위해서 유효 시간이 담긴 SseEmitter 객체를 만들어 반환해야 한다.
-         */
-        SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료시간 설정
+
+        //  SSE 연결을 위해서 만료 시간이 담긴 SseEmitter 객체를 만들어 반환해야 함
+        SseEmitter emitter = new SseEmitter(TIMEOUT); // 만료 시간 설정
         // 현재 저장된 emitter의 수를 조회하여 자동 삭제를 확인
 //        log.info("emitter size: " + emitterRepository.getEmitterSize());
         emitterRepository.save(email,emitter);
