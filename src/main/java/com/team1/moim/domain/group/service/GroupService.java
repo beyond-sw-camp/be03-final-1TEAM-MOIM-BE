@@ -10,8 +10,11 @@ import com.team1.moim.domain.group.dto.response.FindConfirmedGroupResponse;
 import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
 import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.dto.response.ListGroupResponse;
-import com.team1.moim.domain.group.entity.*;
-import com.team1.moim.domain.group.exception.*;
+import com.team1.moim.domain.group.entity.Group;
+import com.team1.moim.domain.group.entity.GroupInfo;
+import com.team1.moim.domain.group.exception.GroupNotFoundException;
+import com.team1.moim.domain.group.exception.HostIncludedException;
+import com.team1.moim.domain.group.exception.ParticipantRequiredException;
 import com.team1.moim.domain.group.repository.GroupAlarmRepository;
 import com.team1.moim.domain.group.repository.GroupInfoRepository;
 import com.team1.moim.domain.group.repository.GroupRepository;
@@ -23,7 +26,14 @@ import com.team1.moim.domain.group.dto.response.VoteResponse;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.config.sse.dto.GroupNotification;
 import com.team1.moim.global.config.sse.service.SseService;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -32,11 +42,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +72,13 @@ public class GroupService {
         // 참여자 정보
         if (groupInfoRequests == null || groupInfoRequests.isEmpty()) {
             throw new ParticipantRequiredException();
+        }
+
+        // 참여자 리스트에 호스트가 포함되어 있는지 검사
+        for (GroupInfoRequest request : groupInfoRequests) {
+            if (request.getMemberEmail().equals(host.getEmail())) {
+                throw new HostIncludedException();
+            }
         }
 
         Group newGroup = groupRequest.toEntity(host, groupInfoRequests);
