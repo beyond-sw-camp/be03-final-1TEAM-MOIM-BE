@@ -47,22 +47,22 @@
 <br>
 
 ## 📝 요구 사항 정의서
-![스크린샷 2024-03-20 112313](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/9e2640bf-e4fc-4898-97f8-affe643ea9d0)
-
-[요구사항 정의서 바로가기](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=0&single=true)
+[![Requirements](assets/images/requirements.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=0&single=true)
 
 <br>
 
 ## ⚙️ ERD 
-![Moim(모임)](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/30846904-0adf-4ead-be19-291e777a92f1)
+[![ERD](assets/images/erd.png)](https://www.erdcloud.com/d/3trf7ooZs6XS8PXTT)
 
 <br>
 
 ## 📝 화면 설계서
+[![Display](assets/images/display_architecture.png)](https://docs.google.com/presentation/d/e/2PACX-1vSx7kP_4zspTFpOuVhswRohKHU05I9Q4N4udH1Z0g22o24sg_w1F-Oq-9-aDzbzvA/pub?start=false&loop=false&delayms=3000)
 
-[모임(MOIM)-화면설계서.pdf](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/files/14720138/MOIM.-.pdf)
+<br>
 
-[화면 설계서 링크](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/blob/main/docs/%EB%AA%A8%EC%9E%84(MOIM)-%ED%99%94%EB%A9%B4%EC%84%A4%EA%B3%84%EC%84%9C.pdf)
+## 🗓️ WBS
+[![WBS](assets/images/wbs.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=1560823417&single=true)
 
 <br>
 
@@ -113,10 +113,7 @@
 
 <br>
 
-## 🗓️ WBS
-![스크린샷 2024-03-20 112909](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/480031b5-b299-478a-9496-92b03e669301)
 
-[WBS 바로가기](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=1560823417&single=true)
 
 <br>
 
@@ -144,5 +141,3 @@
 여기에 아키텍쳐 이미지 삽입
 
 <br>
-
-
