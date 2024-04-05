@@ -305,31 +305,36 @@ public class EventService {
     }
 
     // 알림 전송 스케줄러
-    @Transactional
     @Scheduled(cron = "0 0/1 * * * *") // 매분마다 실행
+    @Transactional
     public void eventSchedule() {
         // 삭제되지 않고, 알림 설정한 일정LiST
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
         for(Event event : events) {
+            // 과거 일정은 알림 X
             if(event.getStartDateTime().isBefore(LocalDateTime.now())) continue;
+            // 이미 전송한 알림 X
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {
                     if(event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
-                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        sseService.sendEventAlarm(member.getEmail(),
+                                NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");
                     }
-                } else if (alarm.getAlarmtype() == AlarmType.H) {
-                    if (event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                }if(alarm.getAlarmtype() == AlarmType.H) {
+                    if(event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
-                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        sseService.sendEventAlarm(member.getEmail(),
+                                NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");
                     }
-                } else if (alarm.getAlarmtype() == AlarmType.M) {
-                    if (event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                }if(alarm.getAlarmtype() == AlarmType.M) {
+                    if(event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
-                        sseService.sendEventAlarm(member.getEmail(), NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                        sseService.sendEventAlarm(member.getEmail(),
+                                NotificationResponse.from(alarm, member, LocalDateTime.now()));
                         alarm.sendCheck("Y");
                     }
                 }
