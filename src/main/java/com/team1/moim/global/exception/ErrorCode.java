@@ -18,6 +18,7 @@ public enum ErrorCode {
     PARTICIPANT_REQUIRED(HttpStatus.BAD_REQUEST, "모임 참여자를 1명 이상 등록해야 합니다."),
     PARTICIPANT_INFO_NOT_MATCH(HttpStatus.BAD_REQUEST, "모임 참여자 정보가 일치하지 않습니다."),
     ALREADY_VOTED(HttpStatus.BAD_REQUEST, "이미 투표하였습니다."),
+    GROUP_AND_GROUP_INFO_NOT_MATCH(HttpStatus.BAD_REQUEST, "모임과 모임 정보가 서로 관련이 없습니다."),
     HOST_INCLUDED(HttpStatus.BAD_REQUEST, "호스트는 모임 참여자에 추가할 수 없습니다."),
 
     // Member
