@@ -79,27 +79,27 @@
 
 <br>
 
-## 📝 요구 사항 정의서
+## 📝 요구 사항 정의서(화면 클릭 시 이동)
 [![Requirements](assets/images/requirements.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=0&single=true)
 
 <br>
 
-## ⚙️ ERD 
+## ⚙️ ERD(화면 클릭 시 이동) 
 [![ERD](assets/images/erd.png)](https://www.erdcloud.com/d/3trf7ooZs6XS8PXTT)
 
 <br>
 
-## 📝 화면 설계서
+## 📝 화면 설계서(화면 클릭 시 이동)
 [![Display](assets/images/display_architecture.png)](https://docs.google.com/presentation/d/e/2PACX-1vSx7kP_4zspTFpOuVhswRohKHU05I9Q4N4udH1Z0g22o24sg_w1F-Oq-9-aDzbzvA/pub?start=false&loop=false&delayms=3000)
 
 <br>
 
-## 🗓️ WBS
+## 🗓️ WBS(화면 클릭 시 이동)
 [![WBS](assets/images/wbs.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=1560823417&single=true)
 
 <br>
 
-## 📝 프로그램 사양서
+## 📝 프로그램 사양서(화면 클릭 시 이동)
 [![APIs](assets/images/api_details.png)](https://interesting-potential-90c.notion.site/9508b92f24254958b3b9f791d6583e3b?v=6fa037217d9b456cb709748c53281d5a&pvs=4)
 
 <br>
@@ -113,7 +113,7 @@
 
 <br>
 
-## 📝 단위 테스트 결과서
+## 📝 단위 테스트 결과서(화면 클릭 시 이동)
 [링크 클릭](assets/test)
 
 <br>
