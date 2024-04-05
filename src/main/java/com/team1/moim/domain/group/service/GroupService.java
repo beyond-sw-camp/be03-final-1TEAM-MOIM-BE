@@ -11,10 +11,10 @@ import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
 import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.dto.response.ListGroupResponse;
 import com.team1.moim.domain.group.entity.Group;
+import com.team1.moim.domain.group.entity.GroupAlarm;
+import com.team1.moim.domain.group.entity.GroupAlarmTimeType;
 import com.team1.moim.domain.group.entity.GroupInfo;
-import com.team1.moim.domain.group.exception.GroupNotFoundException;
-import com.team1.moim.domain.group.exception.HostIncludedException;
-import com.team1.moim.domain.group.exception.ParticipantRequiredException;
+import com.team1.moim.domain.group.exception.*;
 import com.team1.moim.domain.group.repository.GroupAlarmRepository;
 import com.team1.moim.domain.group.repository.GroupInfoRepository;
 import com.team1.moim.domain.group.repository.GroupRepository;
@@ -31,8 +31,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
