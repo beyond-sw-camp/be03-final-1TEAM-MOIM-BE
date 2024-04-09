@@ -140,18 +140,34 @@ public class EventController {
         return new ResponseEntity<>(responseHolidayArr, HttpStatus.OK);
     }
 
+//    월별 조회
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{year}/{month}")
+    @GetMapping("/monthly/{year}/{month}")
     public ResponseEntity<ApiSuccessResponse<List<EventResponse>>> getMonthly(HttpServletRequest httpServletRequest,
                                                                               @PathVariable("year") int year,
                                                                               @PathVariable("month") int month) {
-        log.info("월별조회 시작");
+        log.info("월별 조회 시작");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
                         eventService.getMonthly(year, month)));
+    }
+
+//    주별 조회
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/weekly/{year}/{week}")
+    public ResponseEntity<ApiSuccessResponse<List<EventResponse>>> getWeekly(HttpServletRequest httpServletRequest,
+                                                                              @PathVariable("year") int year,
+                                                                              @PathVariable("week") int week) {
+        log.info("주별 조회 시작");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        eventService.getWeekly(year, week)));
     }
 
 

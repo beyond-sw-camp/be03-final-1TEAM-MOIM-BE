@@ -380,4 +380,20 @@ public class EventService {
 
         return eventResponses;
     }
+
+    public List<EventResponse> getWeekly(int year, int week) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 조회");
+        List<Event> events = eventRepository.findByMemberAndYearAndWeek(member, year, week);
+        if(events.isEmpty()) throw new EventNotFoundException();
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for(Event event : events) {
+            log.info(event.getTitle());
+            EventResponse eventResponse = EventResponse.from(event);
+            eventResponses.add(eventResponse);
+        }
+
+        return eventResponses;
+    }
 }
