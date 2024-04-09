@@ -12,6 +12,11 @@ public enum ErrorCode {
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     LOGIN_FAILED(HttpStatus.BAD_REQUEST, "로그인에 실패했습니다. 이메일 또는 비밀번호를 확인해주세요."),
 
+    // Auth
+    NOT_FOUND_CODE(HttpStatus.BAD_REQUEST, "발송한 인증코드가 없습니다."),
+    CODE_NOT_MATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
+
+
     // Group
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 모임입니다."),
     GROUP_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 모임 게스트입니다."),
