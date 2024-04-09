@@ -59,14 +59,24 @@ public class SseService {
     public void sendEventAlarm(String email, NotificationResponse notificationResponse) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            emitterRepository.get(email).send(SseEmitter.event()
-                    .name("sendEventAlarm")
-                    .data(notificationResponse));
+            SseEmitter emitter = emitterRepository.get(email);
+            if(emitter != null) {
+                emitter.send(SseEmitter.event()
+                        .name("sendEventAlarm")
+                        .data(notificationResponse));
+            }else {
+                log.error(email + " SseEmitter가 존재하지 않음");
+            }
             // redis 저장
             redisService.setList(email, objectMapper.writeValueAsString(notificationResponse));
             log.info("json변환 : " + objectMapper.writeValueAsString(notificationResponse));
-        } catch (IOException e) {
-            redisService.setList(email, objectMapper.writeValueAsString(notificationResponse));
+        } catch (Exception e) {
+            log.error("알림 전송 중 에러");
+            try {
+                redisService.setList(email, objectMapper.writeValueAsString(notificationResponse));
+            } catch (JsonProcessingException ex) {
+                log.error("json 처리 에러");
+            }
         }
     }
 

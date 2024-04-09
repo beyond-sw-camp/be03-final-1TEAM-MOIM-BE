@@ -1,5 +1,6 @@
 package com.team1.moim.global.config.redis;
 
+import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +60,13 @@ public class RedisService {
         }
         return (String) values.get(key);
     }
+
+    public List<NotificationResponse> getList(String key){
+        ValueOperations<String, Object> values = redisTemplate.opsForValue();
+        return (String) redisTemplate.opsForValue().get(key);
+    }
+
+
 
     public void deleteValues(String key) {
         redisTemplate.delete(key);
