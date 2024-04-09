@@ -71,6 +71,16 @@ public class RedisService {
         return notificationResponses;
     }
 
+    public void saveList(String key, List<NotificationResponse> notificationResponses) {
+        ListOperations<String, Object> listOperations = redisTemplate1.opsForList();
+        // 기존 리스트 삭제
+        redisTemplate1.delete(key);
+        // 변경된 리스트 추가\
+        for (NotificationResponse notificationResponse : notificationResponses) {
+            listOperations.leftPush(key, notificationResponse);
+        }
+    }
+
     public void deleteValues(String key) {
         redisTemplate.delete(key);
     }

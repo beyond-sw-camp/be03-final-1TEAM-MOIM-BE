@@ -275,7 +275,20 @@ public class NotificationService {
     public List<NotificationResponse> getAlarms(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         String key = member.getEmail();
-        List<NotificationResponse> alarms = redisService.getList(key);
+        List<NotificationResponse> alarms= redisService.getList(key);
         return alarms;
+    }
+
+    public String readAlarm(Long memberId, Long alarmId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "회원");
+        String key = member.getEmail();
+        List<NotificationResponse> alarms= redisService.getList(key);
+        alarms.stream()
+                .filter(notification -> Objects.equals(notification.getAlarmId(), alarmId))
+                .findFirst()
+                .ifPresent(notification -> notification.read("Y"));
+        redisService.saveList(key, alarms);
+        return alarms.toString();
     }
 }

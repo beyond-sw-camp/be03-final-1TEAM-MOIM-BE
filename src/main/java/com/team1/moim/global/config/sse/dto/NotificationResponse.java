@@ -42,4 +42,10 @@ public class NotificationResponse {
                 .sendTime(sendTime.toString())
                 .build();
     }
+
+    public void read(String readYn) {
+        this.readYn = readYn;
+    }
+
+
 }
