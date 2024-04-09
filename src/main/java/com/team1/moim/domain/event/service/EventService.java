@@ -369,7 +369,7 @@ public class EventService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         log.info(member.getNickname() + "님 일정 조회");
-        List<Event> events = eventRepository.findByMemberAndYearAndMonty(member, year, month);
+        List<Event> events = eventRepository.findByMemberAndYearAndMonth(member, year, month);
         if(events.isEmpty()) throw new EventNotFoundException();
         List<EventResponse> eventResponses = new ArrayList<>();
         for(Event event : events) {
@@ -386,6 +386,22 @@ public class EventService {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         log.info(member.getNickname() + "님 일정 조회");
         List<Event> events = eventRepository.findByMemberAndYearAndWeek(member, year, week);
+        if(events.isEmpty()) throw new EventNotFoundException();
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for(Event event : events) {
+            log.info(event.getTitle());
+            EventResponse eventResponse = EventResponse.from(event);
+            eventResponses.add(eventResponse);
+        }
+
+        return eventResponses;
+    }
+
+    public List<EventResponse> getDaily(int year, int month, int day) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 조회");
+        List<Event> events = eventRepository.findByMemberAndYearAndMonthAndDay(member, year, month, day);
         if(events.isEmpty()) throw new EventNotFoundException();
         List<EventResponse> eventResponses = new ArrayList<>();
         for(Event event : events) {

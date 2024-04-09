@@ -170,5 +170,21 @@ public class EventController {
                         eventService.getWeekly(year, week)));
     }
 
+//    일별 조회
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/daily/{year}/{month}/{day}")
+    public ResponseEntity<ApiSuccessResponse<List<EventResponse>>> getDaily(HttpServletRequest httpServletRequest,
+                                                                             @PathVariable("year") int year,
+                                                                             @PathVariable("month") int month,
+                                                                             @PathVariable("day") int day) {
+        log.info("주별 조회 시작");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        eventService.getDaily(year, month, day)));
+    }
+
 
 }
