@@ -1,12 +1,8 @@
 package com.team1.moim.domain.auth.controller;
 
-import com.team1.moim.domain.auth.dto.request.LoginRequest;
-import com.team1.moim.domain.auth.dto.response.LoginResponse;
-import com.team1.moim.domain.auth.dto.response.EmailResponse;
-import com.team1.moim.domain.auth.service.AuthService;
 import com.team1.moim.domain.auth.dto.request.SignUpRequest;
+import com.team1.moim.domain.auth.service.AuthService;
 import com.team1.moim.domain.member.dto.response.MemberResponse;
-import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -17,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,12 +24,10 @@ import java.security.NoSuchAlgorithmException;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
-    private final RedisService redisService;
 
     @Autowired
-    public AuthController(AuthService authService, RedisService redisService){
+    public AuthController(AuthService authService){
         this.authService = authService;
-        this.redisService = redisService;
     }
 
     @PostMapping("/sign-up")
@@ -51,14 +44,12 @@ public class AuthController {
                 ));
     }
   
-    @PostMapping("/send-email")
-    public ResponseEntity<ApiSuccessResponse<EmailResponse>> send(HttpServletRequest request,
+    @PostMapping("/send")
+    public ResponseEntity<ApiSuccessResponse<String>> send(HttpServletRequest request,
                                                                   @RequestParam("email") String email) throws NoSuchAlgorithmException {
-        String sentAuthCode;
+        log.info("이메일 전송 api 시작");
         try {
-            String createdCode = authService.generateRandomNumber();
-            log.info("이메일 전송 api 시작");
-            sentAuthCode = authService.sendEmailCode(email, createdCode);
+            authService.sendEmailCode(email);
         } catch (MailException e){
             throw new MailSendException("이메일 인증코드 전송에 실패했습니다.");
         }
@@ -68,7 +59,7 @@ public class AuthController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         request.getServletPath(),
-                        EmailResponse.from(email, sentAuthCode)
+                        "해당 이메일로 인증 코드가 발송되었습니다."
                 ));
     }
 
@@ -76,28 +67,43 @@ public class AuthController {
     public ResponseEntity<ApiSuccessResponse<String>> verify(HttpServletRequest request,
                                                            @RequestParam("email") String email,
                                                            @RequestParam("authCode") String authCode){
-        String resultMessage;
-        String authValue = redisService.getValues(email);
-        boolean isAuthCheck = redisService.checkExistsValue(authValue);
-        boolean isAuthEqual = authCode.equals(authValue);
-
-        if (isAuthCheck){
-            if (isAuthEqual){
-                resultMessage = "이메일 인증이 완료되었습니다.";
-                redisService.deleteValues(email);
-            } else {
-                resultMessage = "인증번호가 맞지 않습니다. 다시 확인해주세요";
-            }
-        } else {
-            resultMessage = "이메일 인증시간이 만료되었습니다.";
-        }
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         request.getServletPath(),
-                        resultMessage
+                        authService.verify(email, authCode)
+                ));
+    }
+
+    // 이메일 중복 검증
+    @PostMapping("/email-validate")
+    public ResponseEntity<ApiSuccessResponse<String>> validateEmail(HttpServletRequest request,
+                                                                  @RequestParam("email") String email){
+        authService.validateEmail(email);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        request.getServletPath(),
+                        "사용 가능한 이메일입니다."
+                ));
+    }
+
+    // 닉네임 중복 검증
+    @PostMapping("/nickname-validate")
+    public ResponseEntity<ApiSuccessResponse<String>> validateNickname(HttpServletRequest request,
+                                                                    @RequestParam("nickname") String nickname){
+        authService.validateNickname(nickname);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        request.getServletPath(),
+                        "사용 가능한 닉네임입니다."
                 ));
     }
 }

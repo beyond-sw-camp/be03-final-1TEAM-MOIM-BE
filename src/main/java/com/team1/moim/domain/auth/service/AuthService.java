@@ -1,14 +1,16 @@
 package com.team1.moim.domain.auth.service;
 
 import com.team1.moim.domain.auth.dto.request.SignUpRequest;
+import com.team1.moim.domain.auth.exception.CodeNotMatchException;
+import com.team1.moim.domain.auth.exception.NotFoundCodeException;
 import com.team1.moim.domain.member.dto.response.MemberResponse;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.entity.Role;
-import com.team1.moim.domain.member.exception.*;
+import com.team1.moim.domain.member.exception.EmailDuplicationException;
+import com.team1.moim.domain.member.exception.NicknameDuplicateException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.s3.S3Service;
-import com.team1.moim.global.config.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.mail.MailProperties;
@@ -32,7 +34,6 @@ public class AuthService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtProvider;
     private final S3Service s3Service;
     private final JavaMailSender javaMailSender;
     private final MailProperties mailProperties;
@@ -47,7 +48,7 @@ public class AuthService {
         if (memberRepository.findByEmail(request.getEmail()).isPresent()){
             throw new EmailDuplicationException();
         }
-        String imageUrl = null;
+        String imageUrl;
         if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()){
             imageUrl = s3Service.uploadFile(FILE_TYPE, request.getProfileImage());
         } else {
@@ -58,27 +59,54 @@ public class AuthService {
         return MemberResponse.from(memberRepository.save(newMember));
     }
 
-    public void sendEmail(String from, String to, String title, String contents){
+    public void validateEmail(String email) {
+        if (memberRepository.findByEmail(email).isPresent()){
+            throw new EmailDuplicationException();
+        }
+    }
+
+    public void validateNickname(String nickname) {
+        if (memberRepository.findByNickname(nickname).isPresent()){
+            throw new NicknameDuplicateException();
+        }
+    }
+
+    @Async
+    public void sendEmailCode(String email) throws NoSuchAlgorithmException {
+        String createdCode = generateRandomNumber();
+        Duration duration = Duration.ofMinutes(3);
+        redisService.setValues(email, createdCode, duration);
+
         SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom(from);
-        mailMessage.setTo(to);
-        mailMessage.setSubject(title);
-        mailMessage.setText(contents);
+        mailMessage.setFrom(mailProperties.getUsername());
+        mailMessage.setTo(email);
+        mailMessage.setSubject("MOIM에서 발송한 인증번호를 확인해주세요.");
+        mailMessage.setText(createdCode);
 
         javaMailSender.send(mailMessage);
     }
 
+    public String verify(String email, String authCode){
+        String authValue = redisService.getValues(email);
+        boolean isAuthCheck = redisService.checkExistsValue(authValue);
+        boolean isAuthEqual = authCode.equals(authValue);
+        String resultMessage;
 
-    public String sendEmailCode(String email, String authCode) {
-        Duration duration = Duration.ofMinutes(3);
-        redisService.setValues(email, authCode, duration);
+        if (isAuthCheck){
+            if (isAuthEqual){
+                resultMessage = "이메일 인증이 완료되었습니다.";
+                redisService.deleteValues(email);
+            } else {
+                throw new CodeNotMatchException();
+            }
+        } else {
+            throw new NotFoundCodeException();
+        }
 
-        sendEmail(mailProperties.getUsername(), email, "MOIM에서 발송한 인증번호를 확인해주세요.", authCode);
-
-        return authCode;
+        return resultMessage;
     }
 
-    public String generateRandomNumber() throws NoSuchAlgorithmException {
+    private String generateRandomNumber() throws NoSuchAlgorithmException {
         String result;
 
         do {
