@@ -303,6 +303,26 @@ public class EventService {
 
         }
     }
+    
+    public List<EventResponse> matrixEvents(Matrix matrix) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow();
+        List<Event> events = eventRepository.findByMember(member);
+
+        List<EventResponse> matrixEvents = new ArrayList<>();
+        
+        for (Event event : events){
+            if(event.getMatrix().equals(matrix) && 
+                    event.getStartDateTime().isAfter(LocalDateTime.now()) && 
+                    event.getStartDateTime().isBefore(LocalDateTime.now().plusMonths(1))){
+                log.info(event.getTitle());
+                EventResponse eventResponse = EventResponse.from(event);
+                matrixEvents.add(eventResponse);
+            }
+        }
+
+        return matrixEvents;
+    }
 
     // 알림 전송 스케줄러
     @Scheduled(cron = "0 0/1 * * * *") // 매분마다 실행
@@ -341,4 +361,6 @@ public class EventService {
             }
         }
     }
+
+
 }
