@@ -13,6 +13,7 @@ import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.domain.member.entity.Member;
+import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -360,5 +362,19 @@ public class EventService {
                 }
             }
         }
+    }
+
+    public List<EventResponse> getMonthly(int year, int month) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 조회");
+        List<Event> events = eventRepository.findByMemberAndYearAndMonty(member, year, month);
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for(Event event : events) {
+            log.info(event.getTitle());
+            EventResponse eventResponse = EventResponse.from(event);
+            eventResponses.add(eventResponse);
+        }
+        return eventResponses;
     }
 }

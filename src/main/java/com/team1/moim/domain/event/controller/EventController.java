@@ -7,6 +7,7 @@ import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.service.EventService;
 import com.team1.moim.domain.event.service.PublicHoliyDayAPI;
+import com.team1.moim.domain.member.dto.response.MemberResponse;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -137,6 +138,20 @@ public class EventController {
             e.printStackTrace();
         }
         return new ResponseEntity<>(responseHolidayArr, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{year}/{month}")
+    public ResponseEntity<ApiSuccessResponse<List<EventResponse>>> getMonthly(HttpServletRequest httpServletRequest,
+                                                                              @PathVariable("year") int year,
+                                                                              @PathVariable("month") int month) {
+        log.info("월별조회 시작");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        eventService.getMonthly(year, month)));
     }
 
 

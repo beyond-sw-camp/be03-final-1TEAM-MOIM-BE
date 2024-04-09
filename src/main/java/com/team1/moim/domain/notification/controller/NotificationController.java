@@ -38,6 +38,7 @@ public class NotificationController {
     }
 
 //    알림 목록 조회
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{memberId}")
     public ResponseEntity<ApiSuccessResponse<List<NotificationResponse>>> getAlarms(HttpServletRequest httpServletRequest,
                                                                                    @PathVariable("memberId") Long memberId) {
@@ -50,6 +51,7 @@ public class NotificationController {
     }
 
 //    알림 읽음으로 변경
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/{memberId}/{alarmId}")
     public ResponseEntity<ApiSuccessResponse<String>> readAlarm(HttpServletRequest httpServletRequest,
                                                                 @PathVariable(name = "memberId") Long memberId,
