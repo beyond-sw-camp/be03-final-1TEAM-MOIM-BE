@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -22,6 +23,7 @@ public class EventResponse {
     private String deleteYn;
     private Long repeatParent;
     private String alarmYn;
+//    private List<AlarmResponse> alarms;
 
     public static EventResponse from(Event event){
         return EventResponse.builder()

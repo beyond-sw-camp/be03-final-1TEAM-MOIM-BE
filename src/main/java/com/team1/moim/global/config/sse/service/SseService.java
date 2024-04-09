@@ -1,5 +1,8 @@
 package com.team1.moim.global.config.sse.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.sse.dto.GroupNotification;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
@@ -10,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.naming.ServiceUnavailableException;
 import java.io.IOException;
+import java.time.Duration;
 
 @Component
 @Slf4j
@@ -18,10 +22,12 @@ public class SseService {
     private static final Long TIMEOUT = 60 * 60 * 1000L; // 1시간
 
     private final EmitterRepository emitterRepository;
+    private final RedisService redisService;
 
     @Autowired
-    public SseService(EmitterRepository emitterRepository) {
+    public SseService(EmitterRepository emitterRepository, RedisService redisService) {
         this.emitterRepository = emitterRepository;
+        this.redisService = redisService;
     }
 
     public SseEmitter add(String email) throws ServiceUnavailableException {
@@ -50,13 +56,17 @@ public class SseService {
         return emitter;
     }
 
-    public void sendEventAlarm(String email, NotificationResponse notificationResponse) {
+    public void sendEventAlarm(String email, NotificationResponse notificationResponse) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
             emitterRepository.get(email).send(SseEmitter.event()
                     .name("sendEventAlarm")
                     .data(notificationResponse));
+            // redis 저장
+            redisService.setList(email, objectMapper.writeValueAsString(notificationResponse));
+            log.info("json변환 : " + objectMapper.writeValueAsString(notificationResponse));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            redisService.setList(email, objectMapper.writeValueAsString(notificationResponse));
         }
     }
 

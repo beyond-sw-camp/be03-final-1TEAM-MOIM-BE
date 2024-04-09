@@ -1,8 +1,11 @@
 package com.team1.moim.global.config.redis;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -14,11 +17,19 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class RedisService {
 
+
     private final RedisTemplate<String, Object> redisTemplate;
+    @Qualifier("1")
+    private final RedisTemplate<String, Object> redisTemplate1;
+
+    @Autowired
+    public RedisService(RedisTemplate<String, Object> redisTemplate,  @Qualifier("1") RedisTemplate<String, Object> redisTemplate1) {
+        this.redisTemplate = redisTemplate;
+        this.redisTemplate1 = redisTemplate1;
+    }
 
     public void setValues(String key, String data) {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
@@ -30,6 +41,13 @@ public class RedisService {
         log.info("이메일, 인증 코드 redis에 세팅 시작");
         values.set(key, data, duration);
         log.info("redis에 이메일 인증코드 관련 정보 저장");
+    }
+
+    public void setList(String key, String data) {
+        ListOperations<String, Object> alarms = redisTemplate1.opsForList();
+        log.info("List 알림 저장");
+        alarms.leftPush(key, data);
+        log.info("알림 저장 성공");
     }
 
     @Transactional(readOnly = true)

@@ -57,8 +57,7 @@ public class AuthService {
 
         return MemberResponse.from(memberRepository.save(newMember));
     }
-  
-    @Async
+
     public void sendEmail(String from, String to, String title, String contents){
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(from);
@@ -69,7 +68,6 @@ public class AuthService {
         javaMailSender.send(mailMessage);
     }
 
-    @Async
     public String sendEmailCode(String email, String authCode) {
         Duration duration = Duration.ofMinutes(3);
         redisService.setValues(email, authCode, duration);
