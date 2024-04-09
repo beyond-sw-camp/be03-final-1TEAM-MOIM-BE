@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,12 +58,14 @@ public class RedisService {
         return (String) values.get(key);
     }
 
-    public List<NotificationResponse> getList(String key){
-        ValueOperations<String, Object> values = redisTemplate.opsForValue();
-        return (String) redisTemplate.opsForValue().get(key);
+    public List<Object> getList(String key){
+        ListOperations<String, Object> listOperations = redisTemplate1.opsForList();
+        List<Object> alarms = listOperations.range(key, 0, -1);
+        for(Object alarm : alarms) {
+            System.out.println(alarm.toString());
+        }
+        return alarms;
     }
-
-
 
     public void deleteValues(String key) {
         redisTemplate.delete(key);

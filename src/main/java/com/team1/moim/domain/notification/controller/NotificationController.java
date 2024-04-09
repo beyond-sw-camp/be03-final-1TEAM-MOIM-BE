@@ -32,4 +32,6 @@ public class NotificationController {
                         httpServletRequest.getServletPath(),
                         notificationService.vote(groupInfoId, agreeYn)));
     }
+
+    @GetMapping("")
 }
