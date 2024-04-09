@@ -13,7 +13,9 @@ import com.team1.moim.domain.member.exception.GroupInfoNotFoundException;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.notification.dto.response.VoteResponse;
+import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.sse.dto.GroupNotification;
+import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class NotificationService {
     private final MemberRepository memberRepository;
     private final EventRepository eventRepository;
     private final SseService sseService;
+    private final RedisService redisService;
 
     @Transactional
     public VoteResponse vote(Long groupInfoId, String agreeYn){
@@ -267,5 +270,12 @@ public class NotificationService {
         log.info("availableStartTimes = " + availableStartTimes);
 
         return availableStartTimes;
+    }
+
+    public List<NotificationResponse> getAlarms(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        String key = member.getEmail();
+        List<NotificationResponse> alarms = redisService.getList(key);
+        return alarms;
     }
 }

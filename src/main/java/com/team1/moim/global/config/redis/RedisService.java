@@ -1,5 +1,7 @@
 package com.team1.moim.global.config.redis;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,10 +45,10 @@ public class RedisService {
         log.info("redis에 이메일 인증코드 관련 정보 저장");
     }
 
-    public void setList(String key, String data) {
+    public void setList(String key, NotificationResponse notificationResponse) throws JsonProcessingException {
         ListOperations<String, Object> alarms = redisTemplate1.opsForList();
         log.info("List 알림 저장");
-        alarms.leftPush(key, data);
+        alarms.leftPush(key, notificationResponse);
         log.info("알림 저장 성공");
     }
 
@@ -58,13 +61,14 @@ public class RedisService {
         return (String) values.get(key);
     }
 
-    public List<Object> getList(String key){
+    public List<NotificationResponse> getList(String key){
         ListOperations<String, Object> listOperations = redisTemplate1.opsForList();
         List<Object> alarms = listOperations.range(key, 0, -1);
+        List<NotificationResponse> notificationResponses = new ArrayList<>();
         for(Object alarm : alarms) {
-            System.out.println(alarm.toString());
+            notificationResponses.add((NotificationResponse) alarm);
         }
-        return alarms;
+        return notificationResponses;
     }
 
     public void deleteValues(String key) {
