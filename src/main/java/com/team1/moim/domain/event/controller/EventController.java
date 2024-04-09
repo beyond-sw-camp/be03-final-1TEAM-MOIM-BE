@@ -177,13 +177,26 @@ public class EventController {
                                                                              @PathVariable("year") int year,
                                                                              @PathVariable("month") int month,
                                                                              @PathVariable("day") int day) {
-        log.info("주별 조회 시작");
+        log.info("일별 조회 시작");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
                         eventService.getDaily(year, month, day)));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{eventId}")
+    public ResponseEntity<ApiSuccessResponse<EventResponse>> getEvent(HttpServletRequest httpServletRequest,
+                                                                            @PathVariable("eventId") Long eventId) {
+        log.info("상세 조회 시작");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        eventService.getEvent(eventId)));
     }
 
 

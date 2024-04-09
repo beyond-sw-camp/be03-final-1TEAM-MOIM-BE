@@ -15,6 +15,7 @@ import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
+import com.team1.moim.domain.member.exception.MemberNotMatchException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
@@ -411,5 +412,15 @@ public class EventService {
         }
 
         return eventResponses;
+    }
+
+    public EventResponse getEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        if(member != event.getMember()) {
+            throw new MemberNotMatchException();
+        }
+        return EventResponse.from(event);
     }
 }
