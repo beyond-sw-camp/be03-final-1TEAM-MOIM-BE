@@ -8,6 +8,7 @@ import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.AlarmResponse;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.*;
+import com.team1.moim.domain.event.exception.EventNotFoundException;
 import com.team1.moim.domain.event.repository.AlarmRepository;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
@@ -369,12 +370,14 @@ public class EventService {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         log.info(member.getNickname() + "님 일정 조회");
         List<Event> events = eventRepository.findByMemberAndYearAndMonty(member, year, month);
+        if(events.isEmpty()) throw new EventNotFoundException();
         List<EventResponse> eventResponses = new ArrayList<>();
         for(Event event : events) {
             log.info(event.getTitle());
             EventResponse eventResponse = EventResponse.from(event);
             eventResponses.add(eventResponse);
         }
+
         return eventResponses;
     }
 }
