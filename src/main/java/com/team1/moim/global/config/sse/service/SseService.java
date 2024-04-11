@@ -86,15 +86,4 @@ public class SseService {
             throw new RuntimeException(e);
         }
     }
-
-    //    public void sendGroupAlarm(String email, GroupNotificationScheduler notificationResponse) {
-//        try {
-//            emitterRepository.get(email).send(SseEmitter.event()
-//                    .name("sendGroupAlarm")
-//                    .data(notificationResponse));
-//        } catch (IOException e) {
-//            emitterRepository.deleteByEmail(email);
-//            throw new RuntimeException(e);
-//        }
-//    }
 }

@@ -26,14 +26,9 @@ public class GroupAlarm extends BaseTimeEntity {
     private Long id;
 
     // 모임 ID
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "group_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "groups_id")
     private Group group;
-
-    // 알림 종류
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private GroupAlarmType groupAlarmType;
 
     // 알림 시간 타입
     @Column(nullable = false)
@@ -51,11 +46,9 @@ public class GroupAlarm extends BaseTimeEntity {
     @Builder
     public GroupAlarm(
             Group group,
-            GroupAlarmType groupAlarmType,
             GroupAlarmTimeType groupAlarmTimeType,
             int deadlineAlarm) {
         this.group = group;
-        this.groupAlarmType = groupAlarmType;
         this.groupAlarmTimeType = groupAlarmTimeType;
         this.deadlineAlarm = deadlineAlarm;
     }
@@ -63,5 +56,10 @@ public class GroupAlarm extends BaseTimeEntity {
     // 알림 전송 체크
     public void sendCheck(String sendYn) {
         this.sendYn = sendYn;
+    }
+
+    public void attachGroup(Group group){
+        this.group = group;
+        group.getGroupAlarms().add(this);
     }
 }

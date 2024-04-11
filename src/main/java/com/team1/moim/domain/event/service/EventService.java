@@ -17,6 +17,7 @@ import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.exception.MemberNotMatchException;
 import com.team1.moim.domain.member.repository.MemberRepository;
+import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.service.SseService;
@@ -51,6 +52,7 @@ public class EventService {
     private final AlarmRepository alarmRepository;
     private final S3Service s3Service;
     private final SseService sseService;
+    private final RedisService redisService;
 
     public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, List<AlarmRequest> alarmRequests) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -325,6 +327,26 @@ public class EventService {
             }
 
         }
+    }
+    
+    public List<EventResponse> matrixEvents(Matrix matrix) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow();
+        List<Event> events = eventRepository.findByMember(member);
+
+        List<EventResponse> matrixEvents = new ArrayList<>();
+        
+        for (Event event : events){
+            if(event.getMatrix().equals(matrix) && 
+                    event.getStartDateTime().isAfter(LocalDateTime.now()) && 
+                    event.getStartDateTime().isBefore(LocalDateTime.now().plusMonths(1))){
+                log.info(event.getTitle());
+                EventResponse eventResponse = EventResponse.from(event);
+                matrixEvents.add(eventResponse);
+            }
+        }
+
+        return matrixEvents;
     }
 
     // 알림 전송 스케줄러
