@@ -3,6 +3,7 @@ package com.team1.moim.global.config.redis;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.notification.dto.GroupNotification;
 import com.team1.moim.domain.notification.dto.NotificationResponse;
+import com.team1.moim.domain.notification.dto.NotificationResponseNew;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,16 +47,16 @@ public class RedisService {
 
     public void setEventList(String key, NotificationResponse notificationResponse) throws JsonProcessingException {
         ListOperations<String, Object> alarms = redisTemplate1.opsForList();
-        log.info("List 알림 저장");
+        log.info("일정 알림 저장");
         alarms.leftPush(key, notificationResponse);
-        log.info("알림 저장 성공");
+        log.info("일정 알림 저장 성공");
     }
 
     public void setGroupList(String key, GroupNotification groupNotification) throws JsonProcessingException {
         ListOperations<String, Object> alarms = redisTemplate1.opsForList();
-        log.info("List 알림 저장");
+        log.info("모임 알림 저장");
         alarms.leftPush(key, groupNotification);
-        log.info("알림 저장 성공");
+        log.info("모임 알림 저장 성공");
     }
 
     @Transactional(readOnly = true)
@@ -67,12 +68,18 @@ public class RedisService {
         return (String) values.get(key);
     }
 
-    public List<NotificationResponse> getList(String key){
+    public List<NotificationResponseNew> getList(String key){
         ListOperations<String, Object> listOperations = redisTemplate1.opsForList();
         List<Object> alarms = listOperations.range(key, 0, -1);
-        List<NotificationResponse> notificationResponses = new ArrayList<>();
+        List<NotificationResponseNew> notificationResponses = new ArrayList<>();
         for(Object alarm : alarms) {
-            notificationResponses.add((NotificationResponse) alarm);
+            if(alarm instanceof NotificationResponse) {
+                notificationResponses.add(NotificationResponseNew.fromEvent((NotificationResponse) alarm));
+            }
+            if(alarm instanceof GroupNotification) {
+                notificationResponses.add(NotificationResponseNew.fromGroup((GroupNotification) alarm));
+            }
+
         }
         return notificationResponses;
     }

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 public class GroupNotification {
+    private Long alarmId;
     private Long groupId; // 모임 ID
     private String hostName; // 호스트명
     private String message; // 참여자에게 보여지는 메시지
@@ -21,7 +22,8 @@ public class GroupNotification {
     private String readYn = "N";
 
     @Builder
-    public GroupNotification(Long groupId, String hostName, String message, String groupTitle, String voteDeadline, String sendTime, NotificationType notificationType) {
+    public GroupNotification(Long alarmId, Long groupId, String hostName, String message, String groupTitle, String voteDeadline, String sendTime, NotificationType notificationType) {
+        this.alarmId = alarmId;
         this.groupId = groupId;
         this.hostName = hostName;
         this.message = message;

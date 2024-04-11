@@ -131,7 +131,7 @@ public class GroupService {
             String participantEmail = groupInfo.getMember().getEmail();
             log.info("참여자 이메일 주소: " + participantEmail);
             sseService.sendGroupNotification(participantEmail,
-                    GroupNotification.from(newGroup, message, NotificationType.GROUP, LocalDateTime.now()));
+                    GroupNotification.from(newGroup, message, NotificationType.GROUP_CREATE, LocalDateTime.now()));
         }
 
         return GroupDetailResponse.from(newGroup);
@@ -292,11 +292,11 @@ public class GroupService {
 
                 // 호스트도 알림 발송
                 sseService.sendGroupNotification(updatedGroup.getMember().getEmail(),
-                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP, LocalDateTime.now()));
+                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CANCEL, LocalDateTime.now()));
 
                 for (GroupInfo agreedParticipant : agreedParticipants){
                     sseService.sendGroupNotification(agreedParticipant.getMember().getEmail(),
-                            GroupNotification.from(updatedGroup, message, NotificationType.GROUP, LocalDateTime.now()));
+                            GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CANCEL, LocalDateTime.now()));
                 }
 
                 // 모일 수 있는 일정이 1개라면 자동으로 모임을 확정 짓고 모두에게 알림 전송
@@ -310,11 +310,11 @@ public class GroupService {
 
                 // 호스트도 알림 발송
                 sseService.sendGroupNotification(updatedGroup.getMember().getEmail(),
-                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP, LocalDateTime.now()));
+                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CONFIRM, LocalDateTime.now()));
 
                 for (GroupInfo agreedParticipant : agreedParticipants){
                     sseService.sendGroupNotification(agreedParticipant.getMember().getEmail(),
-                            GroupNotification.from(updatedGroup, message, NotificationType.GROUP, LocalDateTime.now()));
+                            GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CONFIRM, LocalDateTime.now()));
                 }
                 // 추천 일정이 여러개라면 모임 확정 알림을 호스트 에게만 전송
             } else {
@@ -322,7 +322,7 @@ public class GroupService {
 
                 // 호스트한테만 알림 발송
                 sseService.sendGroupNotification(updatedGroup.getMember().getEmail(),
-                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP, LocalDateTime.now()));
+                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CHOICE, LocalDateTime.now()));
             }
         }
 
@@ -342,7 +342,7 @@ public class GroupService {
         for (GroupInfo participant : participants) {
             sseService.sendGroupNotification(
                     participant.getMember().getEmail(),
-                    GroupNotification.from(participant.getGroup(), message, NotificationType.GROUP, LocalDateTime.now()));
+                    GroupNotification.from(participant.getGroup(), message, NotificationType.GROUP_DEADLINE, LocalDateTime.now()));
         }
         groupAlarm.sendCheck("Y");
     }

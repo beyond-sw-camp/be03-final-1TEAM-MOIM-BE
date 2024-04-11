@@ -366,21 +366,21 @@ public class EventService {
                     if(event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                NotificationResponse.from(alarm, member, LocalDateTime.now(), NotificationType.EVENT));
+                                NotificationResponse.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }if(alarm.getAlarmtype() == AlarmType.H) {
                     if(event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                NotificationResponse.from(alarm, member, LocalDateTime.now(), NotificationType.EVENT));
+                                NotificationResponse.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }if(alarm.getAlarmtype() == AlarmType.M) {
                     if(event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                NotificationResponse.from(alarm, member, LocalDateTime.now(), NotificationType.EVENT));
+                                NotificationResponse.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }
