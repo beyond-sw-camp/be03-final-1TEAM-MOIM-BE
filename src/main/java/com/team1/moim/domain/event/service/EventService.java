@@ -1,9 +1,11 @@
 package com.team1.moim.domain.event.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
+import com.team1.moim.domain.event.dto.response.AlarmResponse;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.*;
 import com.team1.moim.domain.event.repository.AlarmRepository;
@@ -71,6 +73,20 @@ public class EventService {
                 toDoListRepository.save(toDoList);
             }
         }
+//        Alarm 추가
+        List<AlarmResponse> alarms = new ArrayList<>();
+        if(alarmRequests != null && request.getAlarmYn().equals("Y")) {
+            for (AlarmRequest alarmRequest : alarmRequests) {
+                AlarmType alarmtype;
+                if (alarmRequest.getAlarmType().equals("M")) alarmtype = AlarmType.M;
+                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = AlarmType.H;
+                else alarmtype = AlarmType.D;
+                Alarm alarm = alarmRequest.toEntity(alarmtype, alarmRequest.getSetTime(), event);
+                alarmRepository.save(alarm);
+                alarms.add(AlarmResponse.from(alarm));
+            }
+        }
+
 //        Repeat추가, 다음 반복일정 만드는 메소드 호출
         if (repeatValue != null) {
 
@@ -84,17 +100,6 @@ public class EventService {
             Repeat repeatEntity = RepeatRequest.toEntity(newRepeat, repeatValue.getRepeat_end_date(),event);
             repeatRepository.save(repeatEntity);
             repeatCreate(request, toDoListRequests, repeatValue, event.getId());
-        }
-//        Alarm 추가
-        if(alarmRequests != null && request.getAlarmYn().equals("Y")) {
-            for (AlarmRequest alarmRequest : alarmRequests) {
-                AlarmType alarmtype;
-                if (alarmRequest.getAlarmType().equals("M")) alarmtype = AlarmType.M;
-                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = AlarmType.H;
-                else alarmtype = AlarmType.D;
-                Alarm alarm = alarmRequest.toEntity(alarmtype, alarmRequest.getSetTime(), event);
-                alarmRepository.save(alarm);
-            }
         }
         return EventResponse.from(event);
     }
@@ -167,6 +172,20 @@ public class EventService {
                 toDoListRepository.save(toDoList);
             }
         }
+
+        //        Alarm 추가
+//        List<AlarmResponse> alarms = new ArrayList<>();
+//        if(alarmRequests != null && request.getAlarmYn().equals("Y")) {
+//            for (AlarmRequest alarmRequest : alarmRequests) {
+//                AlarmType alarmtype;
+//                if (alarmRequest.getAlarmType().equals("M")) alarmtype = AlarmType.M;
+//                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = AlarmType.H;
+//                else alarmtype = AlarmType.D;
+//                Alarm alarm = alarmRequest.toEntity(alarmtype, alarmRequest.getSetTime(), event);
+//                alarmRepository.save(alarm);
+//                alarms.add(AlarmResponse.from(alarm));
+//            }
+//        }
 
         RepeatType newRepeat;
         if (repeatValue.getRepeatType().equals("Y")) newRepeat = RepeatType.Y;
@@ -327,7 +346,7 @@ public class EventService {
     // 알림 전송 스케줄러
     @Scheduled(cron = "0 0/1 * * * *") // 매분마다 실행
     @Transactional
-    public void eventSchedule() {
+    public void eventSchedule() throws JsonProcessingException {
         // 삭제되지 않고, 알림 설정한 일정LiST
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
         for(Event event : events) {
@@ -337,6 +356,7 @@ public class EventService {
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
             for(Alarm alarm : alarms) {
                 if(alarm.getAlarmtype() == AlarmType.D) {
+                    // 지나간 알림은 전송 X
                     if(event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),

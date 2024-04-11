@@ -1,5 +1,8 @@
 package com.team1.moim.global.config.sse.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.sse.dto.GroupNotification;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
@@ -10,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.naming.ServiceUnavailableException;
 import java.io.IOException;
+import java.time.Duration;
 
 @Component
 @Slf4j
@@ -18,10 +22,12 @@ public class SseService {
     private static final Long TIMEOUT = 60 * 60 * 1000L; // 1시간
 
     private final EmitterRepository emitterRepository;
+    private final RedisService redisService;
 
     @Autowired
-    public SseService(EmitterRepository emitterRepository) {
+    public SseService(EmitterRepository emitterRepository, RedisService redisService) {
         this.emitterRepository = emitterRepository;
+        this.redisService = redisService;
     }
 
     public SseEmitter add(String email) throws ServiceUnavailableException {
@@ -50,13 +56,21 @@ public class SseService {
         return emitter;
     }
 
-    public void sendEventAlarm(String email, NotificationResponse notificationResponse) {
+    public void sendEventAlarm(String email, NotificationResponse notificationResponse) throws JsonProcessingException {
         try {
-            emitterRepository.get(email).send(SseEmitter.event()
-                    .name("sendEventAlarm")
-                    .data(notificationResponse));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            SseEmitter emitter = emitterRepository.get(email);
+            if(emitter != null) {
+                emitter.send(SseEmitter.event()
+                        .name("sendEventAlarm")
+                        .data(notificationResponse));
+            }else {
+                log.error(email + " SseEmitter가 존재하지 않음");
+            }
+            // redis 저장
+            redisService.setList(email, notificationResponse);
+        } catch (Exception e) {
+            log.error("알림 전송 중 에러");
+            redisService.setList(email, notificationResponse);
         }
     }
 

@@ -1,24 +1,37 @@
 package com.team1.moim.global.config.redis;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class RedisService {
 
+
     private final RedisTemplate<String, Object> redisTemplate;
+    @Qualifier("1")
+    private final RedisTemplate<String, Object> redisTemplate1;
+
+    @Autowired
+    public RedisService(RedisTemplate<String, Object> redisTemplate,  @Qualifier("1") RedisTemplate<String, Object> redisTemplate1) {
+        this.redisTemplate = redisTemplate;
+        this.redisTemplate1 = redisTemplate1;
+    }
 
     public void setValues(String key, String data) {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
@@ -32,6 +45,13 @@ public class RedisService {
         log.info("redis에 이메일 인증코드 관련 정보 저장");
     }
 
+    public void setList(String key, NotificationResponse notificationResponse) throws JsonProcessingException {
+        ListOperations<String, Object> alarms = redisTemplate1.opsForList();
+        log.info("List 알림 저장");
+        alarms.leftPush(key, notificationResponse);
+        log.info("알림 저장 성공");
+    }
+
     @Transactional(readOnly = true)
     public String getValues(String key) {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
@@ -39,6 +59,26 @@ public class RedisService {
             return "false";
         }
         return (String) values.get(key);
+    }
+
+    public List<NotificationResponse> getList(String key){
+        ListOperations<String, Object> listOperations = redisTemplate1.opsForList();
+        List<Object> alarms = listOperations.range(key, 0, -1);
+        List<NotificationResponse> notificationResponses = new ArrayList<>();
+        for(Object alarm : alarms) {
+            notificationResponses.add((NotificationResponse) alarm);
+        }
+        return notificationResponses;
+    }
+
+    public void saveList(String key, List<NotificationResponse> notificationResponses) {
+        ListOperations<String, Object> listOperations = redisTemplate1.opsForList();
+        // 기존 리스트 삭제
+        redisTemplate1.delete(key);
+        // 변경된 리스트 추가\
+        for (NotificationResponse notificationResponse : notificationResponses) {
+            listOperations.leftPush(key, notificationResponse);
+        }
     }
 
     public void deleteValues(String key) {
