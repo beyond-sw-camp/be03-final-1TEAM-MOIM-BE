@@ -1,11 +1,44 @@
-### 🙌🏻 서비스명 : 모임 (MOIM)
+## 🙌🏻 서비스명 : 모임 (MOIM)
 
-### 😁 팀원
+## 😁 팀원
  
 |<img src="img/bellwin_image.jpg" height="150">|<img src="img/jaeseok_image.jpg" height="150">|<img src="img/soyoung_image.jpg" height="150">|<img src="img/eunji_image.jpg" height="150">|
 |:---:|:---:|:---:|:---:|
 | [한종승(팀장)](https://github.com/BellWin98) | [신재석(팀원)](https://github.com/MrKeeplearning) | [배소영(팀원)](https://github.com/qoth-0) | [장은지(팀원)](https://github.com/Jang-Eun-Ji) |
 </div>
+
+<br>
+
+## 💻 기술 스택
+
+📱 **Front-End :** <img src="https://img.shields.io/badge/Vue-4FC08D.svg?&style=flat-square&logo=Vuedotjs&logoColor=white">
+
+📀 **Back-end :** 
+<img src="https://img.shields.io/badge/Java17-007396.svg?&style=flat-square&logo=Java&logoColor=white">
+<img src="https://img.shields.io/badge/SpringBoot-6DB33F.svg?&style=flat-square&logo=SpringBoot&logoColor=white">
+<img src="https://img.shields.io/badge/SpringDataJpa-6DB33F.svg?&style=flat-square&logo=SpringDataJpa&logoColor=white">
+<img src="https://img.shields.io/badge/SpringSecurity-6DB33F.svg?&style=flat-square&logo=SpringSecurity&logoColor=white">
+<img src="https://img.shields.io/badge/Gradle-02303A.svg?&style=flat-square&logo=Gradle&logoColor=white">
+<img src="https://img.shields.io/badge/JWT-000000.svg?&style=flat-square&logo=jsonwebtokens&logoColor=white">
+
+💾 **Infra & DB :**
+<img src="https://img.shields.io/badge/MariaDB-4479A1?style=flat-square&logo=MariaDB&logoColor=white">
+<img src="https://img.shields.io/badge/AmazonEC2-FF9900?style=flat-square&logo=AmazonEC2&logoColor=white">
+<img src="https://img.shields.io/badge/AmazonRDS-527FFF?style=flat-square&logo=AmazonRDS&logoColor=white">
+<img src="https://img.shields.io/badge/AmazonS3-569A31?style=flat-square&logo=AmazonS3&logoColor=white">
+<img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white">
+
+🚀 **CI/CD :**
+<img src="https://img.shields.io/badge/GithubActions-2088FF?style=flat-square&logo=GithubActions&logoColor=white">
+<img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white">
+<img src="https://img.shields.io/badge/NGINX-009639?style=flat-square&logo=NGINX&logoColor=white">
+
+🔊 **Tools :**
+<img src="https://img.shields.io/badge/Github-181717?style=flat-square&logo=github&logoColor=white">
+<img src="https://img.shields.io/badge/Notion-000000?style=flat-square&logo=Notion&logoColor=white">
+<img src="https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=Slack&logoColor=white">
+<img src="https://img.shields.io/badge/IntelliJidea-000000?style=flat-square&logo=intellijidea&logoColor=white">
+<img src="https://img.shields.io/badge/VScode-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white">
 
 <br>
 
@@ -46,53 +79,47 @@
 
 <br>
 
-## 📝 요구 사항 정의서
-![스크린샷 2024-03-20 112313](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/9e2640bf-e4fc-4898-97f8-affe643ea9d0)
-
-[요구사항 정의서 바로가기](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=0&single=true)
+## 📝 요구 사항 정의서(화면 클릭 시 이동)
+[![Requirements](assets/images/requirements.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=0&single=true)
 
 <br>
 
-## ⚙️ ERD 
-![Moim(모임)](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/30846904-0adf-4ead-be19-291e777a92f1)
+## ⚙️ ERD(화면 클릭 시 이동) 
+[![ERD](assets/images/erd.png)](https://www.erdcloud.com/d/3trf7ooZs6XS8PXTT)
 
 <br>
 
-## 📝 화면 설계서
-
-[모임(MOIM)-화면설계서.pdf](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/files/14720138/MOIM.-.pdf)
-
-[화면 설계서 링크](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/blob/main/docs/%EB%AA%A8%EC%9E%84(MOIM)-%ED%99%94%EB%A9%B4%EC%84%A4%EA%B3%84%EC%84%9C.pdf)
+## 📝 화면 설계서(화면 클릭 시 이동)
+[![Display](assets/images/display_architecture.png)](https://docs.google.com/presentation/d/e/2PACX-1vSx7kP_4zspTFpOuVhswRohKHU05I9Q4N4udH1Z0g22o24sg_w1F-Oq-9-aDzbzvA/pub?start=false&loop=false&delayms=3000)
 
 <br>
 
-## 💻 기술 스택
-
-📱 **Front-End :** <img src="https://img.shields.io/badge/Vue-4FC08D.svg?&style=flat-square&logo=Vuedotjs&logoColor=white">
-
-📀 **Back-end :** 
-<img src="https://img.shields.io/badge/Java17-007396.svg?&style=flat-square&logo=Java&logoColor=white">
-<img src="https://img.shields.io/badge/SpringBoot-6DB33F.svg?&style=flat-square&logo=SpringBoot&logoColor=white">
-<img src="https://img.shields.io/badge/SpringDataJpa-6DB33F.svg?&style=flat-square&logo=SpringDataJpa&logoColor=white">
-<img src="https://img.shields.io/badge/SpringSecurity-6DB33F.svg?&style=flat-square&logo=SpringSecurity&logoColor=white">
-<img src="https://img.shields.io/badge/Gradle-02303A.svg?&style=flat-square&logo=Gradle&logoColor=white">
-<img src="https://img.shields.io/badge/JWT-000000.svg?&style=flat-square&logo=jsonwebtokens&logoColor=white">
-
-💾 **Infra & DB :**
-<img src="https://img.shields.io/badge/MariaDB-4479A1?style=flat-square&logo=MariaDB&logoColor=white">
-<img src="https://img.shields.io/badge/AmazonEC2-FF9900?style=flat-square&logo=AmazonEC2&logoColor=white">
-<img src="https://img.shields.io/badge/AmazonRDS-527FFF?style=flat-square&logo=AmazonRDS&logoColor=white">
-<img src="https://img.shields.io/badge/AmazonS3-569A31?style=flat-square&logo=AmazonS3&logoColor=white">
-<img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white">
-
-🚀 **CI/CD :**
-<img src="https://img.shields.io/badge/GithubActions-2088FF?style=flat-square&logo=GithubActions&logoColor=white">
-<img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white">
-<img src="https://img.shields.io/badge/NGINX-009639?style=flat-square&logo=NGINX&logoColor=white">
+## 🗓️ WBS(화면 클릭 시 이동)
+[![WBS](assets/images/wbs.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=1560823417&single=true)
 
 <br>
 
-🏠 기술 사용 이유
+## 📝 프로그램 사양서(화면 클릭 시 이동)
+[![APIs](assets/images/api_details.png)](https://interesting-potential-90c.notion.site/9508b92f24254958b3b9f791d6583e3b?v=6fa037217d9b456cb709748c53281d5a&pvs=4)
+
+<br>
+
+## 🚀 시스템 아키텍쳐
+### 📍Back-End
+<img src= "assets/images/backend_architecture.png" width="100%" height="100%">
+
+### 📍Front-End
+<img src= "assets/images/frontend_architecture.png" width="100%" height="100%">
+
+<br>
+
+## 📝 단위 테스트 결과서(화면 클릭 시 이동)
+[링크 클릭](assets/test)
+
+<br>
+
+
+## 🏠 기술 사용 이유
 
 | **Java 17** | **Spring Boot** |
 | --- | --- |
@@ -101,27 +128,6 @@
 | **Spring Data Jpa** | **Redis** |
 | --- | --- |
 | 설명3 | 설명4 |
-
-<br>
-
-## 🔊 협업 툴
-![github](https://img.shields.io/badge/Github-181717.svg?&style=for-the-badge&logo=github&logoColor=white)
-![Notion](https://img.shields.io/badge/Notion-000000.svg?&style=for-the-badge&logo=Notion&logoColor=white)
-![Slack](https://img.shields.io/badge/Slack-4A154B.svg?&style=for-the-badge&logo=Slack&logoColor=white)
-![intellijidea](https://img.shields.io/badge/IntelliJidea-000000.svg?&style=for-the-badge&logo=intellijidea&logoColor=white)
-![visualstudiocode](https://img.shields.io/badge/VScode-007ACC.svg?&style=for-the-badge&logo=visualstudiocode&logoColor=white)
-
-<br>
-
-## 🗓️ WBS
-![스크린샷 2024-03-20 112909](https://github.com/HanHwa-Team1-Final-Project/Team1-BE/assets/60949121/480031b5-b299-478a-9496-92b03e669301)
-
-[WBS 바로가기](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=1560823417&single=true)
-
-<br>
-
-## API 명세서
-여기에 api 명세서 이미지 넣기
 
 <br>
 
@@ -136,12 +142,6 @@
 | chore | 그 외 자잘한 수정 |
 
 ![Github Flow](https://cdn.hashnode.com/res/hashnode/image/upload/v1668070000889/rvf5Hx764.png)
-
-<br>
-
-## 🚀 시스템 아키텍쳐
-
-여기에 아키텍쳐 이미지 삽입
 
 <br>
 

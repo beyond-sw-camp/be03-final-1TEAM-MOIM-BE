@@ -1,6 +1,7 @@
 package com.team1.moim.domain.group.entity;
 
 import com.team1.moim.domain.member.entity.Member;
+import com.team1.moim.global.config.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class GroupInfo {
+public class GroupInfo extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

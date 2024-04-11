@@ -80,6 +80,9 @@ public class Group extends BaseTimeEntity {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GroupInfo> groupInfos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupAlarm> groupAlarms = new ArrayList<>();
+
     @Builder
     public Group(Member member, String title, String contents, int runningTime, LocalDate expectStartDate,
                  LocalDate expectEndDate, LocalTime expectStartTime, LocalTime expectEndTime,

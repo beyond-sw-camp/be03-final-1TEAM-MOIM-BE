@@ -5,6 +5,7 @@ import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.EventResponse;
+import com.team1.moim.domain.event.entity.Matrix;
 import com.team1.moim.domain.event.service.EventService;
 import com.team1.moim.domain.event.service.PublicHoliyDayAPI;
 import com.team1.moim.global.dto.ApiSuccessResponse;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequestMapping("/api/events")
-
 public class EventController {
 
     private final EventService eventService;
@@ -81,7 +81,7 @@ public class EventController {
                         ("삭제되었습니다.")));
     }
 
-//   반복일정의 삭제
+    //   반복일정의 삭제
     @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/repeat/{eventId}")
     public ResponseEntity<ApiSuccessResponse<String>> deleteRepeat(HttpServletRequest servRequest,
@@ -94,10 +94,21 @@ public class EventController {
                         servRequest.getServletPath(),
                         ("삭제되었습니다.")));
     }
+    //   메트릭스 일정 조회 api
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/matrix/{matrix}")
+    public ResponseEntity<ApiSuccessResponse<List<EventResponse>>> matrixEvents(
+            HttpServletRequest servRequest,
+            @PathVariable(name = "matrix")Matrix matrix) {
 
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servRequest.getServletPath(),
+                        eventService.matrixEvents(matrix)));
+    }
 
     @PostMapping("/getHoliday")
-    @ResponseBody
     public ResponseEntity<ArrayList<HashMap<String, Object>>> holidayInfoApi(String year, String month) {
 
         log.info("year = " + year);

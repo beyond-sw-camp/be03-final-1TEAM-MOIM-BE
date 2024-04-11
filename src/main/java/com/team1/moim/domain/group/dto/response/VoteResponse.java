@@ -1,4 +1,4 @@
-package com.team1.moim.domain.notification.dto.response;
+package com.team1.moim.domain.group.dto.response;
 
 import com.team1.moim.domain.group.entity.GroupInfo;
 import com.team1.moim.domain.member.entity.Member;

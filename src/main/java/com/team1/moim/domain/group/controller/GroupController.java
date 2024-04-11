@@ -1,12 +1,15 @@
 package com.team1.moim.domain.group.controller;
 
-import com.team1.moim.domain.group.dto.request.*;
+import com.team1.moim.domain.group.dto.request.GroupAlarmRequest;
+import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
+import com.team1.moim.domain.group.dto.request.GroupRequest;
+import com.team1.moim.domain.group.dto.request.GroupSearchRequest;
 import com.team1.moim.domain.group.dto.response.FindConfirmedGroupResponse;
 import com.team1.moim.domain.group.dto.response.FindPendingGroupResponse;
 import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.dto.response.ListGroupResponse;
 import com.team1.moim.domain.group.service.GroupService;
-import com.team1.moim.global.config.sse.service.SseService;
+import com.team1.moim.domain.group.dto.response.VoteResponse;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -23,7 +26,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@RequestMapping("/api/group")
+@RequestMapping("/api/groups")
 public class GroupController {
 
     private final GroupService groupService;
@@ -40,14 +43,14 @@ public class GroupController {
             HttpServletRequest httpServletRequest,
             @Valid GroupRequest groupRequest,
             @RequestPart(value = "groupInfoRequests", required = false) List<GroupInfoRequest> groupInfoRequests,
-            @RequestPart(value = "alarmRequest", required = false) List<GroupCreateAlarmRequest> groupCreateAlarmRequests) {
+            @RequestPart(value = "groupAlarmRequests", required = false) List<GroupAlarmRequest> groupAlarmRequests) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
-                        groupService.create(groupRequest, groupInfoRequests, groupCreateAlarmRequests)));
+                        groupService.create(groupRequest, groupInfoRequests, groupAlarmRequests)));
     }
 
     // 모임 삭제
@@ -102,8 +105,7 @@ public class GroupController {
     public ResponseEntity<ApiSuccessResponse<List<ListGroupResponse>>> findAllGroups(
             HttpServletRequest httpServletRequest,
             GroupSearchRequest groupSearchRequest,
-            Pageable pageable
-    ) {
+            Pageable pageable) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -111,5 +113,19 @@ public class GroupController {
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
                         groupService.findGroups(groupSearchRequest, pageable, email)));
+    }
+
+    @PostMapping("/{groupId}/groupInfo/{groupInfoId}/notification")
+    public ResponseEntity<ApiSuccessResponse<VoteResponse>> vote(HttpServletRequest httpServletRequest,
+                                                                 @PathVariable("groupId") Long groupId,
+                                                                 @PathVariable("groupInfoId") Long groupInfoId,
+                                                                 @RequestParam("agreeYn") String agreeYn) {
+        log.info("참여자 투표 API 시작");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        groupService.vote(groupId, groupInfoId, agreeYn)));
     }
 }
