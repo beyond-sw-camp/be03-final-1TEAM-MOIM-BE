@@ -6,10 +6,9 @@ import com.team1.moim.domain.member.exception.MemberNotMatchException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.notification.exception.NotificationNotFoundException;
 import com.team1.moim.global.config.redis.RedisService;
-import com.team1.moim.global.config.sse.dto.NotificationResponse;
+import com.team1.moim.domain.notification.dto.NotificationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +30,6 @@ public class NotificationService {
         if(!key.equals(loginEmail)) throw new MemberNotMatchException();
         List<NotificationResponse> alarms= redisService.getList(key);
         if(alarms.isEmpty()) throw new NotificationNotFoundException();
-        log.info(alarms.size() + "개");
         return alarms;
     }
 
