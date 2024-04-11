@@ -8,12 +8,16 @@ import com.team1.moim.domain.event.dto.request.ToDoListRequest;
 import com.team1.moim.domain.event.dto.response.AlarmResponse;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.*;
+import com.team1.moim.domain.event.exception.EventNotFoundException;
 import com.team1.moim.domain.event.repository.AlarmRepository;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
 import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.domain.member.entity.Member;
+import com.team1.moim.domain.member.exception.MemberNotFoundException;
+import com.team1.moim.domain.member.exception.MemberNotMatchException;
 import com.team1.moim.domain.member.repository.MemberRepository;
+import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.config.sse.service.SseService;
@@ -31,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +52,7 @@ public class EventService {
     private final AlarmRepository alarmRepository;
     private final S3Service s3Service;
     private final SseService sseService;
+    private final RedisService redisService;
 
     public EventResponse create(EventRequest request, List<ToDoListRequest> toDoListRequests, RepeatRequest repeatValue, List<AlarmRequest> alarmRequests) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -382,5 +388,63 @@ public class EventService {
         }
     }
 
+    public List<EventResponse> getMonthly(int year, int month) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 조회");
+        // JPQL
+        List<Event> events = eventRepository.findByMemberAndYearAndMonth(member, year, month);
+        // 조회된 일정이 없으면 에러
+        if(events.isEmpty()) throw new EventNotFoundException();
+        // EventResponse 조립
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for(Event event : events) {
+            log.info(event.getTitle());
+            EventResponse eventResponse = EventResponse.from(event);
+            eventResponses.add(eventResponse);
+        }
+        return eventResponses;
+    }
 
+    public List<EventResponse> getWeekly(int year, int week) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 조회");
+        List<Event> events = eventRepository.findByMemberAndYearAndWeek(member, year, week);
+        if(events.isEmpty()) throw new EventNotFoundException();
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for(Event event : events) {
+            log.info(event.getTitle());
+            EventResponse eventResponse = EventResponse.from(event);
+            eventResponses.add(eventResponse);
+        }
+
+        return eventResponses;
+    }
+
+    public List<EventResponse> getDaily(int year, int month, int day) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 조회");
+        List<Event> events = eventRepository.findByMemberAndYearAndMonthAndDay(member, year, month, day);
+        if(events.isEmpty()) throw new EventNotFoundException();
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for(Event event : events) {
+            log.info(event.getTitle());
+            EventResponse eventResponse = EventResponse.from(event);
+            eventResponses.add(eventResponse);
+        }
+
+        return eventResponses;
+    }
+
+    public EventResponse getEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        if(member != event.getMember()) {
+            throw new MemberNotMatchException();
+        }
+        return EventResponse.from(event);
+    }
 }
