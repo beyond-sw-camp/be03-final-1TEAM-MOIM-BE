@@ -1,14 +1,9 @@
 package com.team1.moim.domain.notification.dto;
 
-import com.team1.moim.domain.event.entity.Alarm;
-import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.notification.NotificationType;
-import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -31,14 +26,14 @@ public class NotificationResponseNew {
         this.readYn = readYn;
     }
 
-    public static NotificationResponseNew fromEvent(NotificationResponse notificationResponse){
+    public static NotificationResponseNew fromEvent(EventNotification eventNotification){
         return NotificationResponseNew.builder()
-                .id(notificationResponse.getEventId())
-                .nickname(notificationResponse.getNickname())
-                .message(notificationResponse.getMessage())
-                .sendTime(notificationResponse.getSendTime())
-                .notificationType(notificationResponse.getNotificationType())
-                .readYn(notificationResponse.getReadYn())
+                .id(eventNotification.getEventId())
+                .nickname(eventNotification.getNickname())
+                .message(eventNotification.getMessage())
+                .sendTime(eventNotification.getSendTime())
+                .notificationType(eventNotification.getNotificationType())
+                .readYn(eventNotification.getReadYn())
                 .build();
     }
 

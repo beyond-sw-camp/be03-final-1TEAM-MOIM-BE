@@ -3,7 +3,7 @@ package com.team1.moim.global.config.sse.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.domain.notification.dto.GroupNotification;
-import com.team1.moim.domain.notification.dto.NotificationResponse;
+import com.team1.moim.domain.notification.dto.EventNotification;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,21 +54,21 @@ public class SseService {
         return emitter;
     }
 
-    public void sendEventAlarm(String email, NotificationResponse notificationResponse) throws JsonProcessingException {
+    public void sendEventAlarm(String email, EventNotification eventNotification) throws JsonProcessingException {
         try {
             SseEmitter emitter = emitterRepository.get(email);
             if(emitter != null) {
                 emitter.send(SseEmitter.event()
                         .name("sendEventAlarm")
-                        .data(notificationResponse));
+                        .data(eventNotification));
             }else {
                 log.error(email + " SseEmitter가 존재하지 않음");
             }
             // redis 저장
-            redisService.setEventList(email, notificationResponse);
+            redisService.setEventList(email, eventNotification);
         } catch (Exception e) {
             log.error("알림 전송 중 에러");
-            redisService.setEventList(email, notificationResponse);
+            redisService.setEventList(email, eventNotification);
         }
     }
 

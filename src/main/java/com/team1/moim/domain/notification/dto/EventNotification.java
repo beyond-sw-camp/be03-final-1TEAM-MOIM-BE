@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Getter
-public class NotificationResponse {
+public class EventNotification {
     @Id
     private Long alarmId;
     private Long eventId;
@@ -23,7 +23,7 @@ public class NotificationResponse {
     private String readYn = "N";
 
     @Builder
-    public NotificationResponse(Long alarmId, Long eventId, String nickname, String message, String sendTime, NotificationType notificationType) {
+    public EventNotification(Long alarmId, Long eventId, String nickname, String message, String sendTime, NotificationType notificationType) {
         this.alarmId = alarmId;
         this.eventId = eventId;
         this.nickname = nickname;
@@ -32,9 +32,9 @@ public class NotificationResponse {
         this.notificationType = notificationType;
     }
 
-    public static NotificationResponse from(Long eventId , Alarm alarm, Member member, LocalDateTime sendTime, NotificationType notificationType){
+    public static EventNotification from(Long eventId , Alarm alarm, Member member, LocalDateTime sendTime, NotificationType notificationType){
         String message = alarm.getSetTime() + alarm.getAlarmtype().toString()+"전 알람입니다.";
-        return NotificationResponse.builder()
+        return EventNotification.builder()
                 .alarmId(alarm.getId())
                 .eventId(eventId)
                 .nickname(member.getNickname())

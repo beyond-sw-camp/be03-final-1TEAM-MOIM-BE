@@ -7,14 +7,12 @@ import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.notification.dto.NotificationResponseNew;
 import com.team1.moim.domain.notification.exception.NotificationNotFoundException;
 import com.team1.moim.global.config.redis.RedisService;
-import com.team1.moim.domain.notification.dto.NotificationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor

@@ -2,7 +2,7 @@ package com.team1.moim.global.config.redis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.notification.dto.GroupNotification;
-import com.team1.moim.domain.notification.dto.NotificationResponse;
+import com.team1.moim.domain.notification.dto.EventNotification;
 import com.team1.moim.domain.notification.dto.NotificationResponseNew;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +45,10 @@ public class RedisService {
         log.info("redis에 이메일 인증코드 관련 정보 저장");
     }
 
-    public void setEventList(String key, NotificationResponse notificationResponse) throws JsonProcessingException {
+    public void setEventList(String key, EventNotification eventNotification) throws JsonProcessingException {
         ListOperations<String, Object> alarms = redisTemplate1.opsForList();
         log.info("일정 알림 저장");
-        alarms.leftPush(key, notificationResponse);
+        alarms.leftPush(key, eventNotification);
         log.info("일정 알림 저장 성공");
     }
 
@@ -73,8 +73,8 @@ public class RedisService {
         List<Object> alarms = listOperations.range(key, 0, -1);
         List<NotificationResponseNew> notificationResponses = new ArrayList<>();
         for(Object alarm : alarms) {
-            if(alarm instanceof NotificationResponse) {
-                notificationResponses.add(NotificationResponseNew.fromEvent((NotificationResponse) alarm));
+            if(alarm instanceof EventNotification) {
+                notificationResponses.add(NotificationResponseNew.fromEvent((EventNotification) alarm));
             }
             if(alarm instanceof GroupNotification) {
                 notificationResponses.add(NotificationResponseNew.fromGroup((GroupNotification) alarm));
@@ -84,12 +84,12 @@ public class RedisService {
         return notificationResponses;
     }
 
-    public void saveList(String key, List<NotificationResponse> notificationResponses) {
+    public void saveList(String key, List<EventNotification> notificationResponses) {
         ListOperations<String, Object> listOperations = redisTemplate1.opsForList();
         // 기존 리스트 삭제
         redisTemplate1.delete(key);
         // 변경된 리스트 추가
-        for (NotificationResponse notificationResponse : notificationResponses) {
+        for (EventNotification notificationResponse : notificationResponses) {
             listOperations.leftPush(key, notificationResponse);
         }
     }
