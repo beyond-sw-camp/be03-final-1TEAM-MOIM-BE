@@ -370,15 +370,17 @@ public class EventService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         log.info(member.getNickname() + "님 일정 조회");
+        // JPQL
         List<Event> events = eventRepository.findByMemberAndYearAndMonth(member, year, month);
+        // 조회된 일정이 없으면 에러
         if(events.isEmpty()) throw new EventNotFoundException();
+        // EventResponse 조립
         List<EventResponse> eventResponses = new ArrayList<>();
         for(Event event : events) {
             log.info(event.getTitle());
             EventResponse eventResponse = EventResponse.from(event);
             eventResponses.add(eventResponse);
         }
-
         return eventResponses;
     }
 
