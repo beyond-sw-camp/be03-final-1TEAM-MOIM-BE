@@ -34,8 +34,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -328,25 +330,19 @@ public class EventService {
 
         }
     }
-    
+
     public List<EventResponse> matrixEvents(Matrix matrix) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberRepository.findByEmail(email).orElseThrow();
         List<Event> events = eventRepository.findByMember(member);
 
-        List<EventResponse> matrixEvents = new ArrayList<>();
-        
-        for (Event event : events){
-            if(event.getMatrix().equals(matrix) && 
-                    event.getStartDateTime().isAfter(LocalDateTime.now()) && 
-                    event.getStartDateTime().isBefore(LocalDateTime.now().plusMonths(1))){
-                log.info(event.getTitle());
-                EventResponse eventResponse = EventResponse.from(event);
-                matrixEvents.add(eventResponse);
-            }
-        }
-
-        return matrixEvents;
+        return events.stream()
+                .filter(event -> event.getMatrix().equals(matrix))
+                .filter(event -> event.getStartDateTime().isAfter(LocalDateTime.now()))
+                .filter(event -> event.getStartDateTime().isBefore(LocalDateTime.now().plusMonths(1)))
+                .map(EventResponse::from)
+                .sorted(Comparator.comparing(EventResponse::getStartDate))
+                .collect(Collectors.toList());
     }
 
     // 알림 전송 스케줄러
