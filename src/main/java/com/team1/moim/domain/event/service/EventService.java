@@ -443,4 +443,21 @@ public class EventService {
         }
         return EventResponse.from(event);
     }
+
+    public List<EventResponse> searchEvent(String content) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 검색");
+
+        List<Event> events = eventRepository.findByMemberAndTitleOrMemo(member,content);
+        if(events.isEmpty()) throw new EventNotFoundException();
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for(Event event : events) {
+            log.info(event.getTitle());
+            EventResponse eventResponse = EventResponse.from(event);
+            eventResponses.add(eventResponse);
+        }
+
+        return eventResponses;
+    }
 }

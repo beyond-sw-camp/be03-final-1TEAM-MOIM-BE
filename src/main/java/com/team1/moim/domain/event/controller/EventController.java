@@ -210,4 +210,20 @@ public class EventController {
                         httpServletRequest.getServletPath(),
                         eventService.getEvent(eventId)));
     }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/search/{content}")
+    public ResponseEntity<ApiSuccessResponse<List<EventResponse>>> searchEvent(HttpServletRequest httpServletRequest,
+                                                                      @PathVariable("content") String content) {
+        log.info("검색 시작");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        eventService.searchEvent(content)));
+    }
+
+
+
 }
