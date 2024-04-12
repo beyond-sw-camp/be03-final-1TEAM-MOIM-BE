@@ -1,10 +1,9 @@
 package com.team1.moim.global.config.sse.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team1.moim.global.config.redis.RedisService;
-import com.team1.moim.global.config.sse.dto.GroupNotification;
-import com.team1.moim.global.config.sse.dto.NotificationResponse;
+import com.team1.moim.domain.notification.dto.GroupNotification;
+import com.team1.moim.domain.notification.dto.EventNotification;
 import com.team1.moim.global.config.sse.repository.EmitterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.naming.ServiceUnavailableException;
 import java.io.IOException;
-import java.time.Duration;
 
 @Component
 @Slf4j
@@ -56,34 +54,40 @@ public class SseService {
         return emitter;
     }
 
-    public void sendEventAlarm(String email, NotificationResponse notificationResponse) throws JsonProcessingException {
+    public void sendEventAlarm(String email, EventNotification eventNotification) throws JsonProcessingException {
         try {
             SseEmitter emitter = emitterRepository.get(email);
             if(emitter != null) {
                 emitter.send(SseEmitter.event()
                         .name("sendEventAlarm")
-                        .data(notificationResponse));
+                        .data(eventNotification));
             }else {
                 log.error(email + " SseEmitter가 존재하지 않음");
             }
             // redis 저장
-            redisService.setList(email, notificationResponse);
+            redisService.setEventList(email, eventNotification);
         } catch (Exception e) {
             log.error("알림 전송 중 에러");
-            redisService.setList(email, notificationResponse);
+            redisService.setEventList(email, eventNotification);
         }
     }
 
     public void sendGroupNotification(String memberEmail,
-                                      GroupNotification groupNotification){
+                                      GroupNotification groupNotification) throws JsonProcessingException {
         try {
-            emitterRepository.get(memberEmail)
-                    .send(SseEmitter.event()
-                            .name("sendToParticipant")
-                            .data(groupNotification)
-                    );
-        } catch (IOException e){
-            throw new RuntimeException(e);
+            SseEmitter emitter = emitterRepository.get(memberEmail);
+            if(emitter != null) {
+                emitter.send(SseEmitter.event()
+                        .name("sendToParticipant")
+                        .data(groupNotification));
+            }else {
+                log.error(memberEmail + " SseEmitter가 존재하지 않음");
+            }
+            // redis 저장
+            redisService.setGroupList(memberEmail, groupNotification);
+        } catch (Exception e){
+            log.error("알림 전송 중 에러");
+            redisService.setGroupList(memberEmail, groupNotification);
         }
     }
 }

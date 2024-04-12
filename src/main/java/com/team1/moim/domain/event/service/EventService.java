@@ -17,9 +17,10 @@ import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.exception.MemberNotMatchException;
 import com.team1.moim.domain.member.repository.MemberRepository;
+import com.team1.moim.domain.notification.NotificationType;
 import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.s3.S3Service;
-import com.team1.moim.global.config.sse.dto.NotificationResponse;
+import com.team1.moim.domain.notification.dto.EventNotification;
 import com.team1.moim.global.config.sse.service.SseService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,6 @@ import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -366,21 +366,21 @@ public class EventService {
                     if(event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                                EventNotification.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }if(alarm.getAlarmtype() == AlarmType.H) {
                     if(event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                                EventNotification.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }if(alarm.getAlarmtype() == AlarmType.M) {
                     if(event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                NotificationResponse.from(alarm, member, LocalDateTime.now()));
+                                EventNotification.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }
