@@ -30,6 +30,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
@@ -451,11 +452,16 @@ public class EventService {
 
         List<Event> events = eventRepository.findByMemberAndTitleOrMemo(member,content);
         if(events.isEmpty()) throw new EventNotFoundException();
-        List<EventResponse> eventResponses = new ArrayList<>();
-        for(Event event : events) {
-            log.info(event.getTitle());
-            EventResponse eventResponse = EventResponse.from(event);
-            eventResponses.add(eventResponse);
+        LocalDateTime now = LocalDateTime.now();
+        List<EventResponse> eventResponses = events.stream()
+                .sorted(Comparator.comparing(event -> event.getStartDateTime().isBefore(now)
+                        ? Duration.between(event.getStartDateTime(), now)
+                        : Duration.between(now, event.getStartDateTime())))
+                .map(EventResponse::from)
+                .collect(Collectors.toList());
+
+        for (EventResponse eventResponse : eventResponses) {
+            log.info(eventResponse.getTitle());
         }
 
         return eventResponses;
