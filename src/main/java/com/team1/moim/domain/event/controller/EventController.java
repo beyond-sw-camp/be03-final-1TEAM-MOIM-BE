@@ -8,7 +8,6 @@ import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.Matrix;
 import com.team1.moim.domain.event.service.EventService;
 import com.team1.moim.domain.event.service.PublicHoliyDayAPI;
-import com.team1.moim.global.config.sse.dto.NotificationResponse;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

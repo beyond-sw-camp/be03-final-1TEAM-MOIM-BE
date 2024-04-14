@@ -1,5 +1,6 @@
 package com.team1.moim.domain.group.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.group.dto.request.GroupAlarmRequest;
@@ -23,8 +24,9 @@ import com.team1.moim.domain.member.exception.GroupInfoNotFoundException;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.group.dto.response.VoteResponse;
+import com.team1.moim.domain.notification.NotificationType;
 import com.team1.moim.global.config.s3.S3Service;
-import com.team1.moim.global.config.sse.dto.GroupNotification;
+import com.team1.moim.domain.notification.dto.GroupNotification;
 import com.team1.moim.global.config.sse.service.SseService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -64,7 +66,7 @@ public class GroupService {
     public GroupDetailResponse create(
             GroupRequest groupRequest,
             List<GroupInfoRequest> groupInfoRequests,
-            List<GroupAlarmRequest> groupAlarmRequests) {
+            List<GroupAlarmRequest> groupAlarmRequests) throws JsonProcessingException {
 
         Member host = findMemberByEmail();
 
@@ -129,7 +131,7 @@ public class GroupService {
             String participantEmail = groupInfo.getMember().getEmail();
             log.info("참여자 이메일 주소: " + participantEmail);
             sseService.sendGroupNotification(participantEmail,
-                    GroupNotification.from(newGroup, message));
+                    GroupNotification.from(newGroup, message, NotificationType.GROUP_CREATE, LocalDateTime.now()));
         }
 
         return GroupDetailResponse.from(newGroup);
@@ -139,7 +141,7 @@ public class GroupService {
     // 모임 참여 결정에 대한 마감 시간 알림을 제공한다.
     @Transactional
     @Scheduled(cron = "0 0/1 * * * *")
-    public void scheduleGroupAlarm() {
+    public void scheduleGroupAlarm() throws JsonProcessingException {
         // 삭제되지 않은 그룹 리스트를 검색
         List<Group> groups = groupRepository.findByIsDeleted("N");
         for (Group group : groups) {
@@ -248,7 +250,7 @@ public class GroupService {
     }
 
     @Transactional
-    public VoteResponse vote(Long groupId, Long groupInfoId, String agreeYn){
+    public VoteResponse vote(Long groupId, Long groupInfoId, String agreeYn) throws JsonProcessingException {
         Member findParticipant = findMemberByEmail();
         Group findGroup = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         GroupInfo findGroupInfo =
@@ -290,11 +292,11 @@ public class GroupService {
 
                 // 호스트도 알림 발송
                 sseService.sendGroupNotification(updatedGroup.getMember().getEmail(),
-                        GroupNotification.from(updatedGroup, message));
+                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CANCEL, LocalDateTime.now()));
 
                 for (GroupInfo agreedParticipant : agreedParticipants){
                     sseService.sendGroupNotification(agreedParticipant.getMember().getEmail(),
-                            GroupNotification.from(updatedGroup, message));
+                            GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CANCEL, LocalDateTime.now()));
                 }
 
                 // 모일 수 있는 일정이 1개라면 자동으로 모임을 확정 짓고 모두에게 알림 전송
@@ -308,11 +310,11 @@ public class GroupService {
 
                 // 호스트도 알림 발송
                 sseService.sendGroupNotification(updatedGroup.getMember().getEmail(),
-                        GroupNotification.from(updatedGroup, message));
+                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CONFIRM, LocalDateTime.now()));
 
                 for (GroupInfo agreedParticipant : agreedParticipants){
                     sseService.sendGroupNotification(agreedParticipant.getMember().getEmail(),
-                            GroupNotification.from(updatedGroup, message));
+                            GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CONFIRM, LocalDateTime.now()));
                 }
                 // 추천 일정이 여러개라면 모임 확정 알림을 호스트 에게만 전송
             } else {
@@ -320,14 +322,14 @@ public class GroupService {
 
                 // 호스트한테만 알림 발송
                 sseService.sendGroupNotification(updatedGroup.getMember().getEmail(),
-                        GroupNotification.from(updatedGroup, message));
+                        GroupNotification.from(updatedGroup, message, NotificationType.GROUP_CHOICE, LocalDateTime.now()));
             }
         }
 
         return VoteResponse.from(savedGroupInfo, findParticipant);
     }
 
-    private void sendAlarmForParticipants(GroupAlarm groupAlarm) {
+    private void sendAlarmForParticipants(GroupAlarm groupAlarm) throws JsonProcessingException {
         // 알림은 아직 참여 또는 거절을 선택하지 않은 상태이고, 존재하는 유저한테만 보내야 한다.
         List<GroupInfo> participants =
                 groupInfoRepository.findByGroupAndIsAgreed(groupAlarm.getGroup(), "P");
@@ -340,7 +342,7 @@ public class GroupService {
         for (GroupInfo participant : participants) {
             sseService.sendGroupNotification(
                     participant.getMember().getEmail(),
-                    GroupNotification.from(participant.getGroup(), message));
+                    GroupNotification.from(participant.getGroup(), message, NotificationType.GROUP_DEADLINE, LocalDateTime.now()));
         }
         groupAlarm.sendCheck("Y");
     }

@@ -1,5 +1,6 @@
 package com.team1.moim.domain.group.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.group.dto.request.GroupAlarmRequest;
 import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
 import com.team1.moim.domain.group.dto.request.GroupRequest;
@@ -43,7 +44,7 @@ public class GroupController {
             HttpServletRequest httpServletRequest,
             @Valid GroupRequest groupRequest,
             @RequestPart(value = "groupInfoRequests", required = false) List<GroupInfoRequest> groupInfoRequests,
-            @RequestPart(value = "groupAlarmRequests", required = false) List<GroupAlarmRequest> groupAlarmRequests) {
+            @RequestPart(value = "groupAlarmRequests", required = false) List<GroupAlarmRequest> groupAlarmRequests) throws JsonProcessingException {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -119,7 +120,7 @@ public class GroupController {
     public ResponseEntity<ApiSuccessResponse<VoteResponse>> vote(HttpServletRequest httpServletRequest,
                                                                  @PathVariable("groupId") Long groupId,
                                                                  @PathVariable("groupInfoId") Long groupInfoId,
-                                                                 @RequestParam("agreeYn") String agreeYn) {
+                                                                 @RequestParam("agreeYn") String agreeYn) throws JsonProcessingException {
         log.info("참여자 투표 API 시작");
         return ResponseEntity
                 .status(HttpStatus.OK)
