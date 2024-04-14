@@ -31,11 +31,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -328,25 +331,19 @@ public class EventService {
 
         }
     }
-    
+
     public List<EventResponse> matrixEvents(Matrix matrix) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberRepository.findByEmail(email).orElseThrow();
         List<Event> events = eventRepository.findByMember(member);
 
-        List<EventResponse> matrixEvents = new ArrayList<>();
-        
-        for (Event event : events){
-            if(event.getMatrix().equals(matrix) && 
-                    event.getStartDateTime().isAfter(LocalDateTime.now()) && 
-                    event.getStartDateTime().isBefore(LocalDateTime.now().plusMonths(1))){
-                log.info(event.getTitle());
-                EventResponse eventResponse = EventResponse.from(event);
-                matrixEvents.add(eventResponse);
-            }
-        }
-
-        return matrixEvents;
+        return events.stream()
+                .filter(event -> event.getMatrix().equals(matrix))
+                .filter(event -> event.getStartDateTime().isAfter(LocalDateTime.now()))
+                .filter(event -> event.getStartDateTime().isBefore(LocalDateTime.now().plusMonths(1)))
+                .map(EventResponse::from)
+                .sorted(Comparator.comparing(EventResponse::getStartDate))
+                .collect(Collectors.toList());
     }
 
     // 알림 전송 스케줄러
@@ -446,5 +443,27 @@ public class EventService {
             throw new MemberNotMatchException();
         }
         return EventResponse.from(event);
+    }
+
+    public List<EventResponse> searchEvent(String content) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        log.info(member.getNickname() + "님 일정 검색");
+
+        List<Event> events = eventRepository.findByMemberAndTitleOrMemo(member,content);
+        if(events.isEmpty()) throw new EventNotFoundException();
+        LocalDateTime now = LocalDateTime.now();
+        List<EventResponse> eventResponses = events.stream()
+                .sorted(Comparator.comparing(event -> event.getStartDateTime().isBefore(now)
+                        ? Duration.between(event.getStartDateTime(), now)
+                        : Duration.between(now, event.getStartDateTime())))
+                .map(EventResponse::from)
+                .collect(Collectors.toList());
+
+        for (EventResponse eventResponse : eventResponses) {
+            log.info(eventResponse.getTitle());
+        }
+
+        return eventResponses;
     }
 }

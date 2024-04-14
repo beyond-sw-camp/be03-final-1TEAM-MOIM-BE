@@ -65,6 +65,6 @@ public class PublicHoliyDayAPI {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return map ;
+        return map;
     }
 }
