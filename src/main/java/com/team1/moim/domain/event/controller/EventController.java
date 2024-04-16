@@ -42,16 +42,13 @@ public class EventController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
-                                                                    @Valid EventRequest request,
-                                                                    @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests,
-                                                                    @RequestPart(value = "repeat", required = false) RepeatRequest repeatValue,
-                                                                    @RequestPart(value = "alarmRequest", required = false) List<AlarmRequest> alarmRequest) {
+                                                                    @Valid EventRequest request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        eventService.create(request, toDoListRequests, repeatValue, alarmRequest)));
+                        eventService.create(request)));
     }
 
     // 일정 수정

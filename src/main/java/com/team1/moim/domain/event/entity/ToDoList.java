@@ -18,11 +18,6 @@ public class ToDoList extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //    EventID
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
-
     //    내용
     @Column(nullable = false)
     private String contents;
@@ -30,6 +25,11 @@ public class ToDoList extends BaseTimeEntity {
     //    완료여부
     @Column(nullable = false)
     private String isChecked = "N";
+
+    //    EventID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
 
     @Builder
     public ToDoList(Event event, String contents, String isChecked) {

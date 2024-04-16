@@ -13,7 +13,7 @@ public class ToDoListRequest {
 
     private String isChecked;
 
-    public static ToDoList toEntity(String contents, String isChecked, Event event){
+    public ToDoList toEntity(Event event){
         return ToDoList.builder()
                 .contents(contents)
                 .isChecked(isChecked)

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "repeatValue")
-public class Repeat {
+public class RepeatEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,20 +30,17 @@ public class Repeat {
 
     // 반복 종료일
     @Column(nullable = false)
-    private LocalDate repeat_end_date;
-
+    private LocalDate repeatEndDate;
 
     @Builder
-    public Repeat(Event event, RepeatType repeatType, LocalDate repeat_end_date) {
+    public RepeatEvent(Event event, RepeatType repeatType, LocalDate repeatEndDate) {
         this.event = event;
         this.repeatType = repeatType;
-        this.repeat_end_date = repeat_end_date;
+        this.repeatEndDate = repeatEndDate;
     }
 
     //일정 종료일 변경
-    public void changeEndDate(LocalDate repeat_end_date) {
-        this.repeat_end_date = repeat_end_date;
+    public void changeEndDate(LocalDate repeatEndDate) {
+        this.repeatEndDate = repeatEndDate;
     }
-
-
 }

@@ -1,5 +1,6 @@
 package com.team1.moim.domain.event.entity;
 
+import com.team1.moim.domain.group.entity.GroupInfo;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.global.config.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -9,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,11 +21,6 @@ public class Event extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    회원ID
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
 
 //    제목
     @Column(nullable = false)
@@ -64,6 +62,14 @@ public class Event extends BaseTimeEntity {
 //    알림여부
     @Column(nullable = false)
     private String alarmYn = "N";
+
+    //    회원ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ToDoList> toDoLists = new ArrayList<>();
 
     @Builder
     public Event(String title, 

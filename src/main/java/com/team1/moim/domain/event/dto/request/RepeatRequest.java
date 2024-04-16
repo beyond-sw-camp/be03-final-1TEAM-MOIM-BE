@@ -2,7 +2,7 @@ package com.team1.moim.domain.event.dto.request;
 
 
 import com.team1.moim.domain.event.entity.Event;
-import com.team1.moim.domain.event.entity.Repeat;
+import com.team1.moim.domain.event.entity.RepeatEvent;
 import com.team1.moim.domain.event.entity.RepeatType;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -16,14 +16,14 @@ public class RepeatRequest {
     private String repeatType;
 
     @NotEmpty(message = "반복 종료일자가 비어있으면 안됩니다.")
-    private String repeat_end_date;
+    private String repeatEndDate;
 
-    public static Repeat toEntity(RepeatType repeatType, String repeat_end_date, Event event){
+    public RepeatEvent toEntity(RepeatType repeatType, Event event){
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDate LocalEndDate = LocalDate.parse(repeat_end_date);
+        LocalDate LocalEndDate = LocalDate.parse(repeatEndDate);
 
 
-        return Repeat.builder()
+        return RepeatEvent.builder()
                 .repeatType(repeatType)
                 .repeat_end_date(LocalEndDate)
                 .event(event)
