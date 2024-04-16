@@ -12,10 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -43,6 +40,11 @@ public class AuthController {
                         authService.signUp(signUpRequest)
                 ));
     }
+
+    // 토큰 재발급용 api
+    // 아무 것도 실행 안함
+    @GetMapping("/reissue")
+    public void reIssueToken(){}
   
     @PostMapping("/send")
     public ResponseEntity<ApiSuccessResponse<String>> send(HttpServletRequest request,

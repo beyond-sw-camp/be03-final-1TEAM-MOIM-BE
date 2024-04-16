@@ -32,7 +32,16 @@ import java.io.IOException;
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     // 아래 url로 들어오는 요청은 Filter 작동 X
-    private static final String[] NO_CHECK_URLS = {"/login", "/sign-up", "/send-email"};
+    private static final String[] NO_CHECK_URLS =
+            {"/login",
+            "/oauth2/authorization/google",
+            "/login/oauth2/code/google",
+            "/favicon.ico",
+            "/api/auth/sign-up",
+            "/api/auth/send",
+            "/api/auth/verify",
+            "/api/auth/email-validate",
+            "/api/auth/nickname-validate"};
 
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
@@ -46,8 +55,11 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        log.info("JWT Filter 진입");
+        log.info("requestURI: " + request.getRequestURI());
         for (String url : NO_CHECK_URLS){
             if (request.getRequestURI().equals(url)){
+                log.info(url + " 필터 통과");
                 filterChain.doFilter(request, response); // NO_CHECK_URLS로 요청 들어오면 다음 필터 호출
                 return; // 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행 시킴)
             }
