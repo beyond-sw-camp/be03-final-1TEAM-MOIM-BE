@@ -143,7 +143,8 @@ public class JwtProvider {
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         log.info("extractAccessToken() 진입");
         // HttpHeaders를 통해 헤더에 Authorization을 넣어줌 (중요)
-        return Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
+        // request.getHeader(HttpHeaders.AUTHORIZATION)
+        return Optional.ofNullable(request.getHeader(accessHeader))
                 .filter(accessToken -> accessToken.startsWith(BEARER))
                 .map(accessToken -> accessToken.replace(BEARER, ""));
     }
