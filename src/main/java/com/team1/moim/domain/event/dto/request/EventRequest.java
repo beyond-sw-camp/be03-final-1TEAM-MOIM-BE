@@ -2,13 +2,10 @@ package com.team1.moim.domain.event.dto.request;
 
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.entity.Matrix;
-import com.team1.moim.domain.member.entity.Member;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 public class EventRequest {
@@ -29,12 +26,6 @@ public class EventRequest {
 
     @NotEmpty(message = "매트릭스가 비어있으면 안됩니다.")
     private String matrix;
-
-    private MultipartFile file;
-
-    private List<ToDoListRequest> toDoListRequests;
-    private RepeatRequest repeatValue;
-    private List<AlarmRequest> alarmRequests;
     private String alarmYn;
 
     public Event toEntity(Matrix matrix, String fileUrl){

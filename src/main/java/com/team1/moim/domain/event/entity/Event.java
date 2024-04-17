@@ -16,7 +16,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Event extends BaseTimeEntity {
+public class Event extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,8 +82,7 @@ public class Event extends BaseTimeEntity {
                  String place, 
                  Matrix matrix, 
                  String fileUrl, 
-                 Long repeatParent, 
-                 Member member, 
+                 Long repeatParent,
                  String alarmYn) {
         this.title = title;
         this.memo = memo;
@@ -92,9 +91,24 @@ public class Event extends BaseTimeEntity {
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;
-        this.member = member;
         this.alarmYn = alarmYn;
         this.repeatParent = repeatParent;
+    }
+
+    public Event(Event repeatEvent){
+        this.title = repeatEvent.getTitle();
+        this.memo = repeatEvent.getMemo();
+        this.startDateTime = repeatEvent.getStartDateTime();
+        this.endDateTime = repeatEvent.getEndDateTime();
+        this.place = repeatEvent.getPlace();
+        this.matrix = repeatEvent.getMatrix();
+        this.fileUrl = repeatEvent.getFileUrl();
+        this.alarmYn = repeatEvent.getAlarmYn();
+        this.repeatParent = repeatEvent.getRepeatParent();
+        this.alarms.addAll(repeatEvent.getAlarms());
+        this.toDoLists.addAll(repeatEvent.getToDoLists());
+        this.member = repeatEvent.getMember();
+        this.deleteYn = repeatEvent.getDeleteYn();
     }
 
     // 일정 수정

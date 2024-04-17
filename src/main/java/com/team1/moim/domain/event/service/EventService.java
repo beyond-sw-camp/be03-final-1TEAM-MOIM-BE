@@ -3,23 +3,21 @@ package com.team1.moim.domain.event.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
+import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
-import com.team1.moim.domain.event.dto.response.AlarmResponse;
 import com.team1.moim.domain.event.dto.response.EventResponse;
 import com.team1.moim.domain.event.entity.*;
 import com.team1.moim.domain.event.exception.EventNotFoundException;
 import com.team1.moim.domain.event.repository.AlarmRepository;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.event.repository.RepeatRepository;
-import com.team1.moim.domain.event.repository.ToDoListRepository;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.exception.MemberNotMatchException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.notification.NotificationType;
-import com.team1.moim.global.config.redis.RedisService;
-import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.domain.notification.dto.EventNotification;
+import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.config.sse.service.SseService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +26,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -48,139 +47,149 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final MemberRepository memberRepository;
-    private final ToDoListRepository toDoListRepository;
     private final RepeatRepository repeatRepository;
     private final AlarmRepository alarmRepository;
     private final S3Service s3Service;
     private final SseService sseService;
-    private final RedisService redisService;
+//    private final RedisService redisService;
 
-    public EventResponse create(EventRequest request) {
+    @Transactional
+    public EventResponse create(MultipartFile file,
+                                EventRequest eventRequest,
+                                RepeatRequest repeatRequest,
+                                List<ToDoListRequest> toDoListRequests,
+                                List<AlarmRequest> alarmRequests) throws JsonProcessingException{
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info(email);
         Member member = memberRepository.findByEmail(email).orElseThrow();
 
         log.info("일정이 추가 됩니다.");
         Matrix matrix;
-        if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
-        else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
-        else if (request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
-        else matrix = Matrix.Q4;
+        if (eventRequest.getMatrix().equals("Q1")){
+            matrix = Matrix.Q1;
+        } else if (eventRequest.getMatrix().equals("Q2")){
+            matrix = Matrix.Q2;
+        } else if (eventRequest.getMatrix().equals("Q3")){
+            matrix = Matrix.Q3;
+        } else {
+            matrix = Matrix.Q4;
+        }
+
         String fileUrl = null;
-        if (request.getFile() != null) {
-            fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
+        if (file != null) {
+            fileUrl = s3Service.uploadFile(FILE_TYPE, file);
         }
-        Event savedEvent = eventRepository.save(request.toEntity(member, matrix, fileUrl));
 
-//      ToDoList 추가
-        if (request.getToDoListRequests() != null) {
-            for (ToDoListRequest toDoListRequest : request.getToDoListRequests()) {
-                ToDoList toDoList = toDoListRequest.toEntity(savedEvent);
-                toDoListRepository.save(toDoList);
+        // 신규 일정 생성
+        Event newEvent = eventRequest.toEntity(matrix, fileUrl);
+        newEvent.attachMember(member);
+
+        log.info("신규 일정 초안 생성");
+
+        // 일정에 To-Do 리스트 추가
+        if (toDoListRequests != null) {
+            for (ToDoListRequest toDoListRequest : toDoListRequests) {
+                ToDoList toDoList = toDoListRequest.toEntity();
+                toDoList.attachEvent(newEvent);
             }
+
+            log.info("일정에 To-Do 리스트 등록 완료");
         }
-//        Alarm 추가
-        List<AlarmResponse> alarms = new ArrayList<>();
-        if(request.getAlarmRequests() != null && request.getAlarmYn().equals("Y")) {
-            for (AlarmRequest alarmRequest : request.getAlarmRequests()) {
+
+        // 일정에 알림 추가
+        if(alarmRequests != null && eventRequest.getAlarmYn().equals("Y")) {
+            for (AlarmRequest alarmRequest : alarmRequests) {
                 AlarmType alarmtype;
-                if (alarmRequest.getAlarmType().equals("M")) alarmtype = AlarmType.M;
-                else if (alarmRequest.getAlarmType().equals("H")) alarmtype = AlarmType.H;
-                else alarmtype = AlarmType.D;
-                Alarm alarm = alarmRequest.toEntity(alarmtype, savedEvent);
-                alarms.add(AlarmResponse.from(alarmRepository.save(alarm)));
+                if (alarmRequest.getAlarmType().equals("M")){
+                    alarmtype = AlarmType.M;
+                } else if (alarmRequest.getAlarmType().equals("H")){
+                    alarmtype = AlarmType.H;
+                } else {
+                    alarmtype = AlarmType.D;
+                }
+                Alarm alarm = alarmRequest.toEntity(alarmtype);
+                alarm.attachEvent(newEvent);
             }
+            log.info("일정에 알림 등록 완료");
         }
 
-//        Repeat추가, 다음 반복일정 만드는 메소드 호출
-        if (request.getRepeatValue() != null) {
-            RepeatType newRepeat;
-            if (request.getRepeatValue().getRepeatType().equals("Y")) newRepeat = RepeatType.Y;
-            else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
-            else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
-            else newRepeat = RepeatType.D;
+        Event savedEvent = eventRepository.save(newEvent);
+        log.info("DB에 일정 저장 완료");
 
-            log.info("반복일정이 추가됩니다.");
-            RepeatEvent repeatEventEntity = request.getRepeatValue().toEntity(newRepeat, savedEvent);
-            repeatRepository.save(repeatEventEntity);
-            createRepeatEvents(request, savedEvent.getId());
+        // 일정에 반복 일정 추가, 다음 반복 일정 생성하는 메소드 호출
+        if (repeatRequest != null) {
+            RepeatType repeatType = switch (repeatRequest.getRepeatType()) {
+                case "Y" -> RepeatType.Y;
+                case "M" -> RepeatType.M;
+                case "W" -> RepeatType.W;
+                default -> RepeatType.D;
+            };
+
+            Repeat savedRepeat = repeatRepository.save(repeatRequest.toEntity(repeatType, savedEvent));
+            addRepeatEvents(newEvent, savedRepeat);
+            log.info("DB에 저장된 일정에 반복 일정 추가 완료");
         }
+
         return EventResponse.from(savedEvent);
     }
 
-    public void createRepeatEvents(Event priorEvent) {
-        Matrix matrix;
-        if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
-        else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
-        else if (request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
-        else matrix = Matrix.Q4;
-        String fileUrl = null;
-        if (request.getFile() != null) {
-            fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
-        }
+    private void addRepeatEvents(Event newEvent, Repeat repeat) {
 
-        // 날짜형식으로 바꿔주는 형식
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        // startDate를 LocalDateTime으로 파싱
-        LocalDateTime startDate = LocalDateTime.parse(request.getStartDate()); // 들어온값
-        LocalDateTime endDate = LocalDateTime.parse(request.getEndDate());
-        LocalDateTime calculatedStartDate = startDate; // 날짜가 커져서 반복일정에 넣어줄 값
-        LocalDateTime calculatedEndDate = endDate;
+        log.info("반복 일정 추가 함수 진입");
+        LocalDateTime updatedStartDateTime = null; // 날짜가 커져서 반복 일정에 넣어줄 값
+        LocalDateTime updatedEndDateTime = null;
 
-//        다음에 또 반복을 할지 판별하게 해주는 변수
-        LocalDateTime nextStartDate = null;
+        // 다음에 또 반복을 할지 판별하게 해주는 변수
+        LocalDateTime nextStartDateTime = null;
+
         // 단위마다 추가하는 로직
-        if (request.getRepeatValue().getRepeatType().equals("Y")) {
+        if (repeat.getRepeatType() == RepeatType.Y) {
             // 1년 후
-            calculatedStartDate = startDate.plusYears(1); // 현재 반복일정에 들어갈 시작일자
-            calculatedEndDate = startDate.plusYears(1);
-            nextStartDate = calculatedStartDate.plusYears(1); // 현재 반복일정 바로 뒤에 또 들어갈 일자를 미리 계산함
-        } else if (request.getRepeatValue().getRepeatType().equals("M")) {
+            updatedStartDateTime = newEvent.getStartDateTime().plusYears(1); // 현재 반복일정에 들어갈 시작일자
+            updatedEndDateTime = newEvent.getEndDateTime().plusYears(1);
+            nextStartDateTime = updatedStartDateTime.plusYears(1); // 현재 반복일정 바로 뒤에 또 들어갈 일자를 미리 계산함
+        } else if (repeat.getRepeatType() == RepeatType.M) {
             // 1달 후
-            calculatedStartDate = startDate.plusMonths(1);
-            calculatedEndDate = startDate.plusMonths(1);
-            nextStartDate = calculatedStartDate.plusMonths(1);
-        } else if (request.getRepeatValue().getRepeatType().equals("W")) {
+            updatedStartDateTime = newEvent.getStartDateTime().plusMonths(1);
+            updatedEndDateTime = newEvent.getEndDateTime().plusMonths(1);
+            nextStartDateTime = updatedStartDateTime.plusMonths(1);
+        } else if (repeat.getRepeatType() == RepeatType.W) {
             // 1주 후
-            calculatedStartDate = startDate.plusWeeks(1);
-            calculatedEndDate = startDate.plusWeeks(1);
-            nextStartDate = calculatedStartDate.plusWeeks(1);
-        } else if (request.getRepeatValue().getRepeatType().equals("D")) {
+            updatedStartDateTime = newEvent.getStartDateTime().plusWeeks(1);
+            updatedEndDateTime = newEvent.getEndDateTime().plusWeeks(1);
+            nextStartDateTime = updatedStartDateTime.plusWeeks(1);
+        } else if (repeat.getRepeatType() == RepeatType.D) {
             // 1일 후
-            calculatedStartDate = startDate.plusDays(1);
-            calculatedEndDate = startDate.plusDays(1);
-            nextStartDate = calculatedStartDate.plusDays(1);
-        }
-        // LocalDateTime을 다시 String으로 변환
-        String newStartDate = calculatedStartDate.toString();
-        String newEndDate = calculatedEndDate.toString();
-//        그리고 repeat도 넣어주기
-
-        Event repeatedEvent = request.toEntity(member, matrix, fileUrl);
-        eventRepository.save(repeatedEvent);
-
-//        ToDoList 추가
-        if (request.getToDoListRequests() != null) {
-            for (ToDoListRequest toDoListRequest : request.getToDoListRequests()) {
-                ToDoList toDoList = toDoListRequest.toEntity(repeatedEvent);
-                toDoListRepository.save(toDoList);
-            }
+            updatedStartDateTime = newEvent.getStartDateTime().plusDays(1);
+            updatedEndDateTime = newEvent.getEndDateTime().plusDays(1);
+            nextStartDateTime = updatedStartDateTime.plusDays(1);
         }
 
-        RepeatType newRepeat;
-        if (request.getRepeatValue().getRepeatType().equals("Y")) newRepeat = RepeatType.Y;
-        else if (request.getMatrix().equals("M")) newRepeat = RepeatType.M;
-        else if (request.getMatrix().equals("W")) newRepeat = RepeatType.W;
-        else newRepeat = RepeatType.D;
-        
-        RepeatEvent repeatEventEntity = request.getRepeatValue().toEntity(newRepeat, repeatedEvent);
-        repeatRepository.save(repeatEventEntity);
+        log.info("업데이트 된 시작 일정: {}", updatedStartDateTime);
+        log.info("업데이트 된 종료 일정: {}", updatedEndDateTime);
 
-        // 만약 현재 반복일정 보다 1년뒤(반복일정 타입별이 Y인걸로 가정 하면)인 nextStartDate가 반복 종료일보다 전이면 RepeatCreate를 다시 호출한다.
-        LocalDate repeatEndDate = LocalDate.parse(request.getRepeatValue().getRepeatEndDate());
-        if (repeatEndDate.isAfter(ChronoLocalDate.from(nextStartDate))){
-            EventRequest newRequest = request.changeDateRequest();
-            createRepeatEvents(newRequest, repeatParent);
+        Long parentEventId;
+        if (newEvent.getRepeatParent() != null) {
+            parentEventId = newEvent.getRepeatParent();
+        } else {
+            parentEventId = newEvent.getId();
+        }
+
+        // 부모 일정에 대한 반복 일정 생성
+
+        Event repeatEvent = new Event(newEvent);
+        repeatEvent.changeData(updatedStartDateTime, updatedEndDateTime, parentEventId);
+
+        log.info("반복 일정 초안 생성 완료");
+
+        eventRepository.save(repeatEvent);
+
+        log.info("생성된 반복 일정 DB에 저장 완료");
+
+        // 현재 반복 일정 보다 1년 뒤(반복 일정 타입이 Y인 걸로 가정)인 nextStartDate가 반복 종료일보다 전이면 addRepeatEvents() 재귀 호출
+        if (repeat.getRepeatEndDate().isAfter(ChronoLocalDate.from(nextStartDateTime.minusDays(1)))){
+            log.info("반복 종료일 이전이므로, addRepeatEvents 함수를 재호출합니다.");
+            addRepeatEvents(repeatEvent, repeat);
         }
     }
 
@@ -265,11 +274,11 @@ public class EventService {
             }
             // 모든 반복일정의 반복종료일자 변경하기
             //부모객체와 모든 자식객체의 반복 종료일 고치기
-            RepeatEvent parentRepeatEvent = repeatRepository.findByEventId(repeatParentId);
-            parentRepeatEvent.changeEndDate(lastest_end_date);
+            Repeat parentRepeat = repeatRepository.findByEventId(repeatParentId);
+            parentRepeat.changeEndDate(lastest_end_date);
             for (Event value : allEvent) {
-                RepeatEvent repeatEvent = repeatRepository.findByEventId(value.getId());
-                repeatEvent.changeEndDate(lastest_end_date);
+                Repeat repeat = repeatRepository.findByEventId(value.getId());
+                repeat.changeEndDate(lastest_end_date);
             }
 
             // 현재 한가지 일정만 지우기
@@ -289,11 +298,11 @@ public class EventService {
             //현재 일정이 반복하는 일정 중 마지막 일정과 같다면 모든 반복데이터에 마지막 날짜를 바꿔줘야 함
             if(lastDate == event.getStartDateTime()){
                 for (Event value : allEvent) {
-                    RepeatEvent repeatEventTemp = repeatRepository.findByEventId(value.getId());
-                    repeatEventTemp.changeEndDate(LocalDate.from(newLastDate));
+                    Repeat repeatTemp = repeatRepository.findByEventId(value.getId());
+                    repeatTemp.changeEndDate(LocalDate.from(newLastDate));
                 }
-                RepeatEvent repeatEventParent = repeatRepository.findById(repeatParentId).orElseThrow();
-                repeatEventParent.changeEndDate(LocalDate.from(newLastDate));
+                Repeat repeatParent = repeatRepository.findById(repeatParentId).orElseThrow();
+                repeatParent.changeEndDate(LocalDate.from(newLastDate));
             }
 
         }

@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "repeatValue")
-public class RepeatEvent {
+@Table(name = "repeats")
+public class Repeat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +33,7 @@ public class RepeatEvent {
     private LocalDate repeatEndDate;
 
     @Builder
-    public RepeatEvent(Event event, RepeatType repeatType, LocalDate repeatEndDate) {
+    public Repeat(Event event, RepeatType repeatType, LocalDate repeatEndDate) {
         this.event = event;
         this.repeatType = repeatType;
         this.repeatEndDate = repeatEndDate;

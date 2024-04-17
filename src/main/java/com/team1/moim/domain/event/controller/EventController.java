@@ -1,5 +1,6 @@
 package com.team1.moim.domain.event.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
@@ -23,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
@@ -41,14 +43,21 @@ public class EventController {
     // 일정 등록
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
-    public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
-                                                                    @Valid EventRequest request) {
+    public ResponseEntity<ApiSuccessResponse<EventResponse>> create(
+            HttpServletRequest servRequest,
+            @RequestPart(value = "file") MultipartFile file,
+            @RequestPart(value = "eventRequest") @Valid EventRequest eventRequest,
+            @RequestPart(value = "repeatRequest") @Valid RepeatRequest repeatRequest,
+            @RequestPart(value = "toDoListRequests") List<ToDoListRequest> toDoListRequests,
+            @RequestPart(value = "alarmRequests") List<AlarmRequest> alarmRequests
+    ) throws JsonProcessingException {
+        log.info("일정 등록 API 시작");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        eventService.create(request)));
+                        eventService.create(file, eventRequest, repeatRequest, toDoListRequests, alarmRequests)));
     }
 
     // 일정 수정
