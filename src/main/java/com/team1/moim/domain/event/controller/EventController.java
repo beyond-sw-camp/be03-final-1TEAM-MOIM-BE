@@ -68,6 +68,20 @@ public class EventController {
                         eventService.update(eventId, request)));
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PatchMapping("/matrixUpdate/{eventId}/{matrix}")
+    public ResponseEntity<ApiSuccessResponse<EventResponse>> matrixUpdate(HttpServletRequest servRequest,
+                                                                    @PathVariable(name = "eventId") Long eventId,
+                                                                          @PathVariable(name = "matrix") Matrix matrix
+                                                                    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servRequest.getServletPath(),
+                        eventService.matrixUpdate(eventId, matrix)));
+    }
+
     // 일정 삭제
     @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/{eventId}")

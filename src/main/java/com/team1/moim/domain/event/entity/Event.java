@@ -107,5 +107,7 @@ public class Event extends BaseTimeEntity {
     public void delete() {
         this.deleteYn = "Y";
     }
-
+    public void matrixUpdate(Matrix matrix){
+        this.matrix = matrix;
+    }
 }
