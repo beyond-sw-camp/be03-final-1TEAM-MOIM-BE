@@ -63,15 +63,17 @@ public class EventController {
     // 일정 수정
     @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/{eventId}")
-    public ResponseEntity<ApiSuccessResponse<EventResponse>> update(HttpServletRequest servRequest,
-                                                                    @PathVariable(name = "eventId") Long eventId,
-                                                                    @Valid EventRequest request) {
+    public ResponseEntity<ApiSuccessResponse<EventResponse>> update(
+            HttpServletRequest servRequest,
+            @PathVariable(name = "eventId") Long eventId,
+            @RequestPart(value = "file") MultipartFile file,
+            @RequestPart(value = "eventRequest") @Valid EventRequest eventRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        eventService.update(eventId, request)));
+                        eventService.update(eventId, file, eventRequest)));
     }
 
     // 일정 삭제
@@ -90,10 +92,10 @@ public class EventController {
     //   반복일정의 삭제
     @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/repeat/{eventId}")
-    public ResponseEntity<ApiSuccessResponse<String>> deleteRepeat(HttpServletRequest servRequest,
-                                                                   @PathVariable(name = "eventId") Long eventId,
-                                                                   @RequestParam("deleteType") String deleteType) {
-        eventService.repeatDelete(eventId, deleteType);
+    public ResponseEntity<ApiSuccessResponse<String>> deleteRepeatEvents(HttpServletRequest servRequest,
+                                                                         @PathVariable(name = "eventId") Long eventId,
+                                                                         @RequestParam("deleteType") String deleteType) {
+        eventService.deleteRepeatEvents(eventId, deleteType);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,

@@ -59,9 +59,7 @@ public class EventService {
                                 RepeatRequest repeatRequest,
                                 List<ToDoListRequest> toDoListRequests,
                                 List<AlarmRequest> alarmRequests) throws JsonProcessingException{
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info(email);
-        Member member = memberRepository.findByEmail(email).orElseThrow();
+        Member member = findMemberByEmail();
 
         log.info("일정이 추가 됩니다.");
         Matrix matrix;
@@ -195,26 +193,31 @@ public class EventService {
 
 
     @Transactional
-    public EventResponse update(Long eventId, EventRequest request) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow();
+    public EventResponse update(Long eventId, MultipartFile file, EventRequest eventRequest) {
+        Member member = findMemberByEmail();
         Event event = eventRepository.findById(eventId).orElseThrow();
-//        if(member.getId() != event.getMember().getId()) {
-//            throw new AccessDeniedException("작성한 회원이 아닙니다.");
-//        }
+        if(!member.getId().equals(event.getMember().getId())) {
+            throw new MemberNotMatchException();
+        }
         String fileUrl = null;
-        if (request.getFile() != null) {
-            fileUrl = s3Service.uploadFile(FILE_TYPE, request.getFile());
+        if (file != null) {
+            fileUrl = s3Service.uploadFile(FILE_TYPE, file);
         }
         Matrix matrix;
-        if (request.getMatrix().equals("Q1")) matrix = Matrix.Q1;
-        else if (request.getMatrix().equals("Q2")) matrix = Matrix.Q2;
-        else if (request.getMatrix().equals("Q3")) matrix = Matrix.Q3;
+        if (eventRequest.getMatrix().equals("Q1")) matrix = Matrix.Q1;
+        else if (eventRequest.getMatrix().equals("Q2")) matrix = Matrix.Q2;
+        else if (eventRequest.getMatrix().equals("Q3")) matrix = Matrix.Q3;
         else matrix = Matrix.Q4;
-        event.update(request.getTitle(), request.getMemo(), request.getStartDate(), request.getEndDate(), request.getPlace(), matrix, fileUrl);
+        event.update(
+                eventRequest.getTitle(),
+                eventRequest.getMemo(),
+                eventRequest.getStartDate(),
+                eventRequest.getEndDate(),
+                eventRequest.getPlace(),
+                matrix,
+                fileUrl);
 
         return EventResponse.from(event);
-
     }
 
     @Transactional
@@ -222,15 +225,18 @@ public class EventService {
         log.info("delete");
         Event event = eventRepository.findById(eventId).orElseThrow();
         event.delete();
-
     }
 
     @Transactional
-    public void repeatDelete(Long eventId, String deleteType) {
+    public void deleteRepeatEvents(Long eventId, String deleteType) {
+        Member member = findMemberByEmail();
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        if(!member.getId().equals(event.getMember().getId())) {
+            throw new MemberNotMatchException();
+        }
 
 //        현재 이벤트
         log.info("deleteType = " + deleteType);
-        Event event = eventRepository.findById(eventId).orElseThrow();
         // 현재 이벤트 지우기
         event.delete();
 
@@ -246,15 +252,13 @@ public class EventService {
         //부모 이벤트
         Event parentEvent = eventRepository.findById(repeatParentId).orElseThrow();
 
-
-
         // 반복되는 일정 모두를 지움
         if(deleteType.equals("all")){
 
             parentEvent.delete();
 
-            for (int i = 0; i < allEvent.size(); i++) {
-                Event repeatEvent = eventRepository.findById(allEvent.get(i).getId()).orElseThrow();
+            for (Event value : allEvent) {
+                Event repeatEvent = eventRepository.findById(value.getId()).orElseThrow();
                 repeatEvent.delete();
             }
 
@@ -262,23 +266,23 @@ public class EventService {
         } else if (deleteType.equals("after")) {
 
             // 일정이 지워지고 난후 그 직전 날짜 구하기
-            LocalDate lastest_end_date = LocalDate.parse("0001-01-01");
+            LocalDate lastestEndDate = LocalDate.parse("0001-01-01");
             // 현재일정 이후의 일정 구하기
-            for (int i = 0; i < allEvent.size(); i++) {
-                Event event1 = allEvent.get(i);
-                if (event1.getStartDateTime().isAfter(event.getStartDateTime())||event1.getStartDateTime()==event.getStartDateTime()){ // 현재 일정보다 이후인것은 모두 삭제
+            for (Event event1 : allEvent) {
+                if (event1.getStartDateTime().isAfter(event.getStartDateTime()) ||
+                        event1.getStartDateTime() == event.getStartDateTime()) { // 현재 일정보다 이후인것은 모두 삭제
                     event1.delete();
-                }else{ // 현재 일정보다 이전인 모든 일정은 모두 반복 종료일을 바꿔주기....
-                    lastest_end_date = LocalDate.from(event1.getStartDateTime());
+                } else { // 현재 일정보다 이전인 모든 일정은 모두 반복 종료일을 바꿔주기....
+                    lastestEndDate = LocalDate.from(event1.getStartDateTime());
                 }
             }
             // 모든 반복일정의 반복종료일자 변경하기
             //부모객체와 모든 자식객체의 반복 종료일 고치기
             Repeat parentRepeat = repeatRepository.findByEventId(repeatParentId);
-            parentRepeat.changeEndDate(lastest_end_date);
+            parentRepeat.changeEndDate(lastestEndDate);
             for (Event value : allEvent) {
                 Repeat repeat = repeatRepository.findByEventId(value.getId());
-                repeat.changeEndDate(lastest_end_date);
+                repeat.changeEndDate(lastestEndDate);
             }
 
             // 현재 한가지 일정만 지우기
@@ -286,11 +290,11 @@ public class EventService {
             // 만약 뒤의 일정이 없다면 모든 반복일정의 "반복 일정 종료일을"을 바로 직전으로 바꾸기
             LocalDateTime lastDate = event.getStartDateTime();
             LocalDateTime newLastDate = LocalDateTime.parse("0001-01-01T00:00:00"); // 새롭게 바뀔 반복 종료일
-            for (int i = 0; i < allEvent.size(); i++) {
-                Event event1 = allEvent.get(i);
-                if(event1.getStartDateTime().isAfter(event.getStartDateTime())||event1.getStartDateTime()==event.getStartDateTime()){
+            for (Event event1 : allEvent) {
+                if (event1.getStartDateTime().isAfter(event.getStartDateTime()) ||
+                        event1.getStartDateTime() == event.getStartDateTime()) {
                     lastDate = event1.getStartDateTime();
-                }else if(newLastDate.isBefore(event1.getStartDateTime())){
+                } else if (newLastDate.isBefore(event1.getStartDateTime())) {
                     newLastDate = event1.getStartDateTime();
                 }
             }
@@ -309,8 +313,7 @@ public class EventService {
     }
 
     public List<EventResponse> matrixEvents(Matrix matrix) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow();
+        Member member = findMemberByEmail();
         List<Event> events = eventRepository.findByMember(member);
 
         return events.stream()
@@ -339,21 +342,36 @@ public class EventService {
                     if(event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                EventNotification.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
+                                EventNotification.from(
+                                        event.getId(),
+                                        alarm,
+                                        member,
+                                        LocalDateTime.now(),
+                                        NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }if(alarm.getAlarmtype() == AlarmType.H) {
                     if(event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                EventNotification.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
+                                EventNotification.from(
+                                        event.getId(),
+                                        alarm,
+                                        member,
+                                        LocalDateTime.now(),
+                                        NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }if(alarm.getAlarmtype() == AlarmType.M) {
                     if(event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
-                                EventNotification.from(event.getId(), alarm, member, LocalDateTime.now(), NotificationType.EVENT));
+                                EventNotification.from(
+                                        event.getId(),
+                                        alarm,
+                                        member,
+                                        LocalDateTime.now(),
+                                        NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
                 }
@@ -362,13 +380,14 @@ public class EventService {
     }
 
     public List<EventResponse> getMonthly(int year, int month) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 조회");
         // JPQL
         List<Event> events = eventRepository.findByMemberAndYearAndMonth(member, year, month);
         // 조회된 일정이 없으면 에러
-        if(events.isEmpty()) throw new EventNotFoundException();
+        if(events.isEmpty()) {
+            throw new EventNotFoundException();
+        }
         // EventResponse 조립
         List<EventResponse> eventResponses = new ArrayList<>();
         for(Event event : events) {
@@ -380,11 +399,12 @@ public class EventService {
     }
 
     public List<EventResponse> getWeekly(int year, int week) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 조회");
         List<Event> events = eventRepository.findByMemberAndYearAndWeek(member, year, week);
-        if(events.isEmpty()) throw new EventNotFoundException();
+        if(events.isEmpty()) {
+            throw new EventNotFoundException();
+        }
         List<EventResponse> eventResponses = new ArrayList<>();
         for(Event event : events) {
             log.info(event.getTitle());
@@ -396,8 +416,7 @@ public class EventService {
     }
 
     public List<EventResponse> getDaily(int year, int month, int day) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 조회");
         List<Event> events = eventRepository.findByMemberAndYearAndMonthAndDay(member, year, month, day);
         if(events.isEmpty()) throw new EventNotFoundException();
@@ -412,9 +431,8 @@ public class EventService {
     }
 
     public EventResponse getEvent(Long eventId) {
+        Member member = findMemberByEmail();
         Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         if(member != event.getMember()) {
             throw new MemberNotMatchException();
         }
@@ -422,8 +440,7 @@ public class EventService {
     }
 
     public List<EventResponse> searchEvent(String content) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 검색");
 
         List<Event> events = eventRepository.findByMemberAndTitleOrMemo(member,content);
@@ -441,5 +458,11 @@ public class EventService {
         }
 
         return eventResponses;
+    }
+
+    // 이메일로 회원 찾기
+    private Member findMemberByEmail() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
     }
 }
