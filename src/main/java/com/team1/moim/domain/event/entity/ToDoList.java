@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,7 +36,13 @@ public class ToDoList extends BaseTimeEntity {
         this.isChecked = isChecked;
     }
 
-    //투두리스트 수정
+    // Event Entity에 To-Do 리스트 Entity 매핑
+    public void attachEvent(Event event) {
+        this.event = event;
+        event.getToDoLists().add(this);
+    }
+
+    // 투두리스트 수정
     public void update(String contents, String isChecked) {
         this.contents = contents;
         this.isChecked = isChecked;

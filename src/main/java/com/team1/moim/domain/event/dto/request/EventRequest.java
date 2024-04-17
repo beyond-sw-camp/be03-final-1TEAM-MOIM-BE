@@ -37,7 +37,7 @@ public class EventRequest {
     private List<AlarmRequest> alarmRequests;
     private String alarmYn;
 
-    public Event toEntity(Member member, Matrix matrix, String fileUrl){
+    public Event toEntity(Matrix matrix, String fileUrl){
 
         LocalDateTime localStart = LocalDateTime.parse(startDate);
         LocalDateTime localEnd = LocalDateTime.parse(endDate);
@@ -50,27 +50,7 @@ public class EventRequest {
                 .place(place)
                 .matrix(matrix)
                 .fileUrl(fileUrl)
-                .member(member)
                 .alarmYn(alarmYn)
                 .build();
-    }
-
-    public EventRequest changeDateRequest(Long repeatParentId){
-        // 새로운 EventRequest 객체 생성 (깊은 복사는 필요한 필드만 수동으로 진행)
-        EventRequest newRequest = new EventRequest();
-
-        // 기존 request로부터 필요한 모든 필드를 새 객체로 복사
-        newRequest.setTitle(title);
-        newRequest.setMemo(memo);
-        // 새로운 startDate와 endDate로 설정
-        newRequest.setStartDate(startDate);
-        newRequest.setEndDate(endDate);
-        newRequest.setPlace(place);
-        newRequest.setMatrix(matrix);
-        newRequest.setFile(file);
-        newRequest.setAlarmYn(alarmYn);
-
-        // 수정된 객체 반환
-        return newRequest;
     }
 }

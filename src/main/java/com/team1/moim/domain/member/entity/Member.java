@@ -1,11 +1,15 @@
 package com.team1.moim.domain.member.entity;
 
+import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.global.config.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,6 +44,9 @@ public class Member extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String deleteYn = "N";
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Event> events = new ArrayList<>();
 
     @Builder
     public Member(String email, String password, String nickname,

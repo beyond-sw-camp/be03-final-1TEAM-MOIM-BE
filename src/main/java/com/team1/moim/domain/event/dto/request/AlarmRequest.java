@@ -13,9 +13,8 @@ public class AlarmRequest {
     @NotEmpty(message = "알림 타입이 비어있으면 안됩니다.")
     private String alarmType;
 
-    public Alarm toEntity(AlarmType alarmtype, Event event){
+    public Alarm toEntity(AlarmType alarmtype){
         return Alarm.builder()
-                .event(event)
                 .alarmtype(alarmtype)
                 .setTime(setTime)
                 .build();

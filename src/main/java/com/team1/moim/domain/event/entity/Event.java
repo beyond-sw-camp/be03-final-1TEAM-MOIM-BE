@@ -71,6 +71,9 @@ public class Event extends BaseTimeEntity {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToDoList> toDoLists = new ArrayList<>();
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alarm> alarms = new ArrayList<>();
+
     @Builder
     public Event(String title, 
                  String memo, 
@@ -107,6 +110,19 @@ public class Event extends BaseTimeEntity {
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;
+    }
+
+    public void attachMember(Member member) {
+        this.member = member;
+        member.getEvents().add(this);
+    }
+
+    public void changeData(LocalDateTime newStartDateTime,
+                           LocalDateTime newEndDateTime,
+                           Long repeatParent) {
+        this.startDateTime = newStartDateTime;
+        this.endDateTime = newEndDateTime;
+        this.repeatParent = repeatParent;
     }
 
     // 일정 삭제
