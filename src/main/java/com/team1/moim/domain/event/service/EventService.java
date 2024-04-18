@@ -466,4 +466,11 @@ public class EventService {
 
         return eventResponses;
     }
+
+    @Transactional
+    public void matrixUpdate(Long eventId, Matrix matrix) {
+        log.info("matrix update");
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        event.matrixUpdate(matrix);
+    }
 }

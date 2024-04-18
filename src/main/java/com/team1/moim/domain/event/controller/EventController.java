@@ -68,6 +68,21 @@ public class EventController {
                         eventService.update(eventId, request)));
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PatchMapping("/matrixUpdate/{eventId}/{matrix}")
+    public ResponseEntity<ApiSuccessResponse<String>> matrixUpdate(HttpServletRequest servRequest,
+                                                                    @PathVariable(name = "eventId") Long eventId,
+                                                                          @PathVariable(name = "matrix") Matrix matrix
+                                                                    ) {
+        eventService.matrixUpdate(eventId,matrix);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servRequest.getServletPath(),
+                        ("메트릭스가 변경되었습니다.")));
+    }
+
     // 일정 삭제
     @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/{eventId}")
