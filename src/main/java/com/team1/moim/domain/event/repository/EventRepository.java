@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -16,8 +17,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByRepeatParent(Long repeatParent);
     List<Event> findByMember(Member member);
 
-    @Query(value = "SELECT e FROM Event e WHERE e.member = :member AND FUNCTION('YEAR', e.startDateTime) = :year AND FUNCTION('MONTH', e.startDateTime) = :month")
-    List<Event> findByMemberAndYearAndMonth(@Param("member") Member member, @Param("year") int year, @Param("month") int month);
+    @Query("SELECT e FROM Event e WHERE e.member = :member AND (e.startDateTime <= :end AND e.endDateTime >= :start)")
+    List<Event> findByMemberAndDateRange(@Param("member") Member member, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("SELECT e FROM Event e WHERE e.member = :member AND FUNCTION('YEAR', e.startDateTime) = :year AND FUNCTION('WEEK', e.startDateTime) = :week")
     List<Event> findByMemberAndYearAndWeek(@Param("member") Member member, @Param("year") int year, @Param("week") int week);
