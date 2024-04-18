@@ -34,9 +34,12 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -389,8 +392,14 @@ public class EventService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         log.info(member.getNickname() + "님 일정 조회");
-        // JPQL
-        List<Event> events = eventRepository.findByMemberAndYearAndMonth(member, year, month);
+        // 해당 월의 첫날과 마지막 날 구하기
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate endOfMonth = startOfMonth.with(TemporalAdjusters.lastDayOfMonth());
+        // LocalDate를 LocalDateTime으로 변환 (시작 시간은 00:00, 종료 시간은 23:59로 설정)
+        LocalDateTime start = startOfMonth.atStartOfDay();
+        LocalDateTime end = endOfMonth.atTime(23, 59, 59);
+        // 변환된 LocalDateTime 객체를 사용하여 쿼리 실행
+        List<Event> events = eventRepository.findByMemberAndDateRange(member, start, end);
         // 조회된 일정이 없으면 에러
         if(events.isEmpty()) throw new EventNotFoundException();
         // EventResponse 조립
