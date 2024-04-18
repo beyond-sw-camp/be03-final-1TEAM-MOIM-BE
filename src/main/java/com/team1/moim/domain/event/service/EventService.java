@@ -467,15 +467,10 @@ public class EventService {
         return eventResponses;
     }
 
-    public EventResponse matrixUpdate(Long eventId, Matrix matrix) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow();
+    @Transactional
+    public void matrixUpdate(Long eventId, Matrix matrix) {
+        log.info("matrix update");
         Event event = eventRepository.findById(eventId).orElseThrow();
-//        if(member.getId() != event.getMember().getId()) {
-//            throw new AccessDeniedException("작성한 회원이 아닙니다.");
-//        }
         event.matrixUpdate(matrix);
-
-        return EventResponse.from(event);
     }
 }
