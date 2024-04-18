@@ -45,11 +45,11 @@ public class EventController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<EventResponse>> create(
             HttpServletRequest servRequest,
-            @RequestPart(value = "file") MultipartFile file,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             @RequestPart(value = "eventRequest") @Valid EventRequest eventRequest,
-            @RequestPart(value = "repeatRequest") @Valid RepeatRequest repeatRequest,
-            @RequestPart(value = "toDoListRequests") List<ToDoListRequest> toDoListRequests,
-            @RequestPart(value = "alarmRequests") List<AlarmRequest> alarmRequests
+            @RequestPart(value = "repeatRequest", required = false) @Valid RepeatRequest repeatRequest,
+            @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests,
+            @RequestPart(value = "alarmRequests", required = false) List<AlarmRequest> alarmRequests
     ) throws JsonProcessingException {
         log.info("일정 등록 API 시작");
         return ResponseEntity
