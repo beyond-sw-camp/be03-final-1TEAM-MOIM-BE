@@ -460,9 +460,17 @@ public class EventService {
         return eventResponses;
     }
 
+
     // 이메일로 회원 찾기
     private Member findMemberByEmail() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+
+    @Transactional
+    public void matrixUpdate(Long eventId, Matrix matrix) {
+        log.info("matrix update");
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        event.matrixUpdate(matrix);
+
     }
 }
