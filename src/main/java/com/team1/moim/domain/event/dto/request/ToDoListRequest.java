@@ -1,6 +1,5 @@
 package com.team1.moim.domain.event.dto.request;
 
-import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.entity.ToDoList;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -13,11 +12,10 @@ public class ToDoListRequest {
 
     private String isChecked;
 
-    public static ToDoList toEntity(String contents, String isChecked, Event event){
+    public ToDoList toEntity(){
         return ToDoList.builder()
                 .contents(contents)
                 .isChecked(isChecked)
-                .event(event)
                 .build();
     }
 }

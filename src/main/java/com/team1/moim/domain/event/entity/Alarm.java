@@ -13,7 +13,7 @@ public class Alarm extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //    일정ID
+    //    일정 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
@@ -36,6 +36,11 @@ public class Alarm extends BaseTimeEntity {
         this.event = event;
         this.alarmtype = alarmtype;
         this.setTime = setTime;
+    }
+
+    public void attachEvent(Event event) {
+        this.event = event;
+        event.getAlarms().add(this);
     }
 
 //    알림 전송 체크

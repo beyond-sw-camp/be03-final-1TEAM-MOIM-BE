@@ -1,5 +1,6 @@
 package com.team1.moim.domain.event.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
@@ -23,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
@@ -41,31 +43,52 @@ public class EventController {
     // 일정 등록
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
-    public ResponseEntity<ApiSuccessResponse<EventResponse>> create(HttpServletRequest servRequest,
-                                                                    @Valid EventRequest request,
-                                                                    @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests,
-                                                                    @RequestPart(value = "repeat", required = false) RepeatRequest repeatValue,
-                                                                    @RequestPart(value = "alarmRequest", required = false) List<AlarmRequest> alarmRequest) {
+    public ResponseEntity<ApiSuccessResponse<EventResponse>> create(
+            HttpServletRequest servRequest,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart(value = "eventRequest") @Valid EventRequest eventRequest,
+            @RequestPart(value = "repeatRequest", required = false) @Valid RepeatRequest repeatRequest,
+            @RequestPart(value = "toDoListRequests", required = false) List<ToDoListRequest> toDoListRequests,
+            @RequestPart(value = "alarmRequests", required = false) List<AlarmRequest> alarmRequests
+    ) throws JsonProcessingException {
+        log.info("일정 등록 API 시작");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        eventService.create(request, toDoListRequests, repeatValue, alarmRequest)));
+                        eventService.create(file, eventRequest, repeatRequest, toDoListRequests, alarmRequests)));
     }
 
     // 일정 수정
     @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/{eventId}")
-    public ResponseEntity<ApiSuccessResponse<EventResponse>> update(HttpServletRequest servRequest,
-                                                                    @PathVariable(name = "eventId") Long eventId,
-                                                                    @Valid EventRequest request) {
+    public ResponseEntity<ApiSuccessResponse<EventResponse>> update(
+            HttpServletRequest servRequest,
+            @PathVariable(name = "eventId") Long eventId,
+            @RequestPart(value = "file") MultipartFile file,
+            @RequestPart(value = "eventRequest") @Valid EventRequest eventRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        eventService.update(eventId, request)));
+                        eventService.update(eventId, file, eventRequest)));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PatchMapping("/matrixUpdate/{eventId}/{matrix}")
+    public ResponseEntity<ApiSuccessResponse<String>> matrixUpdate(HttpServletRequest servRequest,
+                                                                    @PathVariable(name = "eventId") Long eventId,
+                                                                          @PathVariable(name = "matrix") Matrix matrix
+                                                                    ) {
+        eventService.matrixUpdate(eventId,matrix);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servRequest.getServletPath(),
+                        ("메트릭스가 변경되었습니다.")));
     }
 
     // 일정 삭제
@@ -84,10 +107,10 @@ public class EventController {
     //   반복일정의 삭제
     @PreAuthorize("hasRole('ROLE_USER')")
     @DeleteMapping("/repeat/{eventId}")
-    public ResponseEntity<ApiSuccessResponse<String>> deleteRepeat(HttpServletRequest servRequest,
-                                                                   @PathVariable(name = "eventId") Long eventId,
-                                                                   @RequestParam("deleteType") String deleteType) {
-        eventService.repeatDelete(eventId, deleteType);
+    public ResponseEntity<ApiSuccessResponse<String>> deleteRepeatEvents(HttpServletRequest servRequest,
+                                                                         @PathVariable(name = "eventId") Long eventId,
+                                                                         @RequestParam("deleteType") String deleteType) {
+        eventService.deleteRepeatEvents(eventId, deleteType);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,

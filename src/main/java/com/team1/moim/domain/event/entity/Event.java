@@ -1,5 +1,6 @@
 package com.team1.moim.domain.event.entity;
 
+import com.team1.moim.domain.group.entity.GroupInfo;
 import com.team1.moim.domain.member.entity.Member;
 import com.team1.moim.global.config.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -9,20 +10,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Event extends BaseTimeEntity {
+public class Event extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    회원ID
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
 
 //    제목
     @Column(nullable = false)
@@ -65,6 +63,17 @@ public class Event extends BaseTimeEntity {
     @Column(nullable = false)
     private String alarmYn = "N";
 
+    //    회원ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ToDoList> toDoLists = new ArrayList<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alarm> alarms = new ArrayList<>();
+
     @Builder
     public Event(String title, 
                  String memo, 
@@ -73,8 +82,7 @@ public class Event extends BaseTimeEntity {
                  String place, 
                  Matrix matrix, 
                  String fileUrl, 
-                 Long repeatParent, 
-                 Member member, 
+                 Long repeatParent,
                  String alarmYn) {
         this.title = title;
         this.memo = memo;
@@ -83,9 +91,24 @@ public class Event extends BaseTimeEntity {
         this.place = place;
         this.matrix = matrix;
         this.fileUrl = fileUrl;
-        this.member = member;
         this.alarmYn = alarmYn;
         this.repeatParent = repeatParent;
+    }
+
+    public Event(Event repeatEvent){
+        this.title = repeatEvent.getTitle();
+        this.memo = repeatEvent.getMemo();
+        this.startDateTime = repeatEvent.getStartDateTime();
+        this.endDateTime = repeatEvent.getEndDateTime();
+        this.place = repeatEvent.getPlace();
+        this.matrix = repeatEvent.getMatrix();
+        this.fileUrl = repeatEvent.getFileUrl();
+        this.alarmYn = repeatEvent.getAlarmYn();
+        this.repeatParent = repeatEvent.getRepeatParent();
+        this.alarms.addAll(repeatEvent.getAlarms());
+        this.toDoLists.addAll(repeatEvent.getToDoLists());
+        this.member = repeatEvent.getMember();
+        this.deleteYn = repeatEvent.getDeleteYn();
     }
 
     // 일정 수정
@@ -103,9 +126,24 @@ public class Event extends BaseTimeEntity {
         this.fileUrl = fileUrl;
     }
 
+    public void attachMember(Member member) {
+        this.member = member;
+        member.getEvents().add(this);
+    }
+
+    public void changeData(LocalDateTime newStartDateTime,
+                           LocalDateTime newEndDateTime,
+                           Long repeatParent) {
+        this.startDateTime = newStartDateTime;
+        this.endDateTime = newEndDateTime;
+        this.repeatParent = repeatParent;
+    }
+
     // 일정 삭제
     public void delete() {
         this.deleteYn = "Y";
     }
-
+    public void matrixUpdate(Matrix newMatrix){
+        this.matrix = newMatrix;
+    }
 }

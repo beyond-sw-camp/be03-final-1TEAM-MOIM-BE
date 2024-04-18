@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "repeatValue")
+@Table(name = "repeats")
 public class Repeat {
 
     @Id
@@ -30,20 +30,17 @@ public class Repeat {
 
     // 반복 종료일
     @Column(nullable = false)
-    private LocalDate repeat_end_date;
-
+    private LocalDate repeatEndDate;
 
     @Builder
-    public Repeat(Event event, RepeatType repeatType, LocalDate repeat_end_date) {
+    public Repeat(Event event, RepeatType repeatType, LocalDate repeatEndDate) {
         this.event = event;
         this.repeatType = repeatType;
-        this.repeat_end_date = repeat_end_date;
+        this.repeatEndDate = repeatEndDate;
     }
 
     //일정 종료일 변경
-    public void changeEndDate(LocalDate repeat_end_date) {
-        this.repeat_end_date = repeat_end_date;
+    public void changeEndDate(LocalDate repeatEndDate) {
+        this.repeatEndDate = repeatEndDate;
     }
-
-
 }
