@@ -30,9 +30,12 @@ import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -64,16 +67,16 @@ public class EventService {
                                 EventRequest eventRequest,
                                 RepeatRequest repeatRequest,
                                 List<ToDoListRequest> toDoListRequests,
-                                List<AlarmRequest> alarmRequests) throws JsonProcessingException{
+                                List<AlarmRequest> alarmRequests) throws JsonProcessingException {
         Member member = findMemberByEmail();
 
         log.info("일정이 추가 됩니다.");
         Matrix matrix;
-        if (eventRequest.getMatrix().equals("Q1")){
+        if (eventRequest.getMatrix().equals("Q1")) {
             matrix = Matrix.Q1;
-        } else if (eventRequest.getMatrix().equals("Q2")){
+        } else if (eventRequest.getMatrix().equals("Q2")) {
             matrix = Matrix.Q2;
-        } else if (eventRequest.getMatrix().equals("Q3")){
+        } else if (eventRequest.getMatrix().equals("Q3")) {
             matrix = Matrix.Q3;
         } else {
             matrix = Matrix.Q4;
@@ -101,12 +104,12 @@ public class EventService {
         }
 
         // 일정에 알림 추가
-        if(alarmRequests != null && eventRequest.getAlarmYn().equals("Y")) {
+        if (alarmRequests != null && eventRequest.getAlarmYn().equals("Y")) {
             for (AlarmRequest alarmRequest : alarmRequests) {
                 AlarmType alarmtype;
-                if (alarmRequest.getAlarmType().equals("M")){
+                if (alarmRequest.getAlarmType().equals("M")) {
                     alarmtype = AlarmType.M;
-                } else if (alarmRequest.getAlarmType().equals("H")){
+                } else if (alarmRequest.getAlarmType().equals("H")) {
                     alarmtype = AlarmType.H;
                 } else {
                     alarmtype = AlarmType.D;
@@ -191,7 +194,7 @@ public class EventService {
         log.info("생성된 반복 일정 DB에 저장 완료");
 
         // 현재 반복 일정 보다 1년 뒤(반복 일정 타입이 Y인 걸로 가정)인 nextStartDate가 반복 종료일보다 전이면 addRepeatEvents() 재귀 호출
-        if (repeat.getRepeatEndDate().isAfter(ChronoLocalDate.from(nextStartDateTime.minusDays(1)))){
+        if (repeat.getRepeatEndDate().isAfter(ChronoLocalDate.from(nextStartDateTime.minusDays(1)))) {
             log.info("반복 종료일 이전이므로, addRepeatEvents 함수를 재호출합니다.");
             addRepeatEvents(repeatEvent, repeat);
         }
@@ -202,7 +205,7 @@ public class EventService {
     public EventResponse update(Long eventId, MultipartFile file, EventRequest eventRequest) {
         Member member = findMemberByEmail();
         Event event = eventRepository.findById(eventId).orElseThrow();
-        if(!member.getId().equals(event.getMember().getId())) {
+        if (!member.getId().equals(event.getMember().getId())) {
             throw new MemberNotMatchException();
         }
         String fileUrl = null;
@@ -237,7 +240,7 @@ public class EventService {
     public void deleteRepeatEvents(Long eventId, String deleteType) {
         Member member = findMemberByEmail();
         Event event = eventRepository.findById(eventId).orElseThrow();
-        if(!member.getId().equals(event.getMember().getId())) {
+        if (!member.getId().equals(event.getMember().getId())) {
             throw new MemberNotMatchException();
         }
 
@@ -248,7 +251,7 @@ public class EventService {
 
         Long repeatParentId = event.getRepeatParent();
         // 모든 자식 이벤트
-        if(event.getRepeatParent() == null) {
+        if (event.getRepeatParent() == null) {
             repeatParentId = event.getId();
         }
 
@@ -259,7 +262,7 @@ public class EventService {
         Event parentEvent = eventRepository.findById(repeatParentId).orElseThrow();
 
         // 반복되는 일정 모두를 지움
-        if(deleteType.equals("all")){
+        if (deleteType.equals("all")) {
 
             parentEvent.delete();
 
@@ -292,7 +295,7 @@ public class EventService {
             }
 
             // 현재 한가지 일정만 지우기
-        }else{
+        } else {
             // 만약 뒤의 일정이 없다면 모든 반복일정의 "반복 일정 종료일을"을 바로 직전으로 바꾸기
             LocalDateTime lastDate = event.getStartDateTime();
             LocalDateTime newLastDate = LocalDateTime.parse("0001-01-01T00:00:00"); // 새롭게 바뀔 반복 종료일
@@ -306,7 +309,7 @@ public class EventService {
             }
 
             //현재 일정이 반복하는 일정 중 마지막 일정과 같다면 모든 반복데이터에 마지막 날짜를 바꿔줘야 함
-            if(lastDate == event.getStartDateTime()){
+            if (lastDate == event.getStartDateTime()) {
                 for (Event value : allEvent) {
                     Repeat repeatTemp = repeatRepository.findByEventId(value.getId());
                     repeatTemp.changeEndDate(LocalDate.from(newLastDate));
@@ -337,15 +340,15 @@ public class EventService {
     public void eventSchedule() throws JsonProcessingException {
         // 삭제되지 않고, 알림 설정한 일정LiST
         List<Event> events = eventRepository.findByDeleteYnAndAlarmYn("N", "Y");
-        for(Event event : events) {
+        for (Event event : events) {
             // 과거 일정은 알림 X
-            if(event.getStartDateTime().isBefore(LocalDateTime.now())) continue;
+            if (event.getStartDateTime().isBefore(LocalDateTime.now())) continue;
             // 이미 전송한 알림 X
             List<Alarm> alarms = alarmRepository.findByEventAndSendYn(event, "N");
-            for(Alarm alarm : alarms) {
-                if(alarm.getAlarmtype() == AlarmType.D) {
+            for (Alarm alarm : alarms) {
+                if (alarm.getAlarmtype() == AlarmType.D) {
                     // 지나간 알림은 전송 X
-                    if(event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                    if (event.getStartDateTime().minusDays(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
                                 EventNotification.from(
@@ -356,8 +359,9 @@ public class EventService {
                                         NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
-                }if(alarm.getAlarmtype() == AlarmType.H) {
-                    if(event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                }
+                if (alarm.getAlarmtype() == AlarmType.H) {
+                    if (event.getStartDateTime().minusHours(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
                                 EventNotification.from(
@@ -368,8 +372,9 @@ public class EventService {
                                         NotificationType.EVENT));
                         alarm.sendCheck("Y");
                     }
-                }if(alarm.getAlarmtype() == AlarmType.M) {
-                    if(event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
+                }
+                if (alarm.getAlarmtype() == AlarmType.M) {
+                    if (event.getStartDateTime().minusMinutes(alarm.getSetTime()).isBefore(LocalDateTime.now())) {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
                                 EventNotification.from(
@@ -388,15 +393,21 @@ public class EventService {
     public List<EventResponse> getMonthly(int year, int month) {
         Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 조회");
-        // JPQL
-        List<Event> events = eventRepository.findByMemberAndYearAndMonth(member, year, month);
+        // 해당 월의 첫날과 마지막 날 구하기
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate endOfMonth = startOfMonth.with(TemporalAdjusters.lastDayOfMonth());
+        // LocalDate를 LocalDateTime으로 변환 (시작 시간은 00:00, 종료 시간은 23:59로 설정)
+        LocalDateTime start = startOfMonth.atStartOfDay();
+        LocalDateTime end = endOfMonth.atTime(23, 59, 59);
+        // 변환된 LocalDateTime 객체를 사용하여 쿼리 실행
+        List<Event> events = eventRepository.findByMemberAndDateRange(member, start, end);
         // 조회된 일정이 없으면 에러
-        if(events.isEmpty()) {
+        if (events.isEmpty()) {
             throw new EventNotFoundException();
         }
         // EventResponse 조립
         List<EventResponse> eventResponses = new ArrayList<>();
-        for(Event event : events) {
+        for (Event event : events) {
             log.info(event.getTitle());
             EventResponse eventResponse = EventResponse.from(event);
             eventResponses.add(eventResponse);
@@ -408,11 +419,11 @@ public class EventService {
         Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 조회");
         List<Event> events = eventRepository.findByMemberAndYearAndWeek(member, year, week);
-        if(events.isEmpty()) {
+        if (events.isEmpty()) {
             throw new EventNotFoundException();
         }
         List<EventResponse> eventResponses = new ArrayList<>();
-        for(Event event : events) {
+        for (Event event : events) {
             log.info(event.getTitle());
             EventResponse eventResponse = EventResponse.from(event);
             eventResponses.add(eventResponse);
@@ -425,9 +436,9 @@ public class EventService {
         Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 조회");
         List<Event> events = eventRepository.findByMemberAndYearAndMonthAndDay(member, year, month, day);
-        if(events.isEmpty()) throw new EventNotFoundException();
+        if (events.isEmpty()) throw new EventNotFoundException();
         List<EventResponse> eventResponses = new ArrayList<>();
-        for(Event event : events) {
+        for (Event event : events) {
             log.info(event.getTitle());
             EventResponse eventResponse = EventResponse.from(event);
             eventResponses.add(eventResponse);
@@ -439,7 +450,7 @@ public class EventService {
     public EventResponse getEvent(Long eventId) {
         Member member = findMemberByEmail();
         Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
-        if(member != event.getMember()) {
+        if (member != event.getMember()) {
             throw new MemberNotMatchException();
         }
         return EventResponse.from(event);
@@ -449,8 +460,8 @@ public class EventService {
         Member member = findMemberByEmail();
         log.info(member.getNickname() + "님 일정 검색");
 
-        List<Event> events = eventRepository.findByMemberAndTitleOrMemo(member,content);
-        if(events.isEmpty()) throw new EventNotFoundException();
+        List<Event> events = eventRepository.findByMemberAndTitleOrMemo(member, content);
+        if (events.isEmpty()) throw new EventNotFoundException();
         LocalDateTime now = LocalDateTime.now();
         List<EventResponse> eventResponses = events.stream()
                 .sorted(Comparator.comparing(event -> event.getStartDateTime().isBefore(now)
@@ -464,6 +475,14 @@ public class EventService {
         }
 
         return eventResponses;
+    }
+    // 메트릭스 수정
+    @Transactional
+    public void matrixUpdate (Long eventId, Matrix matrix){
+        log.info("matrix update");
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        event.matrixUpdate(matrix);
+
     }
 
     // 이메일로 회원 찾기
