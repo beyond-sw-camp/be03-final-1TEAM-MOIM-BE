@@ -5,8 +5,15 @@ import com.team1.moim.domain.event.dto.request.AlarmRequest;
 import com.team1.moim.domain.event.dto.request.EventRequest;
 import com.team1.moim.domain.event.dto.request.RepeatRequest;
 import com.team1.moim.domain.event.dto.request.ToDoListRequest;
+import com.team1.moim.domain.event.dto.response.AlarmResponse;
 import com.team1.moim.domain.event.dto.response.EventResponse;
-import com.team1.moim.domain.event.entity.*;
+import com.team1.moim.domain.event.entity.Alarm;
+import com.team1.moim.domain.event.entity.AlarmType;
+import com.team1.moim.domain.event.entity.Event;
+import com.team1.moim.domain.event.entity.Matrix;
+import com.team1.moim.domain.event.entity.Repeat;
+import com.team1.moim.domain.event.entity.RepeatType;
+import com.team1.moim.domain.event.entity.ToDoList;
 import com.team1.moim.domain.event.exception.EventNotFoundException;
 import com.team1.moim.domain.event.repository.AlarmRepository;
 import com.team1.moim.domain.event.repository.EventRepository;
@@ -20,14 +27,6 @@ import com.team1.moim.domain.notification.dto.EventNotification;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.global.config.sse.service.SseService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +35,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -464,5 +470,16 @@ public class EventService {
     private Member findMemberByEmail() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+    }
+
+    // 단일 일정의 알람을 조회
+    public List<AlarmResponse> findAlarmByEventId(Long eventId) {
+//        Member member = findMemberByEmail();
+        List<AlarmResponse> alarmResponses = new ArrayList<>();
+        for (Alarm alarm : alarmRepository.findByEventId(eventId)) {
+            AlarmResponse alarmResponse = AlarmResponse.from(alarm);
+            alarmResponses.add(alarmResponse);
+        }
+        return alarmResponses;
     }
 }
