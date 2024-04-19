@@ -54,9 +54,8 @@ public class MemberController {
 
     //멤버 검색
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/search/{content}")
-    public ResponseEntity<ApiSuccessResponse<List<MemberResponse>>> searchMember(HttpServletRequest request,
-                                                                                 @PathVariable("content") String content) {
+    @GetMapping("/search")
+    public ResponseEntity<ApiSuccessResponse<List<MemberResponse>>> searchMember(HttpServletRequest request) {
 
         log.info("멤버 검색 시작");
         return ResponseEntity
@@ -64,7 +63,7 @@ public class MemberController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         request.getServletPath(),
-                        memberService.searchMember(content)));
+                        memberService.searchMember()));
     }
 
 }

@@ -45,8 +45,9 @@ public class MemberService {
     }
 
     // 멤버 검색
-    public List<MemberResponse> searchMember(String content) {
-        List<Member> members = memberRepository.findByNicknameOrEmail(content);
+    public List<MemberResponse> searchMember() {
+        Member myMember = findMember();
+        List<Member> members = memberRepository.findAllMemberExcept(myMember);
 
         List<MemberResponse> memberResponses = new ArrayList<>();
         for(Member member : members){
