@@ -10,6 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -41,5 +44,15 @@ public class MemberService {
                 .orElseThrow(MemberNotFoundException::new);
     }
 
+    // 멤버 검색
+    public List<MemberResponse> searchMember() {
+        Member myMember = findMember();
+        List<Member> members = memberRepository.findAllMemberExcept(myMember);
 
+        List<MemberResponse> memberResponses = new ArrayList<>();
+        for(Member member : members){
+            memberResponses.add(MemberResponse.from(member));
+        }
+        return memberResponses;
+    }
 }

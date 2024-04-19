@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Slf4j
 @RequestMapping("/api/members")
@@ -50,8 +52,18 @@ public class MemberController {
                 ));
     }
 
-//    @PostMapping
-//    public ResponseEntity
+    //멤버 검색
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/search")
+    public ResponseEntity<ApiSuccessResponse<List<MemberResponse>>> searchMember(HttpServletRequest request) {
 
+        log.info("멤버 검색 시작");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        request.getServletPath(),
+                        memberService.searchMember()));
+    }
 
 }
