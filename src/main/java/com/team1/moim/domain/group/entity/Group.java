@@ -30,6 +30,7 @@ public class Group extends BaseTimeEntity {
     private String title;
 
     // 내용
+    @Column(length=1000)
     private String contents;
 
     // 활동시간
