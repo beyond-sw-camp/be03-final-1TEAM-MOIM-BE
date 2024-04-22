@@ -155,4 +155,8 @@ public class Event extends BaseTimeEntity{
     public void matrixUpdate(Matrix newMatrix){
         this.matrix = newMatrix;
     }
+
+    public void setRepeatParent(long repeatParent) {
+        this.repeatParent = repeatParent;
+    }
 }

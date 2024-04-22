@@ -14,7 +14,7 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByDeleteYnAndAlarmYn(String deleteYn, String alarmYn);
-    List<Event> findByRepeatParent(Long repeatParent);
+    List<Event> findByRepeatParentAndDeleteYn(Long repeatParent, String deleteYn);
     List<Event> findByMember(Member member);
 
     @Query("SELECT e FROM Event e WHERE e.member = :member AND (e.startDateTime <= :end AND e.endDateTime >= :start)")
