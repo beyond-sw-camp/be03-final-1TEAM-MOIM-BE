@@ -22,12 +22,9 @@ public class NotificationService {
     private final MemberRepository memberRepository;
     private final RedisService redisService;
 
-    public List<NotificationResponseNew> getAlarms(Long memberId) {
-        Member findMember = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-        String key = findMember.getEmail();
-        String loginEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(!key.equals(loginEmail)) throw new MemberNotMatchException();
-        List<NotificationResponseNew> alarms= redisService.getList(key);
+    public List<NotificationResponseNew> getAlarms() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<NotificationResponseNew> alarms= redisService.getList(email);
         if(alarms.isEmpty()) throw new NotificationNotFoundException();
         return alarms;
     }

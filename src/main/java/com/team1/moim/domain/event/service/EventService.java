@@ -352,7 +352,7 @@ public class EventService {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
                                 EventNotification.from(
-                                        event.getId(),
+                                        event,
                                         alarm,
                                         member,
                                         LocalDateTime.now(),
@@ -365,7 +365,7 @@ public class EventService {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
                                 EventNotification.from(
-                                        event.getId(),
+                                        event,
                                         alarm,
                                         member,
                                         LocalDateTime.now(),
@@ -378,7 +378,7 @@ public class EventService {
                         Member member = alarm.getEvent().getMember();
                         sseService.sendEventAlarm(member.getEmail(),
                                 EventNotification.from(
-                                        event.getId(),
+                                        event,
                                         alarm,
                                         member,
                                         LocalDateTime.now(),
