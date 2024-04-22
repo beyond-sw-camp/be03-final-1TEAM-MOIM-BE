@@ -17,7 +17,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByRepeatParent(Long repeatParent);
     List<Event> findByMember(Member member);
 
-    @Query("SELECT e FROM Event e WHERE e.member = :member AND (e.startDateTime <= :end AND e.endDateTime >= :start)")
+    @Query("SELECT e FROM Event e WHERE e.member = :member AND e.deleteYn = 'N' AND (e.startDateTime <= :end AND e.endDateTime >= :start)")
     List<Event> findByMemberAndDateRange(@Param("member") Member member, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("SELECT e FROM Event e WHERE e.member = :member AND FUNCTION('YEAR', e.startDateTime) = :year AND FUNCTION('WEEK', e.startDateTime) = :week")
