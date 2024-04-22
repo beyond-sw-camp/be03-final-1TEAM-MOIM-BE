@@ -10,7 +10,7 @@ import lombok.Getter;
 @Builder
 public class GroupDetailResponse {
     private Long id;
-    private Member member;
+    private String hostNickname;
     private String isConfirmed;
     private String title;
     private String place;
@@ -22,7 +22,7 @@ public class GroupDetailResponse {
     public static GroupDetailResponse from(Group group) {
         return GroupDetailResponse.builder()
                 .id(group.getId())
-                .member(group.getMember())
+                .hostNickname(group.getMember().getNickname())
                 .isConfirmed(group.getIsConfirmed())
                 .title(group.getTitle())
                 .place(group.getPlace())
