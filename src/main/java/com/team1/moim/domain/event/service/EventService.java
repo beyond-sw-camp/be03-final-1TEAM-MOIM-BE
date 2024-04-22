@@ -123,8 +123,12 @@ public class EventService {
         Event savedEvent = eventRepository.save(newEvent);
         log.info("DB에 일정 저장 완료");
 
+
         // 일정에 반복 일정 추가, 다음 반복 일정 생성하는 메소드 호출
         if (repeatRequest != null) {
+            //부모 일정도 repeat_parent에 id 추가
+            newEvent.setRepeatParent(newEvent.getId());
+
             RepeatType repeatType = switch (repeatRequest.getRepeatType()) {
                 case "Y" -> RepeatType.Y;
                 case "M" -> RepeatType.M;
@@ -250,16 +254,15 @@ public class EventService {
         event.delete();
 
         Long repeatParentId = event.getRepeatParent();
-        // 모든 자식 이벤트
-        if (event.getRepeatParent() == null) {
-            repeatParentId = event.getId();
-        }
 
-        //같은 repeatParentId 를 가지고 있는 모든 이벤트
-        List<Event> allEvent = new ArrayList<>(eventRepository.findByRepeatParent(repeatParentId));
+        //같은 repeatParentId 를 가지고 있는 모든 이벤트 + 부모 포함
+        List<Event> allEvent = new ArrayList<>(eventRepository.findByRepeatParentAndDeleteYn(repeatParentId, "N"));
 
         //부모 이벤트
         Event parentEvent = eventRepository.findById(repeatParentId).orElseThrow();
+
+        //반복
+        Repeat repeat = repeatRepository.findByEventId(repeatParentId);
 
         // 반복되는 일정 모두를 지움
         if (deleteType.equals("all")) {
@@ -273,7 +276,6 @@ public class EventService {
 
             // 지우고자 하는 반복 일정 이후를 모두 지움
         } else if (deleteType.equals("after")) {
-
             // 일정이 지워지고 난후 그 직전 날짜 구하기
             LocalDate lastestEndDate = LocalDate.parse("0001-01-01");
             // 현재일정 이후의 일정 구하기
@@ -281,42 +283,46 @@ public class EventService {
                 if (event1.getStartDateTime().isAfter(event.getStartDateTime()) ||
                         event1.getStartDateTime() == event.getStartDateTime()) { // 현재 일정보다 이후인것은 모두 삭제
                     event1.delete();
-                } else { // 현재 일정보다 이전인 모든 일정은 모두 반복 종료일을 바꿔주기....
+                } else if(lastestEndDate.isBefore(ChronoLocalDate.from(event1.getStartDateTime()))){ // 현재 일정보다 이전인 모든 일정은 모두 반복 종료일을 바꿔주기....
                     lastestEndDate = LocalDate.from(event1.getStartDateTime());
                 }
             }
             // 모든 반복일정의 반복종료일자 변경하기
-            //부모객체와 모든 자식객체의 반복 종료일 고치기
-            Repeat parentRepeat = repeatRepository.findByEventId(repeatParentId);
-            parentRepeat.changeEndDate(lastestEndDate);
-            for (Event value : allEvent) {
-                Repeat repeat = repeatRepository.findByEventId(value.getId());
-                repeat.changeEndDate(lastestEndDate);
-            }
+
+
+            repeat.changeEndDate(lastestEndDate);
 
             // 현재 한가지 일정만 지우기
         } else {
             // 만약 뒤의 일정이 없다면 모든 반복일정의 "반복 일정 종료일을"을 바로 직전으로 바꾸기
-            LocalDateTime lastDate = event.getStartDateTime();
+            LocalDateTime thisStartDate = event.getStartDateTime();
             LocalDateTime newLastDate = LocalDateTime.parse("0001-01-01T00:00:00"); // 새롭게 바뀔 반복 종료일
             for (Event event1 : allEvent) {
-                if (event1.getStartDateTime().isAfter(event.getStartDateTime()) ||
+                if (event1.getStartDateTime().isAfter(thisStartDate) ||
                         event1.getStartDateTime() == event.getStartDateTime()) {
-                    lastDate = event1.getStartDateTime();
+                    thisStartDate = event1.getStartDateTime(); // 가장 마지막 이벤트를 찾아서 thisStartDate에 넣어둠
                 } else if (newLastDate.isBefore(event1.getStartDateTime())) {
                     newLastDate = event1.getStartDateTime();
                 }
             }
 
             //현재 일정이 반복하는 일정 중 마지막 일정과 같다면 모든 반복데이터에 마지막 날짜를 바꿔줘야 함
-            if (lastDate == event.getStartDateTime()) {
-                for (Event value : allEvent) {
-                    Repeat repeatTemp = repeatRepository.findByEventId(value.getId());
-                    repeatTemp.changeEndDate(LocalDate.from(newLastDate));
-                }
-                Repeat repeatParent = repeatRepository.findById(repeatParentId).orElseThrow();
-                repeatParent.changeEndDate(LocalDate.from(newLastDate));
+            if (thisStartDate == event.getStartDateTime()) {
+                repeat.changeEndDate(LocalDate.from(newLastDate));
             }
+
+
+//            if(LocalDate.from(event.getStartDateTime()).equals(repeat.getRepeatEndDate())){
+//                LocalDateTime newLastDate = LocalDateTime.parse("0001-01-01T00:00:00");
+//                for(Event event1: allEvent){
+//                    if(event1 != event){ // 자신을 제외한 상태로
+//                        if(newLastDate.isBefore(event1.getStartDateTime())){
+//                            newLastDate = event1.getStartDateTime();
+//                        }
+//                    }
+//                }
+//                repeat.changeEndDate(LocalDate.from(newLastDate));
+//            }
 
         }
     }
