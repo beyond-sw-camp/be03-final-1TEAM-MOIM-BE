@@ -73,8 +73,9 @@ public class EventController {
     public ResponseEntity<ApiSuccessResponse<EventResponse>> update(
             HttpServletRequest servRequest,
             @PathVariable(name = "eventId") Long eventId,
-            @RequestPart(value = "file") MultipartFile file,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             @RequestPart(value = "eventRequest") @Valid EventRequest eventRequest) {
+        System.out.println("heeer");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
@@ -85,10 +86,10 @@ public class EventController {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/matrixUpdate/{eventId}/{matrix}")
-    public ResponseEntity<ApiSuccessResponse<String>> matrixUpdate(HttpServletRequest servRequest,
-                                                                    @PathVariable(name = "eventId") Long eventId,
-                                                                          @PathVariable(name = "matrix") Matrix matrix
-                                                                    ) {
+    public ResponseEntity<ApiSuccessResponse<String>> matrixUpdate(
+            HttpServletRequest servRequest,
+            @PathVariable(name = "eventId") Long eventId,
+            @PathVariable(name = "matrix") Matrix matrix) {
         eventService.matrixUpdate(eventId,matrix);
         return ResponseEntity
                 .status(HttpStatus.OK)
