@@ -1,8 +1,14 @@
 package com.team1.moim.global.config.security.jwt;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.team1.moim.domain.member.entity.Member;
+import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
+import com.team1.moim.global.config.security.jwt.exception.JwtExpiredException;
+import com.team1.moim.global.config.security.jwt.exception.RefreshTokenNotFoundException;
 import com.team1.moim.global.config.security.oauth2.util.PasswordUtil;
+import com.team1.moim.global.exception.ErrorCode;
+import com.team1.moim.global.exception.ErrorDetail;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +22,7 @@ import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -54,7 +61,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException, JwtExpiredException {
         log.info("JWT Filter 진입");
         log.info("requestURI: " + request.getRequestURI());
         for (String url : NO_CHECK_URLS){
@@ -66,63 +73,62 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         }
         log.info("NO_CHECK_URL PASS");
 
-        // 요청 헤더에서 RT 호출
-        // RT가 없거나 유효하지 않으면(DB에 저장된 RT와 다르다면) null 반환
-        // 요청 헤더에 RT가 있는 경우는, AT가 만료되어 요청한 경우밖에 없음
-        // 따라서, 위의 경우를 제외하면 추출한 RT는 모두 null임
-        String refreshToken = jwtProvider.extractRefreshToken(request)
-                .filter(jwtProvider::isTokenValid)
-                .orElse(null);
+        try {
+            // 요청 헤더에서 RT 추출
+            // 요청 헤더에 RT가 있는 경우는, AT가 만료되어 요청한 경우 밖에 없음
+            // 요청 헤더의 RT가 유효하고, DB에 있는 RT와 일치하면 AT 재발급
+            String refreshTokenFromHeader = jwtProvider.extractRefreshToken(request).orElse(null);
+            if (refreshTokenFromHeader != null){
+                log.info("Refresh Token 검증을 시작합니다.");
+                Member findMember = memberRepository.findByRefreshToken(refreshTokenFromHeader)
+                        .orElseThrow(RefreshTokenNotFoundException::new);
+                log.info("DB에 일치하는 Refresh Token 존재!");
 
-        log.info("Refresh Token 정보: {}", refreshToken);
+                jwtProvider.validateToken(refreshTokenFromHeader);
 
-        // RT가 요청 헤더에 존재하면, 사용자의 AT가 만료됐기 때문에,
-        // RT까지 보낸 것이므로, 요청 헤더의 RT가 DB의 RT가 일치하는 지 검증하고,
-        // 일치하면 AT 재발급
-        if (refreshToken != null){
-            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-            return; // RT를 보낸 경우, AT를 재발급하고 인증처리는 하지 않게 하기 위해 return으로 필터 진행 막음
+                log.info("Refresh Token 검증 완료. 정보: {}", refreshTokenFromHeader);
+                reissueAccessToken(response, findMember);
+
+                return; // RT를 보낸 경우, AT를 재발급하고 인증처리는 하지 않게 하기 위해 return으로 필터 진행 막음
+            }
+
+            checkAccessTokenAndAuthentication(request, response, filterChain);
+        } catch (TokenExpiredException e){
+            log.error("유효기간이 만료된 토큰입니다. : {}", e.getMessage());
+            HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+            httpServletResponse.setStatus(ErrorCode.JWT_EXPIRED.getStatus().value());
+            httpServletResponse.setContentType("application/json");
+            httpServletResponse.getWriter().write(ErrorDetail.from(ErrorCode.JWT_EXPIRED).getMessage());
         }
-
-        checkAccessTokenAndAuthentication(request, response, filterChain);
     }
 
     /**
      * 요청 헤더에서 추출한 RT로 유저 정보를 찾고,
      * 유저가 있으면 AT 재발급해서 응답 헤더에 보냄
      */
-    public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken){
-        memberRepository.findByRefreshToken(refreshToken)
-                .ifPresent(member -> {
-                    String reIssuedAccessToken = jwtProvider.createAccessToken(member.getEmail(),
-                                                                                member.getRole().name());
-                    try {
-                        jwtProvider.sendAccessToken(response, reIssuedAccessToken);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+    public void reissueAccessToken(HttpServletResponse response, Member member) throws IOException {
+        log.info("Access Token 재발급 시작!");
+        String reissuedAccessToken = jwtProvider.createAccessToken(member.getEmail(), member.getRole().name());
+        jwtProvider.sendAccessToken(response, reissuedAccessToken);
     }
 
     /**
      *
      */
-    public void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                                  FilterChain filterChain) throws ServletException, IOException {
+    public void checkAccessTokenAndAuthentication(HttpServletRequest request,
+                                                  HttpServletResponse response,
+                                                  FilterChain filterChain)
+            throws ServletException, IOException, JwtExpiredException {
         log.info("checkAccessTokenAndAuthentication() 호출");
-        jwtProvider.extractAccessToken(request)
-                .filter(jwtProvider::isTokenValid)
-                .ifPresent(accessToken -> {
-                    try {
-                        jwtProvider.extractEmail(accessToken)
-                                .ifPresent(email -> memberRepository.findByEmail(email)
-                                        .ifPresent(this::saveAuthentication)
-                                );
-                    } catch (Exception e){
-                        throw new RuntimeException(e);
-                    }
-                });
+
+        String accessTokenFromHeader = jwtProvider.extractAccessToken(request).orElse(null);
+        jwtProvider.validateToken(accessTokenFromHeader);
+        String email = jwtProvider.extractEmail(accessTokenFromHeader).orElse(null);
+        Member findMember = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        saveAuthentication(findMember);
+
         log.info("Authentication 객체에 대한 인증 허가 처리 완료");
+
         filterChain.doFilter(request, response);
     }
 

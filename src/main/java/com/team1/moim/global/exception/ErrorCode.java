@@ -8,9 +8,10 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
-    JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "로그인이 만료 되었습니다."),
+    JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "인증 토큰이 만료 되었습니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     LOGIN_FAILED(HttpStatus.BAD_REQUEST, "로그인에 실패했습니다. 이메일 또는 비밀번호를 확인해주세요."),
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "DB에 해당 Refresh Token이 존재하지 않습니다."),
 
     // Auth
     NOT_FOUND_CODE(HttpStatus.BAD_REQUEST, "발송한 인증코드가 없습니다."),
