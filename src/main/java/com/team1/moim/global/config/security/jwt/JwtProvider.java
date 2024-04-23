@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +50,6 @@ public class JwtProvider {
 
     private final ObjectMapper objectMapper;
     private final MemberRepository memberRepository;
-
 
     /**
      * AccessToken 생성 메서드
@@ -99,6 +97,7 @@ public class JwtProvider {
 
         // 클라이언트에게 문자 형태로 응답을 하기 위함
         response.getWriter().write(result);
+
         log.info("재발급된 Access Token: {}", accessToken);
     }
 
@@ -204,15 +203,8 @@ public class JwtProvider {
      * 각 AccessToken, RefreshToken의 유효성을 검증할 때 사용한다.
      * 헤더의 토큰을 HS512 인증 방식을 통해 디코딩 후 유효성 확인
      */
-    public boolean isTokenValid(String token){
-        log.info("isTokenValid() 진입");
-        try {
-            JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
-            log.info("토큰이 유효합니다.");
-            return true;
-        } catch (Exception e){
-            log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
-            return false;
-        }
+    public void validateToken(String token){
+        log.info("validateToken() 진입! 토큰 유효성 검증 시작!");
+        JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
     }
 }
