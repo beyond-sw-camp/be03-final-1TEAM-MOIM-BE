@@ -1,7 +1,10 @@
 package com.team1.moim.domain.group.dto.response;
 
 import com.team1.moim.domain.group.entity.Group;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Builder;
@@ -14,6 +17,11 @@ public class FindPendingGroupResponse {
     private Long id;
     private String isConfirmed;
     private String title;
+    private int runningTime;
+    private LocalDate expectStartDate;
+    private LocalDate expectEndDate;
+    private LocalTime expectStartTime;
+    private LocalTime expectEndTime;
     private List<GroupInfoResponse> groupInfos;
     private String place;
     private LocalDateTime voteDeadline;
@@ -33,6 +41,11 @@ public class FindPendingGroupResponse {
                 .id(group.getId())
                 .isConfirmed(group.getIsConfirmed())
                 .title(group.getTitle())
+                .runningTime(group.getRunningTime())
+                .expectStartDate(group.getExpectStartDate())
+                .expectEndDate(group.getExpectEndDate())
+                .expectStartTime(group.getExpectStartTime())
+                .expectEndTime(group.getExpectEndTime())
                 .groupInfos(groupInfos)
                 .place(group.getPlace())
                 .voteDeadline(group.getVoteDeadline())
