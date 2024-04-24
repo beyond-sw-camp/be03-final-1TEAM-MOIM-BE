@@ -26,6 +26,7 @@ public class SseController {
 //    SSE 연결
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect() throws ServiceUnavailableException {
+        log.info("sse 연결");
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(sseService.add(email));
     }
