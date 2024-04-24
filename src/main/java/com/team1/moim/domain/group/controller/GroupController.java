@@ -105,15 +105,14 @@ public class GroupController {
     @GetMapping("/groups")
     public ResponseEntity<ApiSuccessResponse<List<ListGroupResponse>>> findAllGroups(
             HttpServletRequest httpServletRequest,
-            GroupSearchRequest groupSearchRequest,
             Pageable pageable) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
-                        groupService.findGroups(groupSearchRequest, pageable, email)));
+                        groupService.findGroups(pageable)));
     }
 
     @PostMapping("/{groupId}/groupInfo/{groupInfoId}/notification")
