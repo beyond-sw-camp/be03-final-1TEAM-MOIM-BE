@@ -61,4 +61,20 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+    //      추천 일정 리스트 저장(2번 구역)
+    @Bean
+    @Qualifier("2")
+    LettuceConnectionFactory connectionFactorAvailable() { return redisConnectionFactory(2); }
+
+    @Bean
+    @Qualifier("2")
+    public RedisTemplate<String, String> redisTemplate2() {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactorAvailable());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+
+        return redisTemplate;
+    }
+
 }
