@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface GroupInfoRepository extends JpaRepository<GroupInfo, Long> {
     List<GroupInfo> findByGroup(Group group);
     List<GroupInfo> findByGroupAndIsAgreed(Group group, String isAgreed);
+
+    List<GroupInfo> findByMemberId(Long memberId);
 }

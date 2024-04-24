@@ -23,4 +23,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     List<Group> findByIsDeleted(String isDeleted);
     List<Group> findByIsConfirmedAndIsDeleted(String isConfirmed, String isDeleted);
+
+    List<Group> findByMemberId(Long memberId);
+
+
 }
