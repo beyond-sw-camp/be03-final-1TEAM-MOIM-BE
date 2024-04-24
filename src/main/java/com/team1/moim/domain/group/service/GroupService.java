@@ -1,6 +1,7 @@
 package com.team1.moim.domain.group.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.team1.moim.domain.event.dto.response.AvailableResponse;
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.group.dto.request.GroupAlarmRequest;
@@ -25,6 +26,9 @@ import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.group.dto.response.VoteResponse;
 import com.team1.moim.domain.notification.NotificationType;
+import com.team1.moim.domain.notification.dto.NotificationResponseNew;
+import com.team1.moim.domain.notification.exception.NotificationNotFoundException;
+import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.domain.notification.dto.GroupNotification;
 import com.team1.moim.global.config.sse.service.SseService;
@@ -60,6 +64,7 @@ public class GroupService {
     private final EventRepository eventRepository;
     private final S3Service s3Service;
     private final SseService sseService;
+    private final RedisService redisService;
 
     // 모임 생성하기
     @Transactional
@@ -260,6 +265,15 @@ public class GroupService {
             // 모임 일정 자동 추천 로직 실행 후 추천 일정 리스트 가져오기
             List<LocalDateTime> recommendEvents = recommendGroupSchedule(savedGroupInfo.getGroup());
             log.info("추천 일정: " + recommendEvents);
+            recommendEvents.forEach(recommendEvent -> {
+                try {
+                    redisService.setAvailableList(groupId.toString(), recommendEvent);
+                } catch (Exception  e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            log.info("추천일정 redis 저장완료");
+
 
             // 모임을 수락한 참여자 리스트 가져오기
             List<GroupInfo> agreedParticipants =
@@ -520,5 +534,11 @@ public class GroupService {
         if (!groupInfo.getIsAgreed().equals("P")) {
             throw new AlreadyVotedException();
         }
+    }
+
+    // redis에 저장된 추천 일정
+    public List<AvailableResponse> getAvailable(String groupId) {
+        List<AvailableResponse> availableList = redisService.getAvailableList(groupId);
+        return availableList;
     }
 }

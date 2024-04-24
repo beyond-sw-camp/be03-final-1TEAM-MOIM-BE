@@ -1,6 +1,8 @@
 package com.team1.moim.global.config.redis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.moim.domain.event.dto.response.AvailableResponse;
 import com.team1.moim.domain.notification.dto.GroupNotification;
 import com.team1.moim.domain.notification.dto.EventNotification;
 import com.team1.moim.domain.notification.dto.NotificationResponseNew;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +31,14 @@ public class RedisService {
     @Qualifier("1")
     private final RedisTemplate<String, Object> redisTemplate1;
 
+    @Qualifier("2")
+    private final RedisTemplate<String, String> redisTemplate2;
+
     @Autowired
-    public RedisService(RedisTemplate<String, Object> redisTemplate,  @Qualifier("1") RedisTemplate<String, Object> redisTemplate1) {
+    public RedisService(RedisTemplate<String, Object> redisTemplate,  @Qualifier("1") RedisTemplate<String, Object> redisTemplate1, @Qualifier("2") RedisTemplate<String, String> redisTemplate2) {
         this.redisTemplate = redisTemplate;
         this.redisTemplate1 = redisTemplate1;
+        this.redisTemplate2 = redisTemplate2;
     }
 
     public void setValues(String key, String data) {
@@ -59,6 +67,15 @@ public class RedisService {
         log.info("모임 알림 저장 성공");
     }
 
+    public void setAvailableList(String key, LocalDateTime availableDay) throws JsonProcessingException {
+        ListOperations<String, String> availableList = redisTemplate2.opsForList();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        String formattedDateTime = availableDay.format(formatter);
+        log.info("추천 일정 저장");
+        availableList.leftPush(key, formattedDateTime);
+        log.info("추천 일정 저장 성공");
+    }
+
     @Transactional(readOnly = true)
     public String getValues(String key) {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
@@ -82,6 +99,16 @@ public class RedisService {
 
         }
         return notificationResponses;
+    }
+
+    public List<AvailableResponse> getAvailableList(String key){
+        ListOperations<String, String> listOperations = redisTemplate2.opsForList();
+        List<String> availableList = listOperations.range(key, 0, -1);
+        List<AvailableResponse> AvailableResponses = new ArrayList<>();
+        for(String day : availableList) {
+            AvailableResponses.add(AvailableResponse.from(key, day));
+        }
+        return AvailableResponses;
     }
 
     public void saveList(String key, List<EventNotification> notificationResponses) {
