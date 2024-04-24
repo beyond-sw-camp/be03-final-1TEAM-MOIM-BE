@@ -326,7 +326,7 @@ public class EventService {
 
     public List<EventResponse> matrixEvents(Matrix matrix) {
         Member member = findMemberByEmail();
-        List<Event> events = eventRepository.findByMember(member);
+        List<Event> events = eventRepository.findByMemberAndDeleteYn(member, "N");
 
         return events.stream()
                 .filter(event -> event.getMatrix().equals(matrix))
