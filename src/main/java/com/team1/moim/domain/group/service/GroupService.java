@@ -334,10 +334,19 @@ public class GroupService {
         List<GroupInfo> participants =
                 groupInfoRepository.findByGroupAndIsAgreed(groupAlarm.getGroup(), "P");
 
-        String message = "모임 참여 결정까지"
+        String alarmType = "";
+        if(groupAlarm.getGroupAlarmTimeType() == GroupAlarmTimeType.DAY) {
+            alarmType = "일";
+        }if(groupAlarm.getGroupAlarmTimeType() == GroupAlarmTimeType.HOUR) {
+            alarmType = "시간";
+        }if(groupAlarm.getGroupAlarmTimeType() == GroupAlarmTimeType.MIN) {
+            alarmType = "분";
+        }
+
+        String message = "모임 참여 결정까지 "
                 + groupAlarm.getDeadlineAlarm()
-                + groupAlarm.getGroupAlarmTimeType().name()
-                + "남았습니다.";
+                + alarmType
+                + " 남았습니다.";
 
         for (GroupInfo participant : participants) {
             sseService.sendGroupNotification(

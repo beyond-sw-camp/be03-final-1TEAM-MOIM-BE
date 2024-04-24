@@ -27,15 +27,16 @@ public class NotificationController {
 
     //    알림 목록 조회
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{memberId}")
-    public ResponseEntity<ApiSuccessResponse<List<NotificationResponseNew>>> getAlarms(HttpServletRequest httpServletRequest,
-                                                                                       @PathVariable("memberId") Long memberId) {
+    @GetMapping
+    public ResponseEntity<ApiSuccessResponse<List<NotificationResponseNew>>> getAlarms(HttpServletRequest httpServletRequest) {
+
+        log.info("알림 목록 조회");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
-                        notificationService.getAlarms(memberId)));
+                        notificationService.getAlarms()));
     }
 
 //    //    알림 읽음으로 변경
