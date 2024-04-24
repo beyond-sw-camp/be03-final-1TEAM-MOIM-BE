@@ -2,6 +2,7 @@ package com.team1.moim.global.config.redis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.moim.domain.event.dto.response.AvailableResponse;
 import com.team1.moim.domain.notification.dto.GroupNotification;
 import com.team1.moim.domain.notification.dto.EventNotification;
 import com.team1.moim.domain.notification.dto.NotificationResponseNew;
@@ -98,6 +99,16 @@ public class RedisService {
 
         }
         return notificationResponses;
+    }
+
+    public List<AvailableResponse> getAvailableList(String key){
+        ListOperations<String, String> listOperations = redisTemplate2.opsForList();
+        List<String> availableList = listOperations.range(key, 0, -1);
+        List<AvailableResponse> AvailableResponses = new ArrayList<>();
+        for(String day : availableList) {
+            AvailableResponses.add(AvailableResponse.from(key, day));
+        }
+        return AvailableResponses;
     }
 
     public void saveList(String key, List<EventNotification> notificationResponses) {

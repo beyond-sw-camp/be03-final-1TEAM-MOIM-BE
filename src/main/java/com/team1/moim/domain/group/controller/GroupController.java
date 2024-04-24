@@ -1,6 +1,7 @@
 package com.team1.moim.domain.group.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.team1.moim.domain.event.dto.response.AvailableResponse;
 import com.team1.moim.domain.group.dto.request.GroupAlarmRequest;
 import com.team1.moim.domain.group.dto.request.GroupInfoRequest;
 import com.team1.moim.domain.group.dto.request.GroupRequest;
@@ -11,6 +12,7 @@ import com.team1.moim.domain.group.dto.response.GroupDetailResponse;
 import com.team1.moim.domain.group.dto.response.ListGroupResponse;
 import com.team1.moim.domain.group.service.GroupService;
 import com.team1.moim.domain.group.dto.response.VoteResponse;
+import com.team1.moim.domain.notification.dto.NotificationResponseNew;
 import com.team1.moim.global.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -127,5 +129,20 @@ public class GroupController {
                         HttpStatus.OK,
                         httpServletRequest.getServletPath(),
                         groupService.vote(groupId, groupInfoId, agreeYn)));
+    }
+
+    //    추천 일정 목록 조회
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{groupId}/choice")
+    public ResponseEntity<ApiSuccessResponse<List<AvailableResponse>>> getAvailable(HttpServletRequest httpServletRequest,
+                                                                                    @PathVariable("groupId") String groupId) {
+
+        log.info("추천 일정 목록 조회");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        httpServletRequest.getServletPath(),
+                        groupService.getAvailable(groupId)));
     }
 }

@@ -1,6 +1,7 @@
 package com.team1.moim.domain.group.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.team1.moim.domain.event.dto.response.AvailableResponse;
 import com.team1.moim.domain.event.entity.Event;
 import com.team1.moim.domain.event.repository.EventRepository;
 import com.team1.moim.domain.group.dto.request.GroupAlarmRequest;
@@ -25,6 +26,8 @@ import com.team1.moim.domain.member.exception.MemberNotFoundException;
 import com.team1.moim.domain.member.repository.MemberRepository;
 import com.team1.moim.domain.group.dto.response.VoteResponse;
 import com.team1.moim.domain.notification.NotificationType;
+import com.team1.moim.domain.notification.dto.NotificationResponseNew;
+import com.team1.moim.domain.notification.exception.NotificationNotFoundException;
 import com.team1.moim.global.config.redis.RedisService;
 import com.team1.moim.global.config.s3.S3Service;
 import com.team1.moim.domain.notification.dto.GroupNotification;
@@ -577,5 +580,11 @@ public class GroupService {
         if (!groupInfo.getIsAgreed().equals("P")) {
             throw new AlreadyVotedException();
         }
+    }
+
+    // redis에 저장된 추천 일정
+    public List<AvailableResponse> getAvailable(String groupId) {
+        List<AvailableResponse> availableList = redisService.getAvailableList(groupId);
+        return availableList;
     }
 }
