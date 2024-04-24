@@ -75,7 +75,7 @@ public class GroupController {
     @GetMapping("/pending/{groupId}")
     public ResponseEntity<ApiSuccessResponse<FindPendingGroupResponse>> findPendingGroup(
             HttpServletRequest httpServletRequest,
-            @PathVariable Long groupId) {
+            @PathVariable("groupId") Long groupId) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
