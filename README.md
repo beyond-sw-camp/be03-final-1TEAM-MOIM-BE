@@ -2,9 +2,9 @@
 
 ## 😁 팀원
  
-|<img src="img/bellwin_image.jpg" height="150">|<img src="img/jaeseok_image.jpg" height="150">|<img src="img/soyoung_image.jpg" height="150">|<img src="img/eunji_image.jpg" height="150">|
+|<img src="img/eunji_image.jpg" height="150">|<img src="img/jaeseok_image.jpg" height="150">|<img src="img/soyoung_image.jpg" height="150">|<img src="img/bellwin_image.jpeg" height="150">|
 |:---:|:---:|:---:|:---:|
-| [한종승(팀장)](https://github.com/BellWin98) | [신재석(팀원)](https://github.com/MrKeeplearning) | [배소영(팀원)](https://github.com/qoth-0) | [장은지(팀원)](https://github.com/Jang-Eun-Ji) |
+| [장은지(팀장)](https://github.com/Jang-Eun-Ji) | [신재석(팀원)](https://github.com/MrKeeplearning) | [배소영(팀원)](https://github.com/qoth-0) | [한종승(팀원)](https://github.com/BellWin98)  |
 </div>
 
 <br>
@@ -80,41 +80,60 @@
 <br>
 
 ## 📝 요구 사항 정의서(화면 클릭 시 이동)
-[![Requirements](assets/images/requirements.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=0&single=true)
+[![Requirements](assets/uxui_test/images/requirements.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=0&single=true)
 
 <br>
 
 ## ⚙️ ERD(화면 클릭 시 이동) 
-[![ERD](assets/images/erd.png)](https://www.erdcloud.com/d/3trf7ooZs6XS8PXTT)
+[![ERD](assets/uxui_test/images/erd.png)](https://www.erdcloud.com/d/3trf7ooZs6XS8PXTT)
 
 <br>
 
 ## 📝 화면 설계서(화면 클릭 시 이동)
-[![Display](assets/images/display_architecture.png)](https://docs.google.com/presentation/d/e/2PACX-1vSx7kP_4zspTFpOuVhswRohKHU05I9Q4N4udH1Z0g22o24sg_w1F-Oq-9-aDzbzvA/pub?start=false&loop=false&delayms=3000)
+[![Display](assets/uxui_test/images/display_architecture.png)](https://docs.google.com/presentation/d/e/2PACX-1vSx7kP_4zspTFpOuVhswRohKHU05I9Q4N4udH1Z0g22o24sg_w1F-Oq-9-aDzbzvA/pub?start=false&loop=false&delayms=3000)
 
 <br>
 
 ## 🗓️ WBS(화면 클릭 시 이동)
-[![WBS](assets/images/wbs.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=1560823417&single=true)
+[![WBS](assets/uxui_test/images/wbs.png)](https://docs.google.com/spreadsheets/d/e/2PACX-1vSTZa75qmkYYk5VZ6VWxN_7RTGlplStcqsQiXdpS9FOU4cicxamdVKAI-RX7qicB0TpfyUe9uzkrLFd/pubhtml?gid=1560823417&single=true)
 
 <br>
 
 ## 📝 프로그램 사양서(화면 클릭 시 이동)
-[![APIs](assets/images/api_details.png)](https://interesting-potential-90c.notion.site/9508b92f24254958b3b9f791d6583e3b?v=6fa037217d9b456cb709748c53281d5a&pvs=4)
+[![APIs](assets/uxui_test/images/api_details.png)](https://interesting-potential-90c.notion.site/9508b92f24254958b3b9f791d6583e3b?v=6fa037217d9b456cb709748c53281d5a&pvs=4)
 
 <br>
 
 ## 🚀 시스템 아키텍쳐
 ### 📍Back-End
-<img src= "assets/images/backend_architecture.png" width="100%" height="100%">
+<img src= "assets/uxui_test/images/backend_architecture.png" width="100%" height="100%">
 
 ### 📍Front-End
-<img src= "assets/images/frontend_architecture.png" width="100%" height="100%">
+<img src= "assets/uxui_test/images/frontend_architecture.png" width="100%" height="100%">
 
 <br>
 
 ## 📝 단위 테스트 결과서(화면 클릭 시 이동)
-[링크 클릭](assets/test)
+[링크 클릭](assets/uxui_test/test)
+
+## 📝 화면 테스트
+- 캘린더
+  [링크 클릭](assets/uxui_test/calendar)
+
+- 아이젠하워
+  [링크 클릭](assets/uxui_test/eisenhower)
+
+- 모임 기능
+ [링크 클릭](assets/uxui_test/group)
+
+- 로그인
+[링크 클릭](assets/uxui_test/login)
+
+- 알림
+[링크 클릭](assets/uxui_test/notification)
+
+- 로그인
+[링크 클릭](assets/uxui_test/search)
 
 <br>
 
@@ -146,3 +165,28 @@
 <br>
 
 
+
+# moim-front
+
+## Project setup
+```
+npm install
+```
+
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
