@@ -113,9 +113,64 @@
 
 <br>
 
+
+## 📝 단위 테스트 결과서(화면 클릭 시 이동)
+[링크 클릭](assets/uxui_test/test)
+
+## 📝 화면 테스트
+- 캘린더
+  [링크 클릭](assets/uxui_test/calendar)
+
+- 아이젠하워
+  [링크 클릭](assets/uxui_test/eisenhower)
+
+- 모임 기능
+ [링크 클릭](assets/uxui_test/group)
+
+- 로그인
+[링크 클릭](assets/uxui_test/login)
+
+- 알림
+[링크 클릭](assets/uxui_test/notification)
+
+- 로그인
+[링크 클릭](assets/uxui_test/search)
+
+<br>
+
+
+## 🏠 기술 사용 이유
+
+| **Java 17** | **Spring Boot** |
+| --- | --- |
+| 설명1 | 설명2 |
+
+| **Spring Data Jpa** | **Redis** |
+| --- | --- |
+| 설명3 | 설명4 |
+
+<br>
+
+## 📄 커밋 컨벤션 및 Github Flow
+
+| 이름 | 설명 |
+| --- | --- |
+| feat | 기능 커밋 |
+| fix | 오류 수정 커밋 |
+| refactor | 패키지 구조 수정 |
+| test | 테스트 커밋 |
+| chore | 그 외 자잘한 수정 |
+
+![Github Flow](https://cdn.hashnode.com/res/hashnode/image/upload/v1668070000889/rvf5Hx764.png)
+
+<br>
+
 ## 📈 CI/CD 계획서
 
-### 백엔드
+<details>
+<summary><h2>백엔드</h2></summary>
+<div markdown="1">
+ 
 #### 1. 시스템 개요
 본 시스템은 고성능 및 확장 가능한 백엔드 서비스를 제공하기 위해 AWS 클라우드 서비스를 기반으로 구축되었습니다. Amazon EKS (Elastic Kubernetes Service)를 기반으로 EC2 인스턴스에서 실행되는 워커 노드, AWS Elastic Load Balancer를 통한 Route 53 연결, Amazon ElastiCache (Redis), Amazon RDS(MariaDB), DockerHub, 그리고 GitHub Actions를 이용한 CI/CD 자동화 프로세스를 포함합니다.
 
@@ -169,10 +224,14 @@
 - 구현
     - IAM (Identity and Access Management): EKS, EC2, ElastiCache 및 기타 AWS 서비스에 대한 접근 권한 관리
     - 보안 그룹 및 네트워크 ACLs: EC2 인스턴스 및 ElastiCache 클러스터에 대한 인바운드 및 아웃바운드 트래픽 제어
- 
+
+</div>
+</details>
 <br>
 
-### 프론트엔드
+<details>
+<summary><h2>프론트엔드</h2></summary>
+<div markdown="1">
 
 #### 1. 시스템 개요
 본 시스템은 프론트엔드 정적 웹 애플리케이션의 CI/CD 파이프라인 구축과 높은 가용성, 보안을 위한 구성을 목표로 합니다. 
@@ -186,84 +245,9 @@ Amazon Route 53은 도메인 이름 시스템(DNS) 서비스를 제공하여 사
 - **AWS Certificate Manager**: SSL 인증서를 관리. 인증서는 CloudFront 배포에 연결하여 HTTPS 통신을 가능하게 함
 - **Amazon CloudFront**: S3 버킷에 호스팅된 정적 웹사이트 앞에 위치하는 CDN 서비스로, 캐싱을 통해 전 세계적으로 빠른 콘텐츠 제공을 가능하게 하며, ACM에서 발급받은 SSL 인증서를 사용하여 안전한 HTTPS 연결을 제공
 - **Amazon Route 53**: 웹 애플리케이션의 도메인 이름을 관리하고, CloudFront 배포와 매핑하여 사용자가 웹 애플리케이션에 쉽게 접근할 수 있도록 함
- 
+
+</div>
+</details>
 <br>
 
 
-## 📝 단위 테스트 결과서(화면 클릭 시 이동)
-[링크 클릭](assets/uxui_test/test)
-
-## 📝 화면 테스트
-- 캘린더
-  [링크 클릭](assets/uxui_test/calendar)
-
-- 아이젠하워
-  [링크 클릭](assets/uxui_test/eisenhower)
-
-- 모임 기능
- [링크 클릭](assets/uxui_test/group)
-
-- 로그인
-[링크 클릭](assets/uxui_test/login)
-
-- 알림
-[링크 클릭](assets/uxui_test/notification)
-
-- 로그인
-[링크 클릭](assets/uxui_test/search)
-
-<br>
-
-
-## 🏠 기술 사용 이유
-
-| **Java 17** | **Spring Boot** |
-| --- | --- |
-| 설명1 | 설명2 |
-
-| **Spring Data Jpa** | **Redis** |
-| --- | --- |
-| 설명3 | 설명4 |
-
-<br>
-
-## 📄 커밋 컨벤션 및 Github Flow
-
-| 이름 | 설명 |
-| --- | --- |
-| feat | 기능 커밋 |
-| fix | 오류 수정 커밋 |
-| refactor | 패키지 구조 수정 |
-| test | 테스트 커밋 |
-| chore | 그 외 자잘한 수정 |
-
-![Github Flow](https://cdn.hashnode.com/res/hashnode/image/upload/v1668070000889/rvf5Hx764.png)
-
-<br>
-
-
-
-# moim-front
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
