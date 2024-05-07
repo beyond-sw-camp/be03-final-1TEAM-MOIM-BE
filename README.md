@@ -86,7 +86,7 @@
 
 ## ⚙️ ERD(화면 클릭 시 이동) 
 [![ERD](assets/uxui_test/images/erd.png)](https://www.erdcloud.com/d/3trf7ooZs6XS8PXTT)
-
+https://www.erdcloud.com/d/3trf7ooZs6XS8PXTT 
 <br>
 
 ## 📝 화면 설계서(화면 클릭 시 이동)
